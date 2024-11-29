@@ -3,6 +3,7 @@ import { Server, ServerOptions } from "socket.io";
 import http from "http";
 
 const opt: Partial<ServerOptions> = {
+  path: "/socket.io",
   cors: {
     origin: `${env.CLIENT_URL}`,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],

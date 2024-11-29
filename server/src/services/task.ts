@@ -24,7 +24,6 @@ export async function writeTask(input: CreateTaskReq["body"]) {
       },
     },
   });
-
   return task;
 }
 

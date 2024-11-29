@@ -1,4 +1,4 @@
-import { clearTask, createTask } from "@/controllers/task";
+import { createTask } from "@/controllers/task";
 import { authMiddleware } from "@/middlewares/requiredAuth";
 import validateResource from "@/middlewares/validateResource";
 import { createTaskSchema } from "@/schemas/task";
@@ -13,7 +13,6 @@ function demoRouter(): Router {
     createTask
   );
 
-  router.delete("/tasks", clearTask);
   return router;
 }
 

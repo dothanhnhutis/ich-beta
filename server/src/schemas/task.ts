@@ -8,7 +8,7 @@ const subTask = z.object({
 export const createTaskSchema = z.object({
   body: z
     .object({
-      plansId: z.string({
+      planId: z.string({
         required_error: "username là trường bắt buộc",
         invalid_type_error: "username phải là chuỗi",
       }),

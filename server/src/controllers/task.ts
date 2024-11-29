@@ -29,8 +29,3 @@ export async function updateTask(
 
   return res.status(StatusCodes.OK).send("Create task success");
 }
-
-export function clearTask(req: Request, res: Response) {
-  emptyTask();
-  return res.status(StatusCodes.OK).send("Clear task success");
-}

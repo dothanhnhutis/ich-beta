@@ -22,11 +22,10 @@ export const taskListener = (io: Server) => {
 export const taskSend = (data: CreateTaskReq["body"]) => {
   const factoryNamespace = SocketServer.getInstance().of("/task");
 
-  factoryNamespace.to(data.plansId).emit("createTask", data);
+  factoryNamespace.to(data.planId).emit("createTask", data);
 };
 
-export const emptyTask = () => {
+export const emptyTask = (planId: string) => {
   const factoryNamespace = SocketServer.getInstance().of("/task");
-
-  factoryNamespace.to("nha_may").emit("emptyTask", []);
+  factoryNamespace.to(planId).emit("emptyTask", []);
 };

@@ -16,7 +16,6 @@ import {
 import React from "react";
 import Image from "next/image";
 import { cookies } from "next/headers";
-import TaskProvider from "@/components/providers/task-provider";
 import { getPlans } from "@/services/plan.service";
 import PlanProvider from "@/components/providers/plan-provider";
 import PlanBtn from "./plan-btn";
@@ -79,9 +78,7 @@ const TaskLayout = async ({
           </SidebarFooter>
           <SidebarRail />
         </Sidebar>
-        <SidebarInset className="bg-transparent">
-          <TaskProvider>{children}</TaskProvider>
-        </SidebarInset>
+        <SidebarInset className="bg-transparent">{children}</SidebarInset>
       </SidebarProvider>
     </PlanProvider>
   );

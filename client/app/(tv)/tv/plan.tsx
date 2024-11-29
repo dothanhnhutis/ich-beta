@@ -11,115 +11,40 @@ import {
 } from "lucide-react";
 import { Plan } from "@/schema/plan.schema";
 import Task, { TaskProps } from "./task";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getTaskOfPlan } from "@/services/plan.service";
-
-// const tasks1: TaskProps[] = [
-//   {
-//     title:
-//       "3 Thùng Khóm Specifies the offset length of the shadow. This parameter accepts two, three, or four values. Third and fourth values are optional. They are interpreted as follows:",
-//     subTitle:
-//       "Specifies the offset length of the shadow. This parameter accepts two, three, or four values. Third and fourth values are optional. They are interpreted as follows. Specifies the offset length of the shadow. This parameter accepts two, three, or four values. Third and fourth values are optional. They are interpreted as follows. Specifies the offset length of the shadow. This parameter accepts two, three, or four values. Third and fourth values are optional. They are interpreted as follows:",
-//     dueDate: new Date("2024/11/24").toISOString(),
-//     startDate: new Date("2024/11/24").toISOString(),
-//     priority: "LOW",
-//     progress: "TO_DO",
-//     subTasks: [
-//       {
-//         name: "5 cups chopped Porcini mushrooms",
-//         status: "ACCEPTED",
-//       },
-//       {
-//         name: "5 cups chopped Porcini mushrooms",
-//         status: "REJECTED",
-//       },
-//       {
-//         name: "5 cups chopped Porcini mushrooms",
-//         status: "ASSIGNED",
-//       },
-//     ],
-//     tags: [],
-//   },
-//   {
-//     title:
-//       "3 Thùng Khóm Specifies the offset length of the shadow. This parameter accepts two, three, or four values. Third and fourth values are optional. They are interpreted as follows:",
-//     subTitle:
-//       "Specifies the offset length of the shadow. This parameter accepts two, three, or four values. Third and fourth values are optional. They are interpreted as follows. Specifies the offset length of the shadow. This parameter accepts two, three, or four values. Third and fourth values are optional. They are interpreted as follows. Specifies the offset length of the shadow. This parameter accepts two, three, or four values. Third and fourth values are optional. They are interpreted as follows:",
-//     dueDate: new Date("2024/11/24").toISOString(),
-//     startDate: new Date("2024/11/24").toISOString(),
-//     priority: "NORMAL",
-//     progress: "COMPLETED",
-//     subTasks: [
-//       {
-//         name: "5 cups chopped Porcini mushrooms",
-//         status: "ACCEPTED",
-//       },
-//       {
-//         name: "5 cups chopped Porcini mushrooms",
-//         status: "REJECTED",
-//       },
-//       {
-//         name: "5 cups chopped Porcini mushrooms",
-//         status: "ASSIGNED",
-//       },
-//     ],
-//     tags: [],
-//   },
-//   {
-//     title:
-//       "3 Thùng Khóm Specifies the offset length of the shadow. This parameter accepts two, three, or four values. Third and fourth values are optional. They are interpreted as follows:",
-//     subTitle:
-//       "Specifies the offset length of the shadow. This parameter accepts two, three, or four values. Third and fourth values are optional. They are interpreted as follows. Specifies the offset length of the shadow. This parameter accepts two, three, or four values. Third and fourth values are optional. They are interpreted as follows. Specifies the offset length of the shadow. This parameter accepts two, three, or four values. Third and fourth values are optional. They are interpreted as follows:",
-//     dueDate: new Date("2024/11/24").toISOString(),
-//     startDate: new Date("2024/11/24").toISOString(),
-//     priority: "URGENT",
-//     progress: "IN_REVIEW",
-//     subTasks: [
-//       {
-//         name: "5 cups chopped Porcini mushrooms",
-//         status: "ACCEPTED",
-//       },
-//       {
-//         name: "5 cups chopped Porcini mushrooms",
-//         status: "REJECTED",
-//       },
-//       {
-//         name: "5 cups chopped Porcini mushrooms",
-//         status: "ASSIGNED",
-//       },
-//     ],
-//     tags: [],
-//   },
-//   {
-//     title:
-//       "3 Thùng Khóm Specifies the offset length of the shadow. This parameter accepts two, three, or four values. Third and fourth values are optional. They are interpreted as follows:",
-//     subTitle:
-//       "Specifies the offset length of the shadow. This parameter accepts two, three, or four values. Third and fourth values are optional. They are interpreted as follows. Specifies the offset length of the shadow. This parameter accepts two, three, or four values. Third and fourth values are optional. They are interpreted as follows. Specifies the offset length of the shadow. This parameter accepts two, three, or four values. Third and fourth values are optional. They are interpreted as follows:",
-//     dueDate: new Date("2024/11/24").toISOString(),
-//     startDate: new Date("2024/11/24").toISOString(),
-//     priority: "LOW",
-//     progress: "ON_PROGRESS",
-//     subTasks: [
-//       {
-//         name: "5 cups chopped Porcini mushrooms",
-//         status: "ACCEPTED",
-//       },
-//       {
-//         name: "5 cups chopped Porcini mushrooms",
-//         status: "REJECTED",
-//       },
-//       {
-//         name: "5 cups chopped Porcini mushrooms",
-//         status: "ASSIGNED",
-//       },
-//     ],
-//     tags: ["Factory", "asdsa"],
-//   },
-// ];
+import { useTask } from "@/components/providers/task-provider";
+import { cn } from "@/lib/utils";
 
 const PlanContainer = (props: Plan) => {
   const { selected, removePlan } = useplan();
   const { toggleSidebar } = useSidebar();
+
+  const queryClient = useQueryClient();
+
+  const { socket, connected, socketJoinPlan } = useTask();
+
+  function onCreateTask() {
+    queryClient.invalidateQueries({ queryKey: ["plan", props.id] });
+  }
+
+  React.useEffect(() => {
+    socketJoinPlan(props.id);
+  }, [socketJoinPlan, props.id]);
+
+  React.useEffect(() => {
+    if (socket) {
+      socket.on("createTask", onCreateTask);
+      socket.on("emptyTask", onCreateTask);
+    }
+
+    return () => {
+      if (socket) {
+        socket.off("createTask", onCreateTask);
+        socket.off("emptyTask", onCreateTask);
+      }
+    };
+  }, [socket]);
 
   const planQuery = useQuery({
     queryKey: ["plan", props.id],
@@ -148,6 +73,12 @@ const PlanContainer = (props: Plan) => {
 
           <h4 className="text-lg font-semibold text-back line-clamp-2 w-full">
             {props.name}
+            <div
+              className={cn(
+                "size-4 rounded-full shrink-0",
+                connected ? "bg-green-300" : "bg-red-300"
+              )}
+            ></div>
           </h4>
           <button type="button" className="p-2">
             <FilterIcon className="size-6 shrink-0 text-muted-foreground" />
@@ -172,7 +103,7 @@ const PlanContainer = (props: Plan) => {
             />
           ))
         ) : (
-          <div className="text-center text-xl">Đang chờ lịch sản xuất ...</div>
+          <div className="text-center text-xl">Chưa có đơn hàng</div>
         )}
       </main>
     </div>

@@ -83,7 +83,7 @@ const PlanContainer = (props: Plan) => {
                 "size-2 rounded-full shrink-0",
                 connected ? "bg-green-300" : "bg-red-300"
               )}
-            ></div>
+            />
           </div>
         </div>
         {/* <TaskFilter /> */}

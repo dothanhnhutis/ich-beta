@@ -1,0 +1,6 @@
+/docker_volumes
+/certificate
+
+# misc
+.DS_Store
+*.pem

@@ -1,0 +1,71 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
+  DISABLED
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+model Users {
+  id                       String           @id @default(uuid())
+  email                    String           @unique
+  emailVerified            Boolean          @default(false)
+  emailVerificationExpires DateTime? //24h
+  emailVerificationToken   String?          @unique
+  password                 String?
+  passwordResetToken       String?          @unique
+  passwordResetExpires     DateTime? //4h
+  reActiveToken            String?          @unique
+  reActiveExpires          DateTime? //4h
+  // roles                    UsersRoles[]
+  status                   UserStatus       @default(ACTIVE)
+  username                 String
+  gender                   Gender?
+  picture                  String?
+  birthDate                String?
+  phoneNumber              String?
+  createdAt                DateTime         @default(now())
+  updatedAt                DateTime         @updatedAt
+  mfa                      MFA?
+  oauthProviders           OauthProviders[]
+  // plans                    Plans[]
+  // planMember               PlanMembers[]
+  // usersToPlanRoles         UsersToPlanRoles[]
+  // task                     Tasks[]
+  // taskAssignees            TaskAssignees[]
+}
+
+model OauthProviders {
+  providerId String
+  provider   String
+  userId     String
+  user       Users    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@id([userId, provider, providerId])
+}
+
+model MFA {
+  userId     String
+  secretKey  String
+  lastAccess DateTime @updatedAt
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  user       Users    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId])
+}

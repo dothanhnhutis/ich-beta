@@ -73,16 +73,18 @@ const PlanContainer = (props: Plan) => {
 
           <h4 className="text-lg font-semibold text-back line-clamp-2 w-full">
             {props.name}
+          </h4>
+          <div className="flex items-center gap-1">
+            <button type="button" className="p-2">
+              <FilterIcon className="size-6 shrink-0 text-muted-foreground" />
+            </button>
             <div
               className={cn(
-                "size-4 rounded-full shrink-0",
+                "size-2 rounded-full shrink-0",
                 connected ? "bg-green-300" : "bg-red-300"
               )}
             ></div>
-          </h4>
-          <button type="button" className="p-2">
-            <FilterIcon className="size-6 shrink-0 text-muted-foreground" />
-          </button>
+          </div>
         </div>
         {/* <TaskFilter /> */}
       </div>

@@ -12,6 +12,8 @@ import Task, { TaskProps } from "./task";
 import TaskFilter from "./task-filter";
 import { useTask } from "@/components/providers/task-provider";
 import { Button } from "@/components/ui/button";
+import { useplan } from "@/components/providers/plan-provider";
+import Plan from "./plan";
 
 const tasks1: TaskProps[] = [
   {
@@ -147,65 +149,45 @@ const TaskPage1 = () => {
   );
 };
 
-const max = 4;
 const TaskPage = () => {
+  const { selected } = useplan();
   const { toggleSidebar } = useSidebar();
   const { connected, tasks } = useTask();
-  const [numberOfPlan, setNumberOfPlan] = React.useState<number>(2);
-
-  const handleAdd = () => {
-    if (max > numberOfPlan) setNumberOfPlan(numberOfPlan + 1);
-  };
-  const handleRemove = () => {
-    setNumberOfPlan(numberOfPlan - 1);
-  };
 
   return (
     <div
       className={`grid gap-2 `}
-      style={{ gridTemplateColumns: `repeat(${numberOfPlan}, minmax(0, 1fr))` }}
+      style={{
+        gridTemplateColumns: `repeat(${selected.length}, minmax(0, 1fr))`,
+      }}
     >
-      {Array.from({ length: numberOfPlan }).map((_, idx) => (
-        <div
-          key={idx}
-          className="flex flex-col relative h-screen overflow-hidden"
-        >
-          <div>
-            <div className="flex items-center gap-2 w-full">
-              {idx == 0 ? (
-                <button type="button" onClick={toggleSidebar} className="p-2">
-                  <PanelLeftIcon className="size-6 shrink-0 text-muted-foreground" />
-                </button>
-              ) : (
-                <button type="button" onClick={handleRemove} className="p-2">
-                  <ClipboardMinusIcon className="size-6 shrink-0 text-muted-foreground" />
-                </button>
-              )}
+      {selected.map((plan) => (
+        // <div
+        //   key={plan.id}
+        //   className="flex flex-col relative h-screen overflow-hidden"
+        // >
+        //   <div>
+        //     <div className="flex items-center gap-2 w-full">
+        //       <button type="button" onClick={toggleSidebar} className="p-2">
+        //         <PanelLeftIcon className="size-6 shrink-0 text-muted-foreground" />
+        //       </button>
 
-              {/* <Clock /> */}
-              <h4 className="text-lg font-semibold text-back line-clamp-2 w-full">
-                [Plan]:Hôm nay sản xuất gì ?
-              </h4>
+        //       <h4 className="text-lg font-semibold text-back line-clamp-2 w-full">
+        //         {plan.name}
+        //       </h4>
+        //     </div>
+        //     <TaskFilter />
+        //   </div>
 
-              <button
-                type="button"
-                onClick={handleAdd}
-                className="p-2 disabled:bg-green-500"
-                disabled={numberOfPlan == max}
-              >
-                <ClipboardPlusIcon className="size-6 shrink-0 text-muted-foreground " />
-              </button>
-            </div>
-            <TaskFilter />
-          </div>
+        //   <div className="h-full overflow-y-scroll">
+        //     <div className="h-[500px] bg-green-100">1</div>
+        //     <div className="h-[500px] bg-blue-100">2</div>
+        //     <div className="h-[500px] bg-red-100">3</div>
+        //     <div className="h-[500px] bg-sky-100">4</div>
+        //   </div>
+        // </div>
 
-          <div className="h-full overflow-y-scroll">
-            <div className="h-[500px] bg-green-100">1</div>
-            <div className="h-[500px] bg-blue-100">2</div>
-            <div className="h-[500px] bg-red-100">3</div>
-            <div className="h-[500px] bg-sky-100">4</div>
-          </div>
-        </div>
+        <Plan key={plan.id} {...plan} />
       ))}
     </div>
   );

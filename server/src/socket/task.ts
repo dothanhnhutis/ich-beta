@@ -1,6 +1,6 @@
 import { Server, Socket } from "socket.io";
 import SocketServer from "./init";
-import { CreateTaskReq } from "@/schemas/demo";
+import { CreateTaskReq } from "@/schemas/task";
 
 export const taskListener = (io: Server) => {
   const factoryNamespace = io.of("/task");
@@ -22,7 +22,7 @@ export const taskListener = (io: Server) => {
 export const taskSend = (data: CreateTaskReq["body"]) => {
   const factoryNamespace = SocketServer.getInstance().of("/task");
 
-  factoryNamespace.to("nha_may").emit("createTask", data);
+  factoryNamespace.to(data.plansId).emit("createTask", data);
 };
 
 export const emptyTask = () => {

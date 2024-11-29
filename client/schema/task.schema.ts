@@ -17,3 +17,25 @@ const createTaskSchema = z.object({
 });
 
 export type CreateTask = z.infer<typeof createTaskSchema>;
+
+export type Task = {
+  id: string;
+  title: string;
+  subTitle: string;
+  priority: "LOW" | "NORMAL" | "URGENT";
+  progress: "TO_DO" | "ON_PROGRESS" | "IN_REVIEW" | "COMPLETED";
+  planId: string;
+  closeTask: boolean;
+  subTasks: SubTask[];
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type SubTask = {
+  id: string;
+  title: string;
+  parentTaskId: string;
+  status: "ACCEPTED" | "REJECTED" | "ASSIGNED";
+  createdAt: string;
+  updatedAt: string;
+};

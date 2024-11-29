@@ -1,12 +1,10 @@
 "use client";
 import React from "react";
 import { CircleAlertIcon, CircleCheckBigIcon, CircleIcon } from "lucide-react";
+import { SubTask } from "@/schema/task.schema";
 
 export type SubTasksProps = {
-  subtasks: {
-    name: string;
-    status: "ACCEPTED" | "REJECTED" | "ASSIGNED";
-  }[];
+  subtasks: SubTask[];
 };
 
 const SubTasks = ({ subtasks }: SubTasksProps) => {
@@ -20,7 +18,7 @@ const SubTasks = ({ subtasks }: SubTasksProps) => {
             <li key={idx}>
               <p className="flex items-center gap-1 text-blue-500">
                 <CircleCheckBigIcon className="size-5 shrink-0" />
-                <span>{subTask.name}</span>
+                <span>{subTask.title}</span>
               </p>
             </li>
           );
@@ -29,7 +27,7 @@ const SubTasks = ({ subtasks }: SubTasksProps) => {
             <li key={idx}>
               <p className="flex items-center gap-1 text-amber-500">
                 <CircleAlertIcon className="size-5 shrink-0 " />
-                <span>{subTask.name}</span>
+                <span>{subTask.title}</span>
               </p>
             </li>
           );
@@ -38,7 +36,7 @@ const SubTasks = ({ subtasks }: SubTasksProps) => {
           <li key={idx}>
             <p className="flex items-center gap-1 text-gray-700">
               <CircleIcon className="size-5 shrink-0" />
-              <span>{subTask.name}</span>
+              <span>{subTask.title}</span>
             </p>
           </li>
         );

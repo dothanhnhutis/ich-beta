@@ -80,7 +80,9 @@ export async function middleware(request: NextRequest) {
     }
   } else if (isAuthRoute) {
     if (user) {
-      return NextResponse.redirect(new URL("/profile", request.nextUrl));
+      return NextResponse.redirect(
+        new URL(DEFAULT_LOGIN_REDIRECT, request.nextUrl)
+      );
     }
   }
 }

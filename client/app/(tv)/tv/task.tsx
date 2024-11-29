@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import TaskHeader from "./task-header";
 import TaskFooter from "./task-footer";
 import SubTasks, { SubTasksProps } from "./subtask";
+import { SubTask } from "@/schema/task.schema";
 
 export type TaskProps = {
   title: string;
@@ -12,7 +13,7 @@ export type TaskProps = {
   dueDate: string;
   priority: "LOW" | "NORMAL" | "URGENT";
   progress: "TO_DO" | "ON_PROGRESS" | "IN_REVIEW" | "COMPLETED";
-  subTasks: SubTasksProps["subtasks"];
+  subTasks: SubTask[];
   tags: string[];
 };
 

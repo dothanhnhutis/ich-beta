@@ -30,7 +30,6 @@ model Users {
   passwordResetExpires     DateTime? //4h
   reActiveToken            String?          @unique
   reActiveExpires          DateTime? //4h
-  // roles                    UsersRoles[]
   status                   UserStatus       @default(ACTIVE)
   username                 String
   gender                   Gender?
@@ -41,11 +40,6 @@ model Users {
   updatedAt                DateTime         @updatedAt
   mfa                      MFA?
   oauthProviders           OauthProviders[]
-  // plans                    Plans[]
-  // planMember               PlanMembers[]
-  // usersToPlanRoles         UsersToPlanRoles[]
-  // task                     Tasks[]
-  // taskAssignees            TaskAssignees[]
 }
 
 model OauthProviders {
@@ -68,4 +62,59 @@ model MFA {
   user       Users    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@id([userId])
+}
+
+model Plans {
+  id        String   @id @default(uuid())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  tasks     Tasks[]
+}
+
+enum TaskProgress {
+  TO_DO
+  ON_PROGRESS
+  IN_REVIEW
+  COMPLETED
+}
+
+enum TaskPriority {
+  LOW
+  NORMAL
+  URGENT
+}
+
+model Tasks {
+  id        String       @id @default(uuid())
+  title     String
+  subTitle  String
+  priority  TaskPriority @default(NORMAL)
+  progress  TaskProgress @default(ON_PROGRESS)
+  plan      Plans        @relation(fields: [planId], references: [id], onDelete: Cascade)
+  planId    String
+  closeTask Boolean      @default(false)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+  subTasks  SubTasks[]
+
+  @@index([title, progress, priority, closeTask])
+}
+
+enum SubTasksStatus {
+  ASSIGNED
+  ACCEPTED
+  REJECTED
+}
+
+model SubTasks {
+  id           String         @id @default(uuid())
+  title        String         @default("")
+  parentTask   Tasks          @relation(fields: [parentTaskId], references: [id], onDelete: Cascade)
+  parentTaskId String
+  status       SubTasksStatus @default(ASSIGNED)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  @@index([title, parentTaskId])
 }

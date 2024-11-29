@@ -3,7 +3,6 @@ import { Server, ServerOptions } from "socket.io";
 import http from "http";
 
 const opt: Partial<ServerOptions> = {
-  path: "/socket.io",
   cors: {
     origin: `${env.CLIENT_URL}`,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
@@ -14,6 +13,7 @@ class SocketServer extends Server {
   private static io: SocketServer;
 
   constructor(httpServer: http.Server, options?: Partial<ServerOptions>) {
+    console.log(options);
     super(httpServer, { ...opt, ...options });
     SocketServer.io = this;
   }

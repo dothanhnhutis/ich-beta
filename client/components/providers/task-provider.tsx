@@ -40,22 +40,13 @@ const TaskProvider = ({ children }: TTaskProvider) => {
     console.log(value);
   }
 
-  // function onCreateTask(value: CreateTask) {
-  //   console.log(value);
-  //   setTaskData((prev) => ({ ...prev, tasks: [value, ...prev.tasks] }));
-  // }
-
-  // function onClearTask() {
-  //   setTaskData((prev) => ({ ...prev, tasks: [] }));
-  // }
-
   React.useEffect(() => {
     function initSocket() {
       if (socket) {
         socket.disconnect();
       }
       const newSocket = createSocket({
-        path: "/socket.io",
+        path: "/api/v1/socket.io",
         url: envs.NEXT_PUBLIC_SERVER_URL,
         namespace: "task",
         autoConnect: false,

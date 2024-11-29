@@ -39,7 +39,9 @@ const startServer = async () => {
   try {
     const httpServer: http.Server = new http.Server(app);
     // socket
-    const socketIO: Server = new SocketServer(httpServer);
+    const socketIO: Server = new SocketServer(httpServer, {
+      path: "/api/v1/socket.io",
+    });
     taskListener(socketIO);
 
     await startHttpServer(httpServer);

@@ -13,7 +13,6 @@ class SocketServer extends Server {
   private static io: SocketServer;
 
   constructor(httpServer: http.Server, options?: Partial<ServerOptions>) {
-    console.log(options);
     super(httpServer, { ...opt, ...options });
     SocketServer.io = this;
   }

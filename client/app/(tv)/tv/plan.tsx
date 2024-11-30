@@ -6,6 +6,7 @@ import { useSidebar } from "@/components/ui/sidebar";
 import {
   FilterIcon,
   PanelLeftIcon,
+  PlusIcon,
   SlidersHorizontalIcon,
   XIcon,
 } from "lucide-react";
@@ -15,6 +16,8 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getTaskOfPlan } from "@/services/plan.service";
 import { useTask } from "@/components/providers/task-provider";
 import { cn } from "@/lib/utils";
+
+import CreateTaskModal from "./createTaskModal";
 
 const PlanContainer = (props: Plan) => {
   const { selected, removePlan } = useplan();
@@ -75,9 +78,11 @@ const PlanContainer = (props: Plan) => {
             {props.name}
           </h4>
           <div className="flex items-center gap-1">
-            <button type="button" className="p-2">
+            {/* <button type="button" className="p-2">
               <FilterIcon className="size-6 shrink-0 text-muted-foreground" />
-            </button>
+            </button> */}
+            <CreateTaskModal planId={props.id} title={props.name} />
+
             <div
               className={cn(
                 "size-2 rounded-full shrink-0",

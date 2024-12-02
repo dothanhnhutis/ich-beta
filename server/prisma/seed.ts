@@ -44,7 +44,46 @@ async function initDB() {
     },
   });
 }
-initDB()
+
+async function initFC() {
+  // await prisma.users.deleteMany();
+
+  // const user = await prisma.users.create({
+  //   data: {
+  //     email: "gaconght001@gmail.com",
+  //     password: await hashData("@Abc123123"),
+  //     username: "ICH",
+  //     birthDate: "30/11/2024",
+  //     gender: "MALE",
+  //     phoneNumber: "0707000004",
+  //     emailVerified: true,
+  //   },
+  // });
+
+  await prisma.factorys.deleteMany();
+
+  const factory = await prisma.factorys.create({
+    data: {
+      name: "Công ty TNHH MTV TM Sản Xuất I.C.H",
+      address:
+        "Số 159 Nguyễn Đình Chiểu, Khóm 3, Phường 4, Thành phố Sóc Trăng, Tỉnh Sóc Trăng",
+    },
+  });
+
+  const department = await prisma.departments.createMany({
+    data: [
+      {
+        name: "Phòng 1",
+        factoryId: factory.id,
+      },
+      {
+        name: "Phòng 2",
+        factoryId: factory.id,
+      },
+    ],
+  });
+}
+initFC()
   .then(async () => {
     await prisma.$disconnect();
   })

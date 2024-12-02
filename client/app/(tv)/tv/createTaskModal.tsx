@@ -32,6 +32,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import TipTap from "./tiptap/editor";
 
 const SortUrl = ({ data }: { data: { url: string; id: number } }) => {
   const { attributes, listeners, setNodeRef, transform, transition } =
@@ -109,36 +110,7 @@ const CreateTaskModal = ({
         <div className="grid grid-cols-2 gap-4 py-4">
           <div className="flex flex-col gap-2 col-span-2">
             <Label htmlFor="name">Tiêu đề</Label>
-            <Input id="name" />
-          </div>
-          <div className="flex flex-col gap-2 col-span-2">
-            <Label htmlFor="name">Mô tả</Label>
-            <Input id="name" />
-          </div>
-          <div className="flex flex-col gap-2 col-span-2 sm:col-span-1">
-            <Label htmlFor="name">Tiến độ</Label>
-            <Input id="name" />
-          </div>
-          <div className="flex flex-col gap-2 col-span-2 sm:col-span-1">
-            <Label htmlFor="name">Mức độ</Label>
-            <Input id="name" />
-          </div>
-          <div className="flex flex-col gap-2 col-span-2 sm:col-span-1">
-            <Label htmlFor="name">Sản phẩm</Label>
-            <DndContext
-              sensors={sensors}
-              onDragEnd={handleDragEnd}
-              collisionDetection={closestCorners}
-            >
-              <SortableContext
-                items={urls}
-                strategy={verticalListSortingStrategy}
-              >
-                {urls.map((url) => (
-                  <SortUrl key={url.id} data={url} />
-                ))}
-              </SortableContext>
-            </DndContext>
+            <TipTap />
           </div>
         </div>
         <DialogFooter className="gap-2">

@@ -64,6 +64,50 @@ model MFA {
   @@id([userId])
 }
 
+model Factorys {
+  id          String        @id @default(uuid())
+  name        String
+  address     String        @unique
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  departments Departments[]
+
+  @@index([name, address])
+}
+
+model Departments {
+  id                  String                @id @default(uuid())
+  name                String
+  factoryId           String
+  factory             Factorys              @relation(fields: [factoryId], references: [id], onDelete: Cascade)
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+  departmentsDisplays DepartmentsDisplays[]
+
+  @@unique([factoryId, name])
+  @@index([name, factoryId])
+}
+
+model DepartmentsDisplays {
+  departmentId String
+  displayId    String
+  department   Departments @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  display      Displays    @relation(fields: [displayId], references: [id], onDelete: Cascade)
+
+  @@id([departmentId, displayId])
+}
+
+model Displays {
+  id                  String                @id @default(uuid())
+  content             String
+  enable              Boolean               @default(true)
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+  departmentsDisplays DepartmentsDisplays[]
+
+  @@index([enable])
+}
+
 model Plans {
   id        String   @id @default(uuid())
   name      String

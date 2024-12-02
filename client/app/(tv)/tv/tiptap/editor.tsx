@@ -34,12 +34,11 @@ const schema = new Schema({
       attrs: {
         level: { default: 1 },
       },
-
       content: "inline*",
       group: "block",
       defining: true,
       toDOM(node) {
-        return [`h${node.attrs.level}`, 0]; // Render thẻ h1, h2, ..., h5
+        return [`h${node.attrs.level}`, 0];
       },
       parseDOM: [
         { tag: "h1", getAttrs: () => ({ level: 1 }) },
@@ -47,6 +46,7 @@ const schema = new Schema({
         { tag: "h3", getAttrs: () => ({ level: 3 }) },
         { tag: "h4", getAttrs: () => ({ level: 4 }) },
         { tag: "h5", getAttrs: () => ({ level: 5 }) },
+        { tag: "h6", getAttrs: () => ({ level: 6 }) },
       ],
     },
     hard_break: {
@@ -61,22 +61,24 @@ const schema = new Schema({
 
 // Custom Backspace behavior function
 const handleBackspace: Command = (state, dispatch) => {
-  const { $anchor } = state.selection;
+  const { selection } = state;
 
-  // Check if we have a cursor in an empty block
-  if ($anchor && $anchor.parent.content.size === 0) {
-    const tr = state.tr;
-    const nodeBefore = $anchor.nodeBefore;
+  if (selection instanceof TextSelection) {
+    const { $cursor } = selection;
+    if ($cursor && $cursor.parent.content.size === 0) {
+      // Check if we have a cursor in an empty block
+      const tr = state.tr;
+      const nodeBefore = $cursor.nodeBefore;
 
-    // If nodeBefore exists, delete the node
-    if (nodeBefore) {
-      tr.delete($anchor.pos - 1, $anchor.pos);
-      if (dispatch) dispatch(tr);
-      return true;
+      // If nodeBefore exists, delete the node
+      if (nodeBefore) {
+        tr.delete($cursor.pos - 1, $cursor.pos);
+        if (dispatch) dispatch(tr);
+        return true;
+      }
     }
   }
 
-  // Fallback to default behavior
   return false;
 };
 
@@ -88,26 +90,11 @@ const customKeymap = keymap({
     // Kiểm tra xem có phải là TextSelection
     if (selection instanceof TextSelection) {
       const { $cursor } = selection;
-
       if (!$cursor) return splitBlock(state, dispatch);
-
-      const { hard_break } = schema.nodes;
-
-      if (hard_break && $cursor.parent.isTextblock) {
-        const tr = state.tr;
-
-        // // Chèn `hard_break` tại vị trí hiện tại
-        // tr.insert($cursor.pos, state.schema.node("hard_break"));
-
-        // Tách block ngay sau `hard_break`
-        tr.split($cursor.pos);
-
-        // Di chuyển con trỏ đến đầu block mới
-        // const newCursorPos = tr.mapping.map($cursor.pos);
-        // tr.setSelection(TextSelection.create(tr.doc, newCursorPos));
-        if (dispatch) dispatch(tr);
-        return true;
-      }
+      const tr = state.tr;
+      tr.split($cursor.pos);
+      if (dispatch) dispatch(tr);
+      return true;
     }
 
     // Kiểm tra xem có phải là NodeSelection
@@ -136,32 +123,47 @@ const customKeymap = keymap({
 const toggleHeading =
   (level: number): Command =>
   (state, dispatch) => {
-    const { selection, doc } = state;
-    const { from, to } = selection;
+    const { selection, doc, schema } = state;
+    const { $from, $to } = selection;
 
-    // Kiểm tra nếu đoạn văn bản đang được chọn có phải là heading không
-    const node = doc.nodeAt(from);
-    if (!node) return false;
+    const range = $from.blockRange($to);
 
-    console.log(node.type.name);
+    console.log(range);
+    if (!range) return false;
 
-    console.log(node);
+    const { paragraph, heading } = schema.nodes;
 
-    if (node.type.name === "heading") {
-      // Nếu đã là heading, chuyển nó về paragraph
-      const newNode = schema.nodes.paragraph.createAndFill();
-      const transaction = state.tr.replaceWith(from, to, newNode!);
-      dispatch && dispatch(transaction);
+    const isTarget = state.selection.$from.parent.type === paragraph;
+
+    const tr = state.tr;
+
+    // Toggle block type
+    if (isTarget) {
+      tr.setBlockType(range.start, range.end, heading);
     } else {
-      // Nếu là paragraph, chuyển nó thành heading với level xác định
-      const newNode = schema.nodes.heading.create({ level }, [node]);
-      const transaction = state.tr.replaceWith(from, to, newNode);
-      dispatch && dispatch(transaction);
+      tr.setBlockType(range.start, range.end, paragraph);
+    }
+
+    if (dispatch) {
+      dispatch(tr);
     }
     return true;
+
+    // if (node.type.name === "heading") {
+    //   // Nếu đã là heading, chuyển nó về paragraph
+    //   const newNode = schema.nodes.paragraph.createAndFill();
+    //   const transaction = state.tr.replaceWith(from, to, newNode!);
+    //   dispatch && dispatch(transaction);
+    // } else {
+    //   // Nếu là paragraph, chuyển nó thành heading với level xác định
+    //   const newNode = schema.nodes.heading.create({ level }, [node]);
+    //   const transaction = state.tr.replaceWith(from, to, newNode);
+    //   dispatch && dispatch(transaction);
+    // }
+    // return true;
   };
 
-const Editor = () => {
+const Editor1 = () => {
   const editorRef = React.useRef<HTMLDivElement | null>(null);
   const editorViewRef = React.useRef<EditorView | null>(null);
 
@@ -232,4 +234,4 @@ const Editor = () => {
   );
 };
 
-export default Editor;
+export default Editor1;

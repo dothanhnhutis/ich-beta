@@ -31,9 +31,8 @@ const handleBackspace: Command = (state, dispatch) => {
 
 // Custom keymap
 export const defaultKeymap = keymap({
-  Enter: (state, dispatch, view) => {
-    const { selection, schema } = state;
-
+  Enter: (state, dispatch) => {
+    const { selection } = state;
     // Kiểm tra xem có phải là TextSelection
     if (selection instanceof TextSelection) {
       const { $cursor } = selection;
@@ -43,18 +42,14 @@ export const defaultKeymap = keymap({
       if (dispatch) dispatch(tr);
       return true;
     }
-
     // Kiểm tra xem có phải là NodeSelection
     if (selection instanceof NodeSelection) {
       const tr = state.tr;
-
       // Tách block tại vị trí node được chọn
       tr.split(selection.from);
       if (dispatch) dispatch(tr);
-
       return true;
     }
-
     // Trường hợp không phải TextSelection hoặc NodeSelection
     return splitBlock(state, dispatch);
   },

@@ -8,18 +8,17 @@ import {
   MarkSpec,
 } from "prosemirror-model";
 import { defaultKeymap } from "./keymap";
-import { Node, Mark } from "./schema";
+
 type EditorProps = {
   container: HTMLDivElement;
   schema: Schema;
   html?: string | HTMLDivElement;
-  extensions?: (Node | Mark)[];
 };
 
 export class Editor {
   editorView: EditorView;
 
-  constructor({ schema, html, container, extensions = [] }: EditorProps) {
+  constructor({ schema, html, container }: EditorProps) {
     const contentElement = document.createElement("div");
     if (typeof html == "string") {
       contentElement.innerHTML = html;

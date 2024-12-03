@@ -6,17 +6,14 @@ import {
   joinBackward,
 } from "prosemirror-commands";
 
-// Custom Backspace behavior function
 const handleBackspace: Command = (state, dispatch) => {
   const { selection } = state;
-
   if (selection instanceof TextSelection) {
     const { $cursor } = selection;
     if ($cursor && $cursor.parent.content.size === 0) {
       // Check if we have a cursor in an empty block
       const tr = state.tr;
       const nodeBefore = $cursor.nodeBefore;
-
       // If nodeBefore exists, delete the node
       if (nodeBefore) {
         tr.delete($cursor.pos - 1, $cursor.pos);
@@ -25,7 +22,6 @@ const handleBackspace: Command = (state, dispatch) => {
       }
     }
   }
-
   return false;
 };
 

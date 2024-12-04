@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import { EditorState } from "prosemirror-state";
+import { EditorState, Transaction } from "prosemirror-state";
 import { EditorView } from "prosemirror-view";
 import { DOMParser, MarkType, NodeType } from "prosemirror-model";
 import { defaultKeymap } from "./keymap";
@@ -12,21 +12,28 @@ import {
   AlignLeftIcon,
   AlignRightIcon,
   BoldIcon,
+  Check,
+  ChevronsUpDown,
   Heading1Icon,
   Heading2Icon,
+  Heading3Icon,
+  Heading4Icon,
   ItalicIcon,
+  ListIcon,
+  ListOrderedIcon,
+  LucideIcon,
   PilcrowIcon,
   StrikethroughIcon,
   UnderlineIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+import NodeList from "./components/node";
+
 const EditorSimple = () => {
   const editorRef = React.useRef<HTMLDivElement | null>(null);
   const editorViewRef = React.useRef<EditorView | null>(null);
-  const [editorState, setEditorState] = React.useState<EditorState | null>(
-    null
-  );
+  const [state, setState] = React.useState<EditorState | null>(null);
 
   React.useEffect(() => {
     if (!editorRef.current) return;
@@ -42,7 +49,8 @@ const EditorSimple = () => {
       dispatchTransaction: (transaction) => {
         const newState = editorViewRef.current!.state.apply(transaction);
         editorViewRef.current!.updateState(newState);
-        setEditorState(newState);
+
+        setState(newState);
 
         // if (transaction.selectionSet) {
         //   const cursorPosition = getCursorPosition(newState);
@@ -50,8 +58,7 @@ const EditorSimple = () => {
         // }
       },
     });
-
-    setEditorState(editorViewRef.current.state);
+    setState(state);
 
     const getCursorPosition = (state: EditorState) => {
       const { from, to } = state.selection;
@@ -69,6 +76,7 @@ const EditorSimple = () => {
   const handleHeading = (level: number) => {
     if (!editorViewRef.current) return;
     const { state, dispatch } = editorViewRef.current;
+    state;
     const { $from, $to } = state.selection;
     const range = $from.blockRange($to);
     if (!range || !dispatch) return;
@@ -137,51 +145,52 @@ const EditorSimple = () => {
     }
   };
 
-  const isNodeActive = React.useCallback(
-    (node: string) => {
-      let isActive = false;
-      if (!editorState) return isActive;
+  // const isNodeActive = React.useCallback(
+  //   (node: string) => {
+  //     let isActive = false;
+  //     if (!editorState) return isActive;
 
-      const { from, to } = editorState.selection;
+  //     const { from, to } = editorState.selection;
 
-      const nodeType = editorState.schema.node(node).type;
-      if (!nodeType) return isActive;
+  //     const nodeType = editorState.schema.node(node).type;
+  //     if (!nodeType) return isActive;
 
-      editorState.doc.nodesBetween(from, to, (node) => {
-        if (node.type === nodeType) {
-          isActive = true;
-        }
-      });
+  //     editorState.doc.nodesBetween(from, to, (node) => {
+  //       if (node.type === nodeType) {
+  //         isActive = true;
+  //       }
+  //     });
 
-      return isActive;
-    },
-    [editorState]
-  );
+  //     return isActive;
+  //   },
+  //   [editorState]
+  // );
 
-  const isMarkActive = (mark: string): boolean => {
-    let isActive = false;
-    if (!editorState) return isActive;
-    const { from, $from, to, empty } = editorState.selection;
+  // const isMarkActive = (mark: string): boolean => {
+  //   let isActive = false;
+  //   if (!editorState) return isActive;
+  //   const { from, $from, to, empty } = editorState.selection;
 
-    const markType = editorState.schema.mark(mark).type;
-    if (!markType) return isActive;
+  //   const markType = editorState.schema.mark(mark).type;
+  //   if (!markType) return isActive;
 
-    if (empty) {
-      return !!markType.isInSet(editorState.storedMarks || $from.marks());
-    } else {
-      let isActive = false;
-      editorState.doc.nodesBetween(from, to, (node) => {
-        if (markType.isInSet(node.marks)) {
-          isActive = true;
-        }
-      });
-      return isActive;
-    }
-  };
+  //   if (empty) {
+  //     return !!markType.isInSet(editorState.storedMarks || $from.marks());
+  //   } else {
+  //     let isActive = false;
+  //     editorState.doc.nodesBetween(from, to, (node) => {
+  //       if (markType.isInSet(node.marks)) {
+  //         isActive = true;
+  //       }
+  //     });
+  //     return isActive;
+  //   }
+  // };
 
   return (
     <div className="p-2 border">
       <div className="flex gap-2">
+        <NodeList view={editorViewRef.current} />
         <button
           className="p-2 rounded-md border"
           onClick={() => handleHeading(1)}
@@ -196,8 +205,8 @@ const EditorSimple = () => {
         </button>
         <button
           className={cn(
-            "p-2 rounded-md border",
-            isNodeActive("heading") ? "bg-red-500" : ""
+            "p-2 rounded-md border"
+            // isNodeActive("heading") ? "bg-red-500" : ""
           )}
           onClick={() => handleParagraph()}
         >
@@ -217,7 +226,6 @@ const EditorSimple = () => {
         <button className="p-2 rounded-md border">
           <UnderlineIcon className="shrink-0 size-6" />
         </button>
-
         <button className="p-2 rounded-md border">
           <ItalicIcon className="shrink-0 size-6" />
         </button>
@@ -233,9 +241,15 @@ const EditorSimple = () => {
         <button className="p-2 rounded-md border">
           <AlignJustifyIcon className="shrink-0 size-6" />
         </button>
+        <button className="p-2 rounded-md border">
+          <ListIcon className="shrink-0 size-6" />
+        </button>
+        <button className="p-2 rounded-md border">
+          <ListOrderedIcon className="shrink-0 size-6" />
+        </button>
       </div>
       <div
-        className="p-2 [&>*]:outline-none [&>*]:whitespace-pre rounded"
+        className="p-2 [&>*]:outline-none [&>*]:whitespace-pre rounded border bg-white"
         ref={editorRef}
       />
     </div>

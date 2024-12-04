@@ -5,6 +5,7 @@ import React from "react";
 
 type EditorContext = {
   view: EditorView | null;
+  state: EditorState;
 };
 const EditorConext = React.createContext<EditorContext | null>(null);
 
@@ -19,17 +20,18 @@ export const useEditor = () => {
 export const EditorProvider = ({
   children,
   mount,
-  state,
+  defaultState,
   dispatchTransaction,
   plugins,
 }: {
   children?: React.ReactNode;
   mount: HTMLElement | null;
-  state: EditorState;
+  defaultState: EditorState;
   dispatchTransaction?: (tr: Transaction, view: EditorView) => void;
   plugins?: Plugin[];
 }) => {
   const [view, setView] = React.useState<EditorView | null>(null);
+  const [state, setState] = React.useState<EditorState>(defaultState);
 
   React.useEffect(() => {
     if (!mount) return;
@@ -39,7 +41,7 @@ export const EditorProvider = ({
       dispatchTransaction: (transaction) => {
         const newState = newView.state.apply(transaction);
         newView.updateState(newState);
-
+        setState(newState);
         if (!dispatchTransaction) return;
         dispatchTransaction(transaction, newView);
       },
@@ -56,6 +58,8 @@ export const EditorProvider = ({
   }, [mount]);
 
   return (
-    <EditorConext.Provider value={{ view }}>{children}</EditorConext.Provider>
+    <EditorConext.Provider value={{ view, state }}>
+      {children}
+    </EditorConext.Provider>
   );
 };

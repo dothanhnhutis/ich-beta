@@ -90,11 +90,13 @@ const handleBold = (view: EditorView) => {
 const nodeList: {
   label: string;
   Icon: LucideIcon;
+  path: string;
   action: (view: EditorView | null) => void;
 }[] = [
   {
     label: "Heading 1",
     Icon: Heading1Icon,
+    path: "h1",
     action: (view: EditorView | null) => {
       if (!view) return;
       handleHeading(view, "heading", { level: 1 });
@@ -103,6 +105,7 @@ const nodeList: {
   {
     label: "Heading 2",
     Icon: Heading2Icon,
+    path: "h2",
     action: (view: EditorView | null) => {
       if (!view) return;
       handleHeading(view, "heading", { level: 2 });
@@ -111,6 +114,7 @@ const nodeList: {
   {
     label: "Heading 3",
     Icon: Heading3Icon,
+    path: "h3",
     action: (view: EditorView | null) => {
       if (!view) return;
       handleHeading(view, "heading", { level: 3 });
@@ -119,6 +123,7 @@ const nodeList: {
   {
     label: "Heading 4",
     Icon: Heading4Icon,
+    path: "h4",
     action: (view: EditorView | null) => {
       if (!view) return;
       handleHeading(view, "heading", { level: 4 });
@@ -127,6 +132,7 @@ const nodeList: {
   {
     label: "Paragraph",
     Icon: PilcrowIcon,
+    path: "p",
     action: (view: EditorView | null) => {
       if (!view) return;
       handleHeading(view, "paragraph");
@@ -134,11 +140,68 @@ const nodeList: {
   },
 ];
 
-const NodeList = () => {
-  const [open, setOpen] = React.useState(false);
-  const [value, setValue] = React.useState("");
+// const isNodeActive = React.useCallback(
+//   (node: string) => {
+//     let isActive = false;
+//     if (!editorState) return isActive;
 
-  const { view } = useEditor();
+//     const { from, to } = editorState.selection;
+
+//     const nodeType = editorState.schema.node(node).type;
+//     if (!nodeType) return isActive;
+
+//     editorState.doc.nodesBetween(from, to, (node) => {
+//       if (node.type === nodeType) {
+//         isActive = true;
+//       }
+//     });
+
+//     return isActive;
+//   },
+//   [editorState]
+// );
+
+// const isMarkActive = (mark: string): boolean => {
+//   let isActive = false;
+//   if (!editorState) return isActive;
+//   const { from, $from, to, empty } = editorState.selection;
+
+//   const markType = editorState.schema.mark(mark).type;
+//   if (!markType) return isActive;
+
+//   if (empty) {
+//     return !!markType.isInSet(editorState.storedMarks || $from.marks());
+//   } else {
+//     let isActive = false;
+//     editorState.doc.nodesBetween(from, to, (node) => {
+//       if (markType.isInSet(node.marks)) {
+//         isActive = true;
+//       }
+//     });
+//     return isActive;
+//   }
+// };
+
+const NodeList = () => {
+  const { view, state } = useEditor();
+  const [open, setOpen] = React.useState(false);
+  const [value, setValue] = React.useState<number>(-1);
+
+  React.useEffect(() => {
+    const { from, to } = state.selection;
+    state.doc.nodesBetween(from, to, (node) => {
+      switch (node.type.name) {
+        case "paragraph":
+          setValue(nodeList.findIndex((n) => n.path == "p"));
+          break;
+        case "heading":
+          setValue(nodeList.findIndex((n) => n.path == `h${node.attrs.level}`));
+          break;
+        default:
+          break;
+      }
+    });
+  }, [state]);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -149,23 +212,22 @@ const NodeList = () => {
           aria-expanded={open}
           className="w-[200px] justify-between"
         >
-          {value
-            ? nodeList.find((node) => node.label === value)?.label
-            : "Select framework..."}
+          {nodeList.find((node, idx) => value == idx)?.label}
           <ChevronsUpDown className="opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[200px] p-0">
-        <Command>
+        <Command value="asds">
           <CommandList>
             <CommandGroup>
-              {nodeList.map(({ label, Icon, action }) => (
+              {nodeList.map(({ label, Icon, action }, idx) => (
                 <CommandItem
                   key={label}
                   value={label}
-                  onSelect={(currentValue) => {
+                  onSelect={() => {
                     action(view);
-                    setValue(currentValue === value ? "" : currentValue);
+                    // setValue(currentValue === value ? "" : currentValue);
+                    setValue(idx);
                     setOpen(false);
                   }}
                 >

@@ -7,6 +7,18 @@ import { defaultKeymap } from "./editor/keymap";
 import { EditorView } from "prosemirror-view";
 import { DOMSerializer } from "prosemirror-model";
 import NodeList from "./editor/components/node-list";
+import {
+  AlignCenterIcon,
+  AlignJustifyIcon,
+  AlignLeftIcon,
+  AlignRightIcon,
+  BoldIcon,
+  ItalicIcon,
+  ListIcon,
+  ListOrderedIcon,
+  StrikethroughIcon,
+  UnderlineIcon,
+} from "lucide-react";
 
 const TipTap2 = () => {
   const [mount, setMount] = React.useState<HTMLElement | null>(null);
@@ -34,13 +46,45 @@ const TipTap2 = () => {
   return (
     <EditorProvider
       mount={mount}
-      state={state}
+      defaultState={state}
       dispatchTransaction={(transaction, view) => {
         console.log(getHTML(view));
       }}
       plugins={[defaultKeymap]}
     >
-      <NodeList />
+      <div className="flex gap-2">
+        <NodeList />
+        <button className="p-2 rounded-md border">
+          <BoldIcon className="shrink-0 size-6" />
+        </button>
+        <button className="p-2 rounded-md border">
+          <StrikethroughIcon className="shrink-0 size-6" />
+        </button>
+        <button className="p-2 rounded-md border">
+          <UnderlineIcon className="shrink-0 size-6" />
+        </button>
+        <button className="p-2 rounded-md border">
+          <ItalicIcon className="shrink-0 size-6" />
+        </button>
+        <button className="p-2 rounded-md border">
+          <AlignLeftIcon className="shrink-0 size-6" />
+        </button>
+        <button className="p-2 rounded-md border">
+          <AlignCenterIcon className="shrink-0 size-6" />
+        </button>
+        <button className="p-2 rounded-md border">
+          <AlignRightIcon className="shrink-0 size-6" />
+        </button>
+        <button className="p-2 rounded-md border">
+          <AlignJustifyIcon className="shrink-0 size-6" />
+        </button>
+        <button className="p-2 rounded-md border">
+          <ListIcon className="shrink-0 size-6" />
+        </button>
+        <button className="p-2 rounded-md border">
+          <ListOrderedIcon className="shrink-0 size-6" />
+        </button>
+      </div>
       <div
         ref={setMount}
         className="p-2 [&>*]:outline-none [&>*]:whitespace-pre-wrap rounded border bg-white"

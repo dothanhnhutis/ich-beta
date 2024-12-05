@@ -19,20 +19,52 @@ const ListBtn = ({
 
     if (!range) return;
 
-    if (
-      !("list_item" in state.schema.nodes) ||
-      !(listType in state.schema.nodes)
-    )
-      return;
-    console.log(state.schema.nodes[listType]);
-    console.log(state.schema);
+    const isInList = range.depth >= 1 && range.parent.type.name === listType;
+    if (isInList) {
+      // Unwrap the list
+      if (dispatch) {
+        const tr = state.tr;
+        const target = liftTarget(range);
+        if (target !== null) {
+          tr.lift(range, target);
+        }
+        dispatch(tr);
+      }
+      return true;
+    } else {
+      // Wrap in the target list
+      const wrapping = findWrapping(range, listType, {}, itemType);
 
-    dispatch(
-      state.tr.wrap(range, [
-        { type: state.schema.nodes[listType] },
-        { type: state.schema.nodes.list_item },
-      ])
-    );
+      if (!wrapping) return false;
+
+      if (dispatch) {
+        const tr = state.tr;
+        tr.wrap(range, wrapping);
+        dispatch(tr);
+      }
+      return true;
+    }
+    // if (
+    //   !("list_item" in state.schema.nodes) ||
+    //   !(listType in state.schema.nodes)
+    // )
+    //   return;
+
+    // const parentList = range.parent.type;
+
+    // if (parentList.name == "list_item") {
+    //   console.log("first");
+    //   dispatch(
+    //     state.tr.setNodeMarkup(range.start, state.schema.nodes.paragraph)
+    //   );
+    // } else {
+    //   dispatch(
+    //     state.tr.wrap(range, [
+    //       { type: state.schema.nodes[listType] },
+    //       { type: state.schema.nodes.list_item },
+    //     ])
+    //   );
+    // }
   };
   return (
     <button

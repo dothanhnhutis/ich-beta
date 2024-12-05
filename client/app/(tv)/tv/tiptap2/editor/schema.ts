@@ -1,15 +1,42 @@
 import { Schema } from "prosemirror-model";
 
+const headingClassName: { class: string }[] = [
+  {
+    class: "font-bold text-4xl",
+  },
+  {
+    class: "font-bold text-2xl",
+  },
+  {
+    class: "font-bold text-xl",
+  },
+  {
+    class: "font-bold text-lg",
+  },
+];
+
 export const schemaDefault = new Schema({
   nodes: {
     doc: {
       content: "block+",
     },
     paragraph: {
+      attrs: { textAlign: { default: "left" } },
       content: "inline*",
       group: "block",
-      parseDOM: [{ tag: "p" }],
-      toDOM: () => ["p", 0],
+      toDOM: (node) => [
+        "p",
+        { style: `text-align: ${node.attrs.textAlign}` },
+        0,
+      ],
+      parseDOM: [
+        {
+          tag: "p",
+          getAttrs: (dom: HTMLElement) => ({
+            textAlign: dom.style.textAlign || "left",
+          }),
+        },
+      ],
     },
     text: {
       group: "inline",
@@ -17,20 +44,64 @@ export const schemaDefault = new Schema({
     heading: {
       attrs: {
         level: { default: 1 },
+        textAlign: { default: "left" },
       },
       content: "inline*",
       group: "block",
       defining: true,
       toDOM(node) {
-        return [`h${node.attrs.level}`, 0];
+        return [
+          `h${node.attrs.level}`,
+          {
+            ...headingClassName[node.attrs.level - 1],
+            style: `text-align: ${node.attrs.textAlign}`,
+          },
+          0,
+        ];
       },
       parseDOM: [
-        { tag: "h1", getAttrs: () => ({ level: 1 }) },
-        { tag: "h2", getAttrs: () => ({ level: 2 }) },
-        { tag: "h3", getAttrs: () => ({ level: 3 }) },
-        { tag: "h4", getAttrs: () => ({ level: 4 }) },
-        { tag: "h5", getAttrs: () => ({ level: 5 }) },
-        { tag: "h6", getAttrs: () => ({ level: 6 }) },
+        {
+          tag: "h1",
+          getAttrs: (dom: HTMLElement) => ({
+            level: 1,
+            textAlign: dom.style.textAlign || "left",
+          }),
+        },
+        {
+          tag: "h2",
+          getAttrs: (dom: HTMLElement) => ({
+            level: 2,
+            textAlign: dom.style.textAlign || "left",
+          }),
+        },
+        {
+          tag: "h3",
+          getAttrs: (dom: HTMLElement) => ({
+            level: 3,
+            textAlign: dom.style.textAlign || "left",
+          }),
+        },
+        {
+          tag: "h4",
+          getAttrs: (dom: HTMLElement) => ({
+            level: 4,
+            textAlign: dom.style.textAlign || "left",
+          }),
+        },
+        {
+          tag: "h5",
+          getAttrs: (dom: HTMLElement) => ({
+            level: 5,
+            textAlign: dom.style.textAlign || "left",
+          }),
+        },
+        {
+          tag: "h6",
+          getAttrs: (dom: HTMLElement) => ({
+            level: 6,
+            textAlign: dom.style.textAlign || "left",
+          }),
+        },
       ],
     },
     hard_break: {
@@ -39,6 +110,36 @@ export const schemaDefault = new Schema({
       selectable: false,
       parseDOM: [{ tag: "br" }],
       toDOM: () => ["br"],
+    },
+    bullet_list: {
+      group: "block",
+      content: "list_item+",
+      parseDOM: [{ tag: "ul" }],
+      toDOM: () => ["ul", 0],
+    },
+    ordered_list: {
+      group: "block",
+      content: "list_item+",
+      attrs: { order: { default: 1 } },
+      parseDOM: [
+        {
+          tag: "ol",
+          getAttrs: (dom: HTMLElement) => ({
+            order: dom.hasAttribute("start")
+              ? Number(dom.getAttribute("start"))
+              : 1,
+          }),
+        },
+      ],
+      toDOM: (node) =>
+        node.attrs.order === 1
+          ? ["ol", 0]
+          : ["ol", { start: node.attrs.order }, 0],
+    },
+    list_item: {
+      content: "paragraph block*",
+      parseDOM: [{ tag: "li" }],
+      toDOM: () => ["li", 0],
     },
   },
   marks: {

@@ -19,6 +19,9 @@ import {
   StrikethroughIcon,
   UnderlineIcon,
 } from "lucide-react";
+import { MarkBtn } from "./editor/components/mark-btn";
+import AligmentBtn from "./editor/components/aligment-btn";
+import ListBtn from "./editor/components/list-btn";
 
 const TipTap2 = () => {
   const [mount, setMount] = React.useState<HTMLElement | null>(null);
@@ -54,33 +57,19 @@ const TipTap2 = () => {
     >
       <div className="flex gap-2">
         <NodeList />
-        <button className="p-2 rounded-md border">
-          <BoldIcon className="shrink-0 size-6" />
-        </button>
-        <button className="p-2 rounded-md border">
-          <StrikethroughIcon className="shrink-0 size-6" />
-        </button>
-        <button className="p-2 rounded-md border">
-          <UnderlineIcon className="shrink-0 size-6" />
-        </button>
-        <button className="p-2 rounded-md border">
-          <ItalicIcon className="shrink-0 size-6" />
-        </button>
-        <button className="p-2 rounded-md border">
-          <AlignLeftIcon className="shrink-0 size-6" />
-        </button>
-        <button className="p-2 rounded-md border">
-          <AlignCenterIcon className="shrink-0 size-6" />
-        </button>
-        <button className="p-2 rounded-md border">
-          <AlignRightIcon className="shrink-0 size-6" />
-        </button>
-        <button className="p-2 rounded-md border">
-          <AlignJustifyIcon className="shrink-0 size-6" />
-        </button>
-        <button className="p-2 rounded-md border">
+        <MarkBtn mark="bold" Icon={BoldIcon} />
+        <MarkBtn mark="underline" Icon={UnderlineIcon} />
+        <MarkBtn mark="italic" Icon={ItalicIcon} />
+        <MarkBtn mark="strike" Icon={StrikethroughIcon} />
+        <AligmentBtn alignment="left" Icon={AlignLeftIcon} />
+        <AligmentBtn alignment="center" Icon={AlignCenterIcon} />
+        <AligmentBtn alignment="right" Icon={AlignRightIcon} />
+        <AligmentBtn alignment="justify" Icon={AlignJustifyIcon} />
+        <ListBtn listType="bullet_list" Icon={ListIcon} />
+        {/* <button className="p-2 rounded-md border">
           <ListIcon className="shrink-0 size-6" />
-        </button>
+        </button> */}
+
         <button className="p-2 rounded-md border">
           <ListOrderedIcon className="shrink-0 size-6" />
         </button>

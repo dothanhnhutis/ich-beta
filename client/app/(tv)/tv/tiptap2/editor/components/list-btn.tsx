@@ -20,30 +20,7 @@ const ListBtn = ({
     if (!range) return;
 
     const isInList = range.depth >= 1 && range.parent.type.name === listType;
-    if (isInList) {
-      // Unwrap the list
-      if (dispatch) {
-        const tr = state.tr;
-        const target = liftTarget(range);
-        if (target !== null) {
-          tr.lift(range, target);
-        }
-        dispatch(tr);
-      }
-      return true;
-    } else {
-      // Wrap in the target list
-      const wrapping = findWrapping(range, listType, {}, itemType);
 
-      if (!wrapping) return false;
-
-      if (dispatch) {
-        const tr = state.tr;
-        tr.wrap(range, wrapping);
-        dispatch(tr);
-      }
-      return true;
-    }
     // if (
     //   !("list_item" in state.schema.nodes) ||
     //   !(listType in state.schema.nodes)

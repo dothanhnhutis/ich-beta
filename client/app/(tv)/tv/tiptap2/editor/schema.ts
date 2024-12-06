@@ -137,7 +137,7 @@ export const schemaDefault = new Schema({
           : ["ol", { start: node.attrs.order }, 0],
     },
     list_item: {
-      content: "paragraph block*",
+      content: "paragraph",
       parseDOM: [{ tag: "li" }],
       toDOM: () => ["li", 0],
     },

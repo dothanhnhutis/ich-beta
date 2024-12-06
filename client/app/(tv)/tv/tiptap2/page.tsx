@@ -55,7 +55,7 @@ const TipTap2 = () => {
       }}
       plugins={[defaultKeymap]}
     >
-      <div className="flex gap-2">
+      <div className="flex gap-2 items-center p-2">
         <NodeList />
         <MarkBtn mark="bold" Icon={BoldIcon} />
         <MarkBtn mark="underline" Icon={UnderlineIcon} />
@@ -76,7 +76,7 @@ const TipTap2 = () => {
       </div>
       <div
         ref={setMount}
-        className="p-2 [&>*]:outline-none [&>*]:whitespace-pre-wrap rounded border bg-white"
+        className="[&>div]:prose-base  p-2 [&>*]:outline-none [&>*]:whitespace-pre-wrap rounded border bg-white"
       />
     </EditorProvider>
   );

@@ -34,7 +34,9 @@ export const defaultKeymap = keymap({
       const { $cursor } = selection;
       if (!$cursor) return splitBlock(state, dispatch);
       const tr = state.tr;
+
       tr.split($cursor.pos);
+
       if (dispatch) dispatch(tr);
       return true;
     }

@@ -137,21 +137,9 @@ export const schemaDefault = new Schema({
           : ["ol", { start: node.attrs.order }, 0],
     },
     list_item: {
-      content: "(paragraph | ordered_list | bullet_list){1}",
-      group: "block",
+      content: "paragraph",
       parseDOM: [{ tag: "li" }],
       toDOM: () => ["li", 0],
-    },
-    product: {
-      group: "block",
-      attrs: { value: { default: "" } },
-      toDOM: (node) => ["div", { "data-custom-node": node.attrs.value }],
-      parseDOM: [
-        {
-          tag: "div[data-custom-node]",
-          getAttrs: (dom) => ({ value: dom.dataset.customNode }),
-        },
-      ],
     },
   },
   marks: {

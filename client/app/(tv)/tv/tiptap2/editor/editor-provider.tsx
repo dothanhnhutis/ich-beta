@@ -2,6 +2,7 @@
 import { EditorState, Transaction, Plugin } from "prosemirror-state";
 import { EditorView } from "prosemirror-view";
 import React from "react";
+import { ReactNodeView } from "./components/more-btn";
 
 type EditorContext = {
   view: EditorView | null;
@@ -46,6 +47,10 @@ export const EditorProvider = ({
         dispatchTransaction(transaction, newView);
       },
       plugins,
+      nodeViews: {
+        customNode: (node, view, getPos) =>
+          new ReactNodeView(node, view, getPos),
+      },
     });
     setView(newView);
 

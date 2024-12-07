@@ -13,6 +13,7 @@ import {
   AlignLeftIcon,
   AlignRightIcon,
   BoldIcon,
+  EllipsisIcon,
   ItalicIcon,
   ListIcon,
   ListOrderedIcon,
@@ -22,6 +23,7 @@ import {
 import { MarkBtn } from "./editor/components/mark-btn";
 import AligmentBtn from "./editor/components/aligment-btn";
 import ListBtn from "./editor/components/list-btn";
+import { MoreBtn } from "./editor/components/more-btn";
 
 const TipTap2 = () => {
   const [mount, setMount] = React.useState<HTMLElement | null>(null);
@@ -66,13 +68,8 @@ const TipTap2 = () => {
         <AligmentBtn alignment="right" Icon={AlignRightIcon} />
         <AligmentBtn alignment="justify" Icon={AlignJustifyIcon} />
         <ListBtn listType="bullet_list" Icon={ListIcon} />
-        {/* <button className="p-2 rounded-md border">
-          <ListIcon className="shrink-0 size-6" />
-        </button> */}
-
-        <button className="p-2 rounded-md border">
-          <ListOrderedIcon className="shrink-0 size-6" />
-        </button>
+        <ListBtn listType="ordered_list" Icon={ListOrderedIcon} />
+        <MoreBtn Icon={EllipsisIcon} />
       </div>
       <div
         ref={setMount}

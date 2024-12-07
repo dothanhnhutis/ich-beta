@@ -73,7 +73,7 @@ const TipTap2 = () => {
       </div>
       <div
         ref={setMount}
-        className="[&>div]:prose-base  p-2 [&>*]:outline-none [&>*]:whitespace-pre-wrap rounded border bg-white"
+        className=" p-2 [&>*]:outline-none [&>*]:whitespace-pre-wrap rounded border bg-white"
       />
     </EditorProvider>
   );

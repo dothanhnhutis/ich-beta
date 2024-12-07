@@ -48,8 +48,8 @@ export const EditorProvider = ({
       },
       plugins,
       nodeViews: {
-        customNode: (node, view, getPos) =>
-          new ReactNodeView(node, view, getPos),
+        product: (node, view, getPos, decoration, decorationSource) =>
+          new ReactNodeView(node, view, getPos, decoration),
       },
     });
     setView(newView);

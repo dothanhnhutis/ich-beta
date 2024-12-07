@@ -1,28 +1,42 @@
 import React from "react";
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { LucideIcon } from "lucide-react";
-import { EditorView, NodeView } from "prosemirror-view";
+import { Decoration, EditorView, NodeView } from "prosemirror-view";
 import { Node } from "prosemirror-model";
 import ReactDOM from "react-dom/client";
 import { useEditor } from "../editor-provider";
 
 interface CustomNodeProps {
   node: any;
-  updateAttributes: (attrs: Record<string, any>) => void;
 }
 
-const CustomNode = ({ node, updateAttributes }: CustomNodeProps) => {
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    updateAttributes({ value: event.target.value });
+const CustomNode = ({ node }: CustomNodeProps) => {
+  const [number, setNumber] = React.useState<number>(0);
+  const handleChange = () => {
+    setNumber(number + 1);
   };
-
   return (
-    <div contentEditable={false}>
-      <input
-        type="text"
-        value={node.attrs.value || ""}
-        onChange={handleChange}
+    <div className="flex gap-2 py-4">
+      <Image
+        src="/product-list/product1.jpg"
+        alt="product"
+        width="1000"
+        height="1000"
+        className="shrink-0 size-[200px]"
       />
+      <div className="flex flex-col gap-2 w-full">
+        <h3 className="text-4xl font-bold">
+          thành nhựt Thành Tổ When adding steps to a transaction for content
+          changes thành nhựt Thành Tổ When adding steps to a transaction for
+          content changes
+        </h3>
+        <div className="flex items-center">
+          <p className="rounded-lg text-2xl bg-slate-300 inline p-2 shadow-md">
+            Số lượng: 3000 Thùng
+          </p>
+        </div>
+      </div>
     </div>
   );
 };
@@ -32,29 +46,36 @@ export class ReactNodeView implements NodeView {
   contentDOM?: HTMLElement;
   root: ReactDOM.Root;
 
-  constructor(node: Node, view: EditorView, getPos: () => number | undefined) {
-    this.dom = document.createElement("div");
+  node: Node;
+  view: EditorView;
+  getPos: () => number | undefined;
+  decorations: readonly Decoration[];
 
-    // Update attributes when they change
-    const updateAttributes = (attrs: Record<string, any>) => {
-      const transaction = view.state.tr.setNodeMarkup(
-        getPos() || 0,
-        undefined,
-        {
-          ...node.attrs,
-          ...attrs,
-        }
-      );
-      view.dispatch(transaction);
-    };
-
-    // Render the React component
+  constructor(
+    node: Node,
+    view: EditorView,
+    getPos: () => number | undefined,
+    decorations: readonly Decoration[]
+  ) {
+    this.dom = document.createElement("h1");
     this.root = ReactDOM.createRoot(this.dom);
-    this.root.render(
-      <CustomNode node={node} updateAttributes={updateAttributes} />
-    );
+    // this.contentDOM = document.createElement("div");
+
+    this.node = node;
+    this.view = view;
+    this.getPos = getPos;
+    this.decorations = decorations;
+
+    this.root.render(<CustomNode node={node} />);
   }
 
+  // update(node: Node) {
+  //   return true;
+  // }
+
+  // stopEvent() {
+  //   return true;
+  // }
   destroy() {
     this.root.unmount();
   }

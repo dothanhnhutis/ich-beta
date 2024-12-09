@@ -62,38 +62,24 @@ const conditionSchema: z.ZodTypeAny = z.lazy(() =>
   )
 );
 
-export const createRoleSchema = z.object({
+export const createPolicychema = z.object({
   body: z
     .object({
-      name: z.string({
-        required_error: "name is required",
-        invalid_type_error: "name must be string",
+      action: z.string({
+        required_error: "action is required",
+        invalid_type_error: "action must be string",
       }),
-      policies: z.array(
-        z
-          .object({
-            action: z.string({
-              required_error: "action is required",
-              invalid_type_error: "action must be string",
-            }),
-            resource: z.string({
-              required_error: "resource is required",
-              invalid_type_error: "resource must be string",
-            }),
-            description: z.string({
-              required_error: "description is required",
-              invalid_type_error: "description must be string",
-            }),
-            condition: conditionSchema.optional(),
-          })
-          .strip(),
-        {
-          required_error: "policies is required",
-          invalid_type_error: "policies must be array",
-        }
-      ),
+      resource: z.string({
+        required_error: "resource is required",
+        invalid_type_error: "resource must be string",
+      }),
+      description: z.string({
+        required_error: "description is required",
+        invalid_type_error: "description must be string",
+      }),
+      condition: conditionSchema.optional(),
     })
     .strict(),
 });
 
-export type CreateRole = z.infer<typeof createRoleSchema>;
+export type CreatePolicy = z.infer<typeof createPolicychema>;

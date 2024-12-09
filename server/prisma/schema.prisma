@@ -31,8 +31,6 @@ model Users {
   passwordResetExpires     DateTime? //4h
   reActiveToken            String?          @unique
   reActiveExpires          DateTime? //4h
-  roleId                   String
-  role                     Roles            @relation(fields: [roleId], references: [id])
   status                   UserStatus       @default(ACTIVE)
   username                 String
   gender                   Gender?
@@ -43,7 +41,8 @@ model Users {
   updatedAt                DateTime         @updatedAt
   mfa                      MFA?
   oauthProviders           OauthProviders[]
-  Displays                 Displays[]
+  displays                 Displays[]
+  usersPolicies            UsersPolicies[]
 }
 
 model OauthProviders {
@@ -80,28 +79,24 @@ model Factorys {
 }
 
 // Role
-model Roles {
-  id        String     @id @default(uuid())
-  name      String
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
-  policies  Policies[]
-  users     Users[]
+model UsersPolicies {
+  userId   String
+  policyId String
+  user     Users    @relation(fields: [userId], references: [id])
+  policy   Policies @relation(fields: [policyId], references: [id], onDelete: Cascade)
 
-  @@index([name])
+  @@id([userId, policyId])
 }
 
 model Policies {
-  id          String @id @default(uuid())
-  description String
-  action      String
-  resource    String
-  condition   Json?
-  roleId      String
-  role        Roles  @relation(fields: [roleId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id            String          @id @default(uuid())
+  description   String
+  action        String
+  resource      String
+  condition     Json?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  usersPolicies UsersPolicies[]
 
   @@index([action, resource])
 }
@@ -195,4 +190,14 @@ model SubTasks {
   updatedAt    DateTime       @updatedAt
 
   @@index([title, parentTaskId])
+}
+
+model Roles1 {
+  id          String   @id @default(uuid())
+  name        String
+  permissions String[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([name])
 }

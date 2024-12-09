@@ -1,76 +1,96 @@
+import { Condition } from "@/middlewares/checkpolicy";
 import prisma from "@/services/db";
 import { hashData } from "@/utils/helper";
 
+type Policy = {
+  action: string;
+  resource: string;
+  description: string;
+  condition?: Condition;
+};
+const adminPolicies: Policy[] = [
+  {
+    action: "create",
+    resource: "policies",
+    description: "create policy",
+  },
+  {
+    action: "read",
+    resource: "policies",
+    description: "read policy",
+  },
+  {
+    action: "update",
+    resource: "policies",
+    description: "update policy",
+  },
+  {
+    action: "delete",
+    resource: "policies",
+    description: "delete policy",
+  },
+  {
+    action: "create",
+    resource: "users",
+    description: "create user",
+  },
+  {
+    action: "read",
+    resource: "users",
+    description: "read user",
+  },
+  {
+    action: "update",
+    resource: "users",
+    description: "update user",
+  },
+  {
+    action: "delete",
+    resource: "users",
+    description: "delete user",
+  },
+  {
+    action: "create",
+    resource: "displays",
+    description: "create display",
+  },
+  {
+    action: "read",
+    resource: "displays",
+    description: "read display",
+  },
+  {
+    action: "update",
+    resource: "displays",
+    description: "update display",
+  },
+  {
+    action: "delete",
+    resource: "displays",
+    description: "delete display",
+  },
+];
+
 async function initDB() {
+  await prisma.policies.deleteMany();
   await prisma.users.deleteMany();
-  await prisma.roles.deleteMany();
 
-  const adminRole = await prisma.roles.create({
+  await prisma.users.create({
     data: {
-      name: "admin",
-      policies: {
-        create: [
-          {
-            action: "create",
-            resource: "policies",
-            description: "create policy",
-          },
-          {
-            action: "read",
-            resource: "policies",
-            description: "read policy",
-          },
-          {
-            action: "update",
-            resource: "policies",
-            description: "update policy",
-          },
-          {
-            action: "delete",
-            resource: "policies",
-            description: "delete policy",
-          },
-          {
-            action: "create",
-            resource: "roles",
-            description: "create role",
-          },
-          {
-            action: "read",
-            resource: "roles",
-            description: "read role",
-          },
-          {
-            action: "update",
-            resource: "roles",
-            description: "update role",
-          },
-          {
-            action: "delete",
-            resource: "roles",
-            description: "delete role",
-          },
-        ],
-      },
-    },
-  });
-
-  const baseRole = await prisma.roles.create({
-    data: {
-      name: "normal user",
-    },
-  });
-
-  const user = await prisma.users.create({
-    data: {
-      email: "gaconght001@gmail.com",
+      email: "gaconght@gmail.com",
       password: await hashData("@Abc123123"),
       username: "ICH",
       birthDate: "30/11/2024",
       gender: "MALE",
-      roleId: adminRole.id,
       phoneNumber: "0707000004",
       emailVerified: true,
+      usersPolicies: {
+        create: adminPolicies.map((p) => ({
+          policy: {
+            create: p,
+          },
+        })),
+      },
     },
   });
 

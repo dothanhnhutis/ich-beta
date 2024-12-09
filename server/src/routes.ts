@@ -2,6 +2,8 @@ import { type Application } from "express";
 import healthRouter from "@/routes/health";
 import authRouter from "@/routes/auth";
 import userRouter from "@/routes/user";
+import roleRouter from "@/routes/roles";
+
 import planRouter from "@/routes/plan";
 import taskRouter from "@/routes/task";
 
@@ -11,6 +13,8 @@ export function appRoutes(app: Application) {
   app.use(BASE_PATH, healthRouter);
   app.use(BASE_PATH, authRouter);
   app.use(BASE_PATH, userRouter);
+  app.use(BASE_PATH, roleRouter);
+
   app.use(BASE_PATH, planRouter);
   app.use(BASE_PATH, taskRouter);
 }

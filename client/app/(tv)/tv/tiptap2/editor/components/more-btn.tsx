@@ -17,13 +17,13 @@ const CustomNode = ({ node }: CustomNodeProps) => {
     setNumber(number + 1);
   };
   return (
-    <div className="flex gap-2 py-4">
+    <div className="flex items-center gap-2 py-4">
       <Image
         src="/product-list/product1.jpg"
         alt="product"
         width="1000"
         height="1000"
-        className="shrink-0 size-[200px]"
+        className="shrink-0 size-[150px]"
       />
       <div className="flex flex-col gap-2 w-full">
         <h3 className="text-4xl font-bold">

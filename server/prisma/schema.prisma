@@ -19,6 +19,7 @@ enum Gender {
   OTHER
 }
 
+// User 
 model Users {
   id                       String           @id @default(uuid())
   email                    String           @unique
@@ -30,6 +31,8 @@ model Users {
   passwordResetExpires     DateTime? //4h
   reActiveToken            String?          @unique
   reActiveExpires          DateTime? //4h
+  roleId                   String
+  role                     Roles            @relation(fields: [roleId], references: [id])
   status                   UserStatus       @default(ACTIVE)
   username                 String
   gender                   Gender?
@@ -40,6 +43,7 @@ model Users {
   updatedAt                DateTime         @updatedAt
   mfa                      MFA?
   oauthProviders           OauthProviders[]
+  Displays                 Displays[]
 }
 
 model OauthProviders {
@@ -75,6 +79,34 @@ model Factorys {
   @@index([name, address])
 }
 
+// Role
+model Roles {
+  id        String     @id @default(uuid())
+  name      String
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  policies  Policies[]
+  users     Users[]
+
+  @@index([name])
+}
+
+model Policies {
+  id          String @id @default(uuid())
+  description String
+  action      String
+  resource    String
+  condition   Json?
+  roleId      String
+  role        Roles  @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([action, resource])
+}
+
+// Display TV
 model Departments {
   id                  String                @id @default(uuid())
   name                String
@@ -101,11 +133,13 @@ model Displays {
   id                  String                @id @default(uuid())
   content             String
   enable              Boolean               @default(true)
+  userId              String
+  createdBy           Users                 @relation(fields: [userId], references: [id])
   createdAt           DateTime              @default(now())
   updatedAt           DateTime              @updatedAt
   departmentsDisplays DepartmentsDisplays[]
 
-  @@index([enable])
+  @@index([enable, userId])
 }
 
 model Plans {

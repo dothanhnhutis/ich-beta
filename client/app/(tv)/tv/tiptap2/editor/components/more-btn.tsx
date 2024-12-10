@@ -3,80 +3,139 @@ import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { LucideIcon } from "lucide-react";
 import { Decoration, EditorView, NodeView } from "prosemirror-view";
-import { Node } from "prosemirror-model";
-import ReactDOM from "react-dom/client";
+import { Node as ProseMirrorNode } from "prosemirror-model";
+import ReactDOM, { createRoot } from "react-dom/client";
 import { useEditor } from "../editor-provider";
 
-interface CustomNodeProps {
-  node: any;
-}
+type ProductFetch = {
+  url: string;
+  defaultName: string;
+};
 
-const CustomNode = ({ node }: CustomNodeProps) => {
-  const [number, setNumber] = React.useState<number>(0);
-  const handleChange = () => {
-    setNumber(number + 1);
+const productView: ProductFetch[] = [
+  {
+    url: "https://res.cloudinary.com/dr1ntj4ar/image/upload/v1733792755/ich/z6113933456466_e226585b670b0e7de7074471d135cc0a_fk2rtu.jpg",
+    defaultName: "Sản Phẩm A",
+  },
+  {
+    url: "https://res.cloudinary.com/dr1ntj4ar/image/upload/v1733792755/ich/z6113933456466_e226585b670b0e7de7074471d135cc0a_fk2rtu.jpg",
+    defaultName: "Sản Phẩm B",
+  },
+];
+
+type ProductNodeComponentProps = {
+  handleAttrChange: (newAttrs: ProductAttrs) => void;
+  attrs: ProductAttrs;
+};
+
+const ProductNodeComponent: React.FC<ProductNodeComponentProps> = ({
+  handleAttrChange,
+  attrs,
+}) => {
+  const handleInputChange = (
+    key: keyof ProductAttrs,
+    value: string | number
+  ) => {
+    handleAttrChange({ ...attrs, [key]: value });
   };
+
   return (
-    <div className="flex items-center gap-2 py-4">
-      <Image
-        src="/product-list/product1.jpg"
-        alt="product"
-        width="1000"
-        height="1000"
-        className="shrink-0 size-[150px]"
-      />
-      <div className="flex flex-col gap-2 w-full">
-        <h3 className="text-4xl font-bold">
-          thành nhựt Thành Tổ When adding steps to a transaction for content
-          changes thành nhựt Thành Tổ When adding steps to a transaction for
-          content changes
-        </h3>
-        <div className="flex items-center">
-          <p className="rounded-lg text-2xl bg-slate-300 inline p-2 shadow-md">
-            Số lượng: 3000 Thùng
-          </p>
-        </div>
+    <div className="product-node">
+      {/* Editable name */}
+      <div
+        contentEditable="true"
+        suppressContentEditableWarning
+        onBlur={(e) =>
+          handleInputChange("name", e.currentTarget.textContent || "")
+        }
+      >
+        {attrs.name}
       </div>
+
+      {/* Image selection/upload */}
+      <div className="product-image">
+        <img src={attrs.url || "placeholder.jpg"} alt="Product" />
+        <button
+          onClick={() => handleInputChange("url", prompt("Enter URL:") || "")}
+        >
+          Upload/Select Image
+        </button>
+      </div>
+
+      {/* Editable amount */}
+      <input
+        type="number"
+        value={attrs.amount}
+        onChange={(e) =>
+          handleInputChange("amount", parseInt(e.target.value, 10))
+        }
+      />
+
+      {/* Unit toggle */}
+      <button
+        onClick={() =>
+          handleInputChange(
+            "unit",
+            attrs.unit === "Thùng" ? "Sản phẩm" : "Thùng"
+          )
+        }
+      >
+        {attrs.unit}
+      </button>
     </div>
   );
 };
 
-export class ReactNodeView implements NodeView {
-  dom: HTMLElement;
-  contentDOM?: HTMLElement;
-  root: ReactDOM.Root;
+type ProductAttrs = {
+  name: string;
+  url: string;
+  amount: number;
+  unit: "Thùng" | "Sản phẩm";
+};
 
-  node: Node;
+export class ProductNodeView implements NodeView {
+  dom: HTMLElement;
+  root: ReactDOM.Root;
+  node: ProseMirrorNode;
   view: EditorView;
   getPos: () => number | undefined;
-  decorations: readonly Decoration[];
 
   constructor(
-    node: Node,
+    node: ProseMirrorNode,
     view: EditorView,
-    getPos: () => number | undefined,
-    decorations: readonly Decoration[]
+    getPos: () => number | undefined
   ) {
-    this.dom = document.createElement("h1");
-    this.root = ReactDOM.createRoot(this.dom);
-    // this.contentDOM = document.createElement("div");
-
+    this.dom = document.createElement("div");
     this.node = node;
     this.view = view;
     this.getPos = getPos;
-    this.decorations = decorations;
 
-    this.root.render(<CustomNode node={node} />);
+    // Create React root and render the React component
+    this.root = createRoot(this.dom);
+    this.root.render(
+      <ProductNodeComponent
+        handleAttrChange={this.updateProduct}
+        attrs={this.node.attrs as ProductAttrs}
+      />
+    );
   }
 
-  // update(node: Node) {
-  //   return true;
-  // }
+  // Method to update the ProseMirror node's attributes
+  updateProduct = (newAttrs: ProductAttrs) => {
+    const { tr } = this.view.state;
+    const pos = this.getPos();
+    if (pos !== undefined) {
+      this.view.dispatch(tr.setNodeMarkup(pos, undefined, newAttrs));
+    }
+  };
 
-  // stopEvent() {
-  //   return true;
-  // }
+  stopEvent() {
+    // Prevent ProseMirror from handling React-generated events
+    return true;
+  }
+
   destroy() {
+    // Cleanup React root when the node is destroyed
     this.root.unmount();
   }
 }

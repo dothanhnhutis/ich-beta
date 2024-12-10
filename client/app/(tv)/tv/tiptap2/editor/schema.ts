@@ -142,14 +142,41 @@ export const schemaDefault = new Schema({
       parseDOM: [{ tag: "li" }],
       toDOM: () => ["li", 0],
     },
+
+    product_title: {
+      content: "(heading | paragraph)",
+      toDOM: () => ["div", { "data-node-type": "product-title" }, 0],
+      parseDOM: [{ tag: "div[data-node-type='product-title']" }],
+    },
     product: {
       group: "block",
-      attrs: { value: { default: "" } },
-      toDOM: (node) => ["div", { "data-custom-node": node.attrs.value }],
+      content: "product_title+",
+      attrs: {
+        name: { default: "" },
+        url: { default: "" },
+        amount: { default: 0 },
+        unit: { default: "Thùng" },
+      },
+      toDOM: (node) => [
+        "div",
+        {
+          "data-node-type": "product",
+          "data-name": node.attrs.name,
+          "data-amount": node.attrs.amount,
+          "data-unit": node.attrs.unit,
+          "data-url": node.attrs.url,
+        },
+        0,
+      ],
       parseDOM: [
         {
-          tag: "div[data-custom-node]",
-          getAttrs: (dom) => ({ value: dom.dataset.customNode }),
+          tag: "div[data-node-type='product']",
+          getAttrs: (dom) => ({
+            name: dom.getAttribute("data-name") || "",
+            amount: dom.getAttribute("data-amount") || "",
+            unit: dom.getAttribute("data-unit") || "",
+            url: dom.getAttribute("data-url") || "",
+          }),
         },
       ],
     },

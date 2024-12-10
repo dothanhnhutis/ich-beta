@@ -2,7 +2,7 @@
 import { EditorState, Transaction, Plugin } from "prosemirror-state";
 import { EditorView } from "prosemirror-view";
 import React from "react";
-import { ReactNodeView } from "./components/more-btn";
+import { ProductNodeView } from "./components/more-btn";
 
 type EditorContext = {
   view: EditorView | null;
@@ -48,8 +48,8 @@ export const EditorProvider = ({
       },
       plugins,
       nodeViews: {
-        product: (node, view, getPos, decoration, decorationSource) =>
-          new ReactNodeView(node, view, getPos, decoration),
+        product: (node, view, getPos) =>
+          new ProductNodeView(node, view, getPos),
       },
     });
     setView(newView);

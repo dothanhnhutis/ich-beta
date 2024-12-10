@@ -26,11 +26,13 @@ const productView: ProductFetch[] = [
 type ProductNodeComponentProps = {
   handleAttrChange: (newAttrs: ProductAttrs) => void;
   attrs: ProductAttrs;
+  contentDOMRef: (element?: HTMLElement | null | undefined) => void;
 };
 
 const ProductNodeComponent: React.FC<ProductNodeComponentProps> = ({
   handleAttrChange,
   attrs,
+  contentDOMRef,
 }) => {
   const handleInputChange = (
     key: keyof ProductAttrs,
@@ -40,48 +42,49 @@ const ProductNodeComponent: React.FC<ProductNodeComponentProps> = ({
   };
 
   return (
-    <div className="product-node">
-      {/* Editable name */}
-      <div
-        contentEditable="true"
-        suppressContentEditableWarning
-        onBlur={(e) =>
-          handleInputChange("name", e.currentTarget.textContent || "")
-        }
-      >
-        {attrs.name}
+    <div className="flex gap-2">
+      {attrs.url == "" ? (
+        <div className="border-2 border-dashed rounded-md shrink-0 size-[150px]">
+          <button onClick={() => handleInputChange("url", productView[0].url)}>
+            select
+          </button>
+        </div>
+      ) : (
+        <div className="relative aspect-square size-[200px] rounded-md overflow-hidden">
+          <Image src={attrs.url} fill alt="Product" className="shrink-0" />
+        </div>
+      )}
+
+      <div>
+        <div
+          ref={contentDOMRef}
+          className="product-content-wrapper [&>*]:whitespace-pre-wrap"
+        />
+
+        <div className="flex items-center gap-1">
+          <p>Số lượng: </p>
+          <input
+            type="text"
+            defaultValue={attrs.amount}
+            onBlur={(e) => {
+              const regex = /^\d+$/;
+              if (regex.test(e.target.value))
+                handleInputChange("amount", parseInt(e.target.value, 10));
+            }}
+          />
+
+          <button
+            onClick={() =>
+              handleInputChange(
+                "unit",
+                attrs.unit === "Thùng" ? "Sản phẩm" : "Thùng"
+              )
+            }
+          >
+            {attrs.unit}
+          </button>
+        </div>
       </div>
-
-      {/* Image selection/upload */}
-      <div className="product-image">
-        <img src={attrs.url || "placeholder.jpg"} alt="Product" />
-        <button
-          onClick={() => handleInputChange("url", prompt("Enter URL:") || "")}
-        >
-          Upload/Select Image
-        </button>
-      </div>
-
-      {/* Editable amount */}
-      <input
-        type="number"
-        value={attrs.amount}
-        onChange={(e) =>
-          handleInputChange("amount", parseInt(e.target.value, 10))
-        }
-      />
-
-      {/* Unit toggle */}
-      <button
-        onClick={() =>
-          handleInputChange(
-            "unit",
-            attrs.unit === "Thùng" ? "Sản phẩm" : "Thùng"
-          )
-        }
-      >
-        {attrs.unit}
-      </button>
     </div>
   );
 };
@@ -98,6 +101,7 @@ export class ProductNodeView implements NodeView {
   root: ReactDOM.Root;
   node: ProseMirrorNode;
   view: EditorView;
+  contentDOM?: HTMLElement | null | undefined;
   getPos: () => number | undefined;
 
   constructor(
@@ -105,17 +109,30 @@ export class ProductNodeView implements NodeView {
     view: EditorView,
     getPos: () => number | undefined
   ) {
-    this.dom = document.createElement("div");
     this.node = node;
     this.view = view;
     this.getPos = getPos;
 
+    this.dom = document.createElement("div");
+    this.contentDOM = document.createElement("div");
+
+    this.dom.className = "container";
+    this.dom.appendChild(this.contentDOM);
+
+    this.contentDOM.className = "content";
+
     // Create React root and render the React component
+
     this.root = createRoot(this.dom);
     this.root.render(
       <ProductNodeComponent
         handleAttrChange={this.updateProduct}
         attrs={this.node.attrs as ProductAttrs}
+        contentDOMRef={(el) => {
+          if (el && this.contentDOM) {
+            el.appendChild(this.contentDOM);
+          }
+        }}
       />
     );
   }
@@ -162,4 +179,8 @@ export const MoreBtn = ({ Icon }: { Icon: LucideIcon }) => {
       <Icon className="shrink-0 size-6" />
     </button>
   );
+};
+
+export const Test = () => {
+  return <div>asds</div>;
 };

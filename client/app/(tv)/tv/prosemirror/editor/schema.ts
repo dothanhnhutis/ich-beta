@@ -153,7 +153,10 @@ export const schemaDefault = new Schema({
       content: "product_title+",
       attrs: {
         name: { default: "" },
-        url: { default: "" },
+        url: {
+          default:
+            "https://res.cloudinary.com/dr1ntj4ar/image/upload/v1733792755/ich/z6113933456466_e226585b670b0e7de7074471d135cc0a_fk2rtu.jpg",
+        },
         amount: { default: 0 },
         unit: { default: "Thùng" },
       },

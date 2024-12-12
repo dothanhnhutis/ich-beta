@@ -8,7 +8,7 @@ import { GroupButtonAction } from "./components/group-button-action";
 import TextAlign from "@tiptap/extension-text-align";
 import { MoreAction } from "./components/more-action";
 import { mergeAttributes, Node as TipTapNode } from "@tiptap/core";
-import ProductNodeView from "./components/product-view";
+import { AddProductBtn, ProductNodeView } from "./components/product-view";
 import { Button } from "@/components/ui/button";
 import { ImageIcon } from "lucide-react";
 import Heading from "@tiptap/extension-heading";
@@ -16,20 +16,31 @@ import Heading from "@tiptap/extension-heading";
 declare module "@tiptap/core" {
   interface Commands<ReturnType> {
     customExtension: {
-      addProduct: () => ReturnType;
+      addProduct: (data: ProductNodeData) => ReturnType;
     };
   }
 }
+
+export type ProductNodeData = {
+  id: string;
+  name: string;
+  url: string;
+  amount: number;
+  unit: "Thùng" | "Sản Phẩm";
+  amountOfCargoBox: number;
+};
 
 const ProductNode = TipTapNode.create({
   name: "product",
   group: "block",
   atom: true,
   addAttributes: () => ({
+    id: { default: "" },
     name: { default: "" },
-    unit: { default: "Thùng" },
-    amount: { default: "0" },
     url: { default: "" },
+    amount: { default: "0" },
+    unit: { default: "Sản Phẩm" },
+    amountOfCargoBox: { default: "0" },
   }),
   renderHTML({ HTMLAttributes, node }) {
     return [
@@ -50,15 +61,17 @@ const ProductNode = TipTapNode.create({
   },
   addCommands() {
     return {
-      addProduct() {
+      addProduct(data: ProductNodeData) {
         return ({ commands }) => {
           return commands.insertContent({
             type: "product",
             attrs: {
-              name: "Năm Á À Ấ Ầ Ằ Ắ, có thể xem là thời kỳ đỉnh cao trong sự nghiệp của anh. Vào tháng 1 năm 2018, anh nhận được số tiền ủng hộ từ một người hâm mộ mang tên Bunngan.com với tổng số tiền lên tới 80 triệu đồng. Điều này khiến cho anh chàng vô cùng xúc động, thậm chí còn không dám tin vào mắt mình.[8] 9 tháng sau đó, anh chàng lại tiếp tục bàng hoàng với màn donate vô tiền khoáng hậu từ phía người hâm mộ mang tên Khang Nade. Tổng số tiền anh nhận trong buổi stream tối hôm đó lên tới 63 triệu đồng.[8] Một năm sau đó, trong tháng 9, Độ Mixi lại tiếp tục được nhận số tiền donate lớn từ",
-              url: "https://res.cloudinary.com/dr1ntj4ar/image/upload/v1733792755/ich/z6113933456466_e226585b670b0e7de7074471d135cc0a_fk2rtu.jpg",
-              amount: "200",
-              unit: "Thùng",
+              name: data.name,
+              url: data.url,
+              amount: data.amount.toString(),
+              unit: data.unit,
+              id: data.id,
+              amountOfCargoBox: data.amountOfCargoBox.toString(),
             },
           });
         };
@@ -118,7 +131,10 @@ const TiptapPage = () => {
         <NodeList editor={editor} />
         <GroupButtonAction editor={editor} />
         <MoreAction editor={editor} />
-        <Button
+
+        <AddProductBtn editor={editor} />
+
+        {/* <Button
           type="button"
           size="icon"
           className="rounded-md"
@@ -128,7 +144,7 @@ const TiptapPage = () => {
           }}
         >
           <ImageIcon className="size-5" />
-        </Button>
+        </Button> */}
       </div>
       <EditorContent
         className="p-2 [&>*]:outline-none [&>*]:whitespace-pre-wrap rounded border bg-white min-h-[200px] max-h-[500px] overflow-y-scroll"

@@ -14,32 +14,33 @@ import {
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { cn } from "@/lib/utils";
+import { cn, getBase64 } from "@/lib/utils";
 import { ProductNodeData } from "../page";
+import { ImageIcon } from "lucide-react";
 
 const listProductData = [
   {
     id: "1",
     name: "Sản Phẩm A",
-    url: "https://res.cloudinary.com/dr1ntj4ar/image/upload/v1733792755/ich/z6113933456466_e226585b670b0e7de7074471d135cc0a_fk2rtu.jpg",
+    src: "https://res.cloudinary.com/dr1ntj4ar/image/upload/v1733792755/ich/z6113933456466_e226585b670b0e7de7074471d135cc0a_fk2rtu.jpg",
     amountOfCargoBox: 200,
   },
   {
     id: "2",
     name: "Sản Phẩm B",
-    url: "https://res.cloudinary.com/dr1ntj4ar/image/upload/v1733792755/ich/z6113933456466_e226585b670b0e7de7074471d135cc0a_fk2rtu.jpg",
+    src: "https://res.cloudinary.com/dr1ntj4ar/image/upload/v1733792755/ich/z6113933456466_e226585b670b0e7de7074471d135cc0a_fk2rtu.jpg",
     amountOfCargoBox: 100,
   },
   {
     id: "3",
     name: "Sản Phẩm C",
-    url: "https://res.cloudinary.com/dr1ntj4ar/image/upload/v1733792755/ich/z6113933456466_e226585b670b0e7de7074471d135cc0a_fk2rtu.jpg",
+    src: "https://res.cloudinary.com/dr1ntj4ar/image/upload/v1733792755/ich/z6113933456466_e226585b670b0e7de7074471d135cc0a_fk2rtu.jpg",
     amountOfCargoBox: 0,
   },
   {
     id: "4",
     name: "Sản Phẩm D",
-    url: "https://res.cloudinary.com/dr1ntj4ar/image/upload/v1733792755/ich/z6113933456466_e226585b670b0e7de7074471d135cc0a_fk2rtu.jpg",
+    src: "https://res.cloudinary.com/dr1ntj4ar/image/upload/v1733792755/ich/z6113933456466_e226585b670b0e7de7074471d135cc0a_fk2rtu.jpg",
     amountOfCargoBox: 500,
   },
 ];
@@ -48,25 +49,39 @@ const units = ["Thùng", "Sản Phẩm"];
 
 export const AddProductBtn = ({ editor }: { editor: Editor }) => {
   const [open, setOpen] = React.useState<boolean>(false);
+  const [isSelected, setIsSelected] = React.useState<boolean>(false);
   const [data, setData] = React.useState<ProductNodeData>({
     id: "0",
     name: "",
-    url: "",
+    src: "",
     amount: 0,
     unit: "Sản Phẩm",
     amountOfCargoBox: 0,
   });
 
-  // editor.on("selectionUpdate", ({ editor, transaction }) => {
-  //   console.log("selectionUpdate");
-  // });
+  editor.on("selectionUpdate", ({ editor, transaction }) => {
+    if (editor.isActive("product")) {
+      setIsSelected(true);
+      const data = editor.getAttributes("product");
+      setData({
+        id: data.id,
+        name: data.name,
+        src: data.src,
+        amount: parseInt(data.amount, 10),
+        unit: data.unit,
+        amountOfCargoBox: parseInt(data.amountOfCargoBox, 10),
+      });
+    } else {
+      setIsSelected(false);
+    }
+  });
 
   React.useEffect(() => {
-    if (open) {
+    if (open && !isSelected) {
       setData({
         id: "0",
         name: "",
-        url: "",
+        src: "",
         amount: 0,
         unit: "Sản Phẩm",
         amountOfCargoBox: 0,
@@ -80,15 +95,39 @@ export const AddProductBtn = ({ editor }: { editor: Editor }) => {
     setOpen(false);
   };
 
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const data = await getBase64<string>(file);
+    setData((prev) => ({
+      ...prev,
+      id: "",
+      src: data,
+      name: "",
+      amount: 0,
+      amountOfCargoBox: 0,
+      unit: "Sản Phẩm",
+    }));
+  };
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline">Sản Phẩm</Button>
+        <Button
+          variant="outline"
+          className={cn(isSelected ? "bg-red-200" : "")}
+        >
+          Sản Phẩm
+        </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-screen-sm">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
-            <DialogTitle>Sản Phẩm</DialogTitle>
+            <DialogTitle>
+              {isSelected ? "Chỉnh sửa sản phẩm" : "Thêm sản phẩm"}
+            </DialogTitle>
+            <DialogDescription>{isSelected ? "" : ""}</DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-center gap-4">
@@ -96,11 +135,22 @@ export const AddProductBtn = ({ editor }: { editor: Editor }) => {
                 Hình
               </Label>
               <div className="col-span-3 flex gap-2">
-                {data.url == "" ? (
-                  <div className="shrink-0 size-[150px] border-2 border-dashed rounded-md"></div>
+                {data.src == "" ? (
+                  <div className="flex flex-col justify-center items-center text-center text-muted-foreground shrink-0 size-[150px] border-2 border-dashed rounded-md">
+                    <ImageIcon className="shrink-0 size-10 mx-auto" />
+                    <p className="text-xs mx-4">
+                      Chọn hình hoặc tải hình ảnh không quá 5MB
+                    </p>
+                  </div>
                 ) : (
                   <div className="relative aspect-square size-[150px] rounded-md overflow-hidden shrink-0">
-                    <Image src={data.url} fill alt="Product" />
+                    <Image
+                      src={data.src}
+                      fill
+                      alt="Product"
+                      className="object-cover"
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    />
                   </div>
                 )}
 
@@ -108,12 +158,12 @@ export const AddProductBtn = ({ editor }: { editor: Editor }) => {
                   <Label htmlFor="url" className="text-base font-medium">
                     Danh sách sản phẩm:
                   </Label>
-                  <ul className="h-full overflow-y-scroll pr-1 space-y-0.5">
+                  <ul className="h-full max-w-[272px] overflow-y-scroll pr-1 space-y-0.5">
                     {listProductData.map((product) => (
                       <li
                         key={product.id}
                         className={cn(
-                          "p-1 rounded-md",
+                          "p-1 rounded-md truncate",
                           product.id == data.id
                             ? "bg-accent"
                             : "hover:bg-accent"
@@ -122,7 +172,7 @@ export const AddProductBtn = ({ editor }: { editor: Editor }) => {
                           setData((prev) => ({
                             ...prev,
                             id: product.id,
-                            url: product.url,
+                            src: product.src,
                             name: product.name,
                             unit:
                               product.amountOfCargoBox == 0
@@ -136,24 +186,29 @@ export const AddProductBtn = ({ editor }: { editor: Editor }) => {
                       </li>
                     ))}
                   </ul>
-                  <label
-                    htmlFor="upload"
-                    className="w-full text-center h-6 rounded-md hover:bg-accent border cursor-pointer"
-                    // onClick={() =>
-                    //   setData((prev) => ({
-                    //     ...prev,
-                    //     id: "",
-                    //     url: "",
-                    //     name: "",
-                    //     amount: 0,
-                    //     amountOfCargoBox: 0,
-                    //     unit: "Sản Phẩm",
-                    //   }))
-                    // }
-                  >
-                    <p>Tải lên</p>
-                    <input id="upload" type="file" className="hidden" />
-                  </label>
+                  <div className="flex items-center gap-1">
+                    <label
+                      htmlFor="upload"
+                      className="basis-1/2 text-center h-6 rounded-md hover:bg-accent border cursor-pointer"
+                    >
+                      <p>Tải hình lên</p>
+                      <input
+                        id="upload"
+                        onChange={handleUpload}
+                        type="file"
+                        className="hidden"
+                        accept="image/png, image/gif, image/jpeg"
+                      />
+                    </label>
+                    <button
+                      disabled={data.src == ""}
+                      type="button"
+                      className="basis-1/2 h-6 rounded-md hover:bg-accent border disabled:opacity-50"
+                      onClick={() => setData((prev) => ({ ...prev, src: "" }))}
+                    >
+                      Xoá hình
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -173,7 +228,7 @@ export const AddProductBtn = ({ editor }: { editor: Editor }) => {
                     name: e.target.value,
                   }));
                 }}
-                className="col-span-3"
+                className="col-span-3 focus-visible:ring-offset-0 focus-visible:ring-0"
                 placeholder="Tên sản phẩm"
               />
             </div>
@@ -185,8 +240,10 @@ export const AddProductBtn = ({ editor }: { editor: Editor }) => {
                 Số lượng
               </Label>
               <Input
+                type="number"
                 id="amount"
                 className={cn(
+                  "focus-visible:ring-offset-0 focus-visible:ring-0",
                   data.unit == "Thùng" && data.amountOfCargoBox > 0
                     ? "col-span-1"
                     : "col-span-3"
@@ -195,7 +252,7 @@ export const AddProductBtn = ({ editor }: { editor: Editor }) => {
                 onChange={(e) => {
                   setData((prev) => ({
                     ...prev,
-                    amount: parseInt(e.target.value),
+                    amount: parseInt(e.target.value, 10),
                   }));
                 }}
               />
@@ -248,9 +305,9 @@ export const AddProductBtn = ({ editor }: { editor: Editor }) => {
             </DialogClose>
             <Button
               type="submit"
-              disabled={data.url == "" || data.name == "" || data.amount == 0}
+              disabled={data.name == "" || data.amount == 0}
             >
-              Thêm
+              {isSelected ? "Lưu" : "Thêm "}
             </Button>
           </DialogFooter>
         </form>
@@ -263,22 +320,34 @@ export const ProductNodeView = ({ node }: NodeViewRendererProps) => {
   return (
     <NodeViewWrapper>
       <div className="flex gap-2 py-2">
-        {node.attrs.url == "" ? (
-          <div className="border-2 border-dashed rounded-md shrink-0 size-[100px]">
-            <button>select</button>
+        {node.attrs.src == "" ? (
+          <div className="hidden sm:flex items-center border-2 border-dashed rounded-md shrink-0 size-[100px] text-center">
+            <ImageIcon className="shrink-0 size-8 text-muted-foreground mx-auto" />
           </div>
         ) : (
-          <div className="relative aspect-square size-[100px] rounded-md overflow-hidden shrink-0">
-            <Image src={node.attrs.url} fill alt="Product" />
+          <div className="hidden sm:block relative aspect-square size-[100px] rounded-md overflow-hidden shrink-0">
+            <Image
+              src={node.attrs.src}
+              fill
+              alt="Product"
+              className="object-cover"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            />
           </div>
         )}
         <div className="w-full p-1">
-          <h1 className="text-xl font-bold line-clamp-2">{node.attrs.name}</h1>
+          <h1 className="text-4xl font-bold line-clamp-2 md:line-clamp-1">
+            {node.attrs.name}
+          </h1>
           <div className="flex items-center gap-1">
-            <p className="p-1 font-medium text-xl">
-              SL: <span className="font-bold">{node.attrs.amount}</span>{" "}
-              {node.attrs.unit}
-              <span> x {node.attrs.amountOfCargoBox} Sản phẩm</span>
+            <p className="p-1 text-md">
+              <span>SL:</span>
+              <span className="font-bold text-2xl">{` ${node.attrs.amount} ${node.attrs.unit}`}</span>
+              {node.attrs.amountOfCargoBox > 0 && (
+                <span className="text-sm">
+                  {` x ${node.attrs.amountOfCargoBox} SP`}
+                </span>
+              )}
             </p>
           </div>
         </div>

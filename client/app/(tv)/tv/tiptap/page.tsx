@@ -24,7 +24,7 @@ declare module "@tiptap/core" {
 export type ProductNodeData = {
   id: string;
   name: string;
-  url: string;
+  src: string;
   amount: number;
   unit: "Thùng" | "Sản Phẩm";
   amountOfCargoBox: number;
@@ -33,20 +33,96 @@ export type ProductNodeData = {
 const ProductNode = TipTapNode.create({
   name: "product",
   group: "block",
-  atom: true,
   addAttributes: () => ({
     id: { default: "" },
     name: { default: "" },
-    url: { default: "" },
+    src: { default: "" },
     amount: { default: "0" },
     unit: { default: "Sản Phẩm" },
     amountOfCargoBox: { default: "0" },
   }),
   renderHTML({ HTMLAttributes, node }) {
+    console.log(HTMLAttributes);
     return [
       "div",
-      { "data-type": "product" },
-      ["div", { "data-product": node.attrs.url }],
+      { "data-type": "product", class: "flex gap-2 py-2" },
+      HTMLAttributes.src == ""
+        ? [
+            "div",
+            {
+              class:
+                "hidden sm:flex items-center border-2 border-dashed rounded-md shrink-0 size-[100px] text-center",
+            },
+            [
+              "svg",
+              {
+                class:
+                  "lucide lucide-image shrink-0 size-8 text-muted-foreground mx-auto",
+                width: "24",
+                height: "24",
+                viewBox: "0 0 24 24",
+                fill: "none",
+                stroke: "currentColor",
+                "stroke-width": "2",
+                "stroke-linecap": "round",
+                "stroke-linejoin": "round",
+              },
+              [
+                "rect",
+                { width: "24", height: "24", x: "3", y: "3", rx: "2", ry: "2" },
+              ],
+              ["circle", { cx: "9", cy: "9", r: "2" }],
+              ["path", { d: "m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" }],
+            ],
+          ]
+        : [
+            "div",
+            {
+              class:
+                "hidden sm:block relative aspect-square size-[100px] rounded-md overflow-hidden shrink-0",
+            },
+            [
+              "img",
+              {
+                src: HTMLAttributes.src,
+                alt: "Product",
+                loading: "lazy",
+                decoding: "async",
+                "data-nimg": "fill",
+                class: "object-cover",
+                sizes:
+                  "(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw",
+                style:
+                  "position: absolute; height: 100%; width: 100%; inset: 0px; color: transparent;",
+              },
+            ],
+          ],
+      [
+        "div",
+        { class: "w-full p-1" },
+        [
+          "h1",
+          { class: "text-4xl font-bold line-clamp-2 md:line-clamp-1" },
+          HTMLAttributes.name,
+        ],
+        [
+          "div",
+          { class: "flex items-center gap-1" },
+          ["p", { class: "p-1 text-md" }],
+          [
+            "span",
+            { class: "font-bold text-2xl" },
+            ` ${node.attrs.amount} ${node.attrs.unit}`,
+          ],
+          node.attrs.amountOfCargoBox != "0"
+            ? [
+                "span",
+                { class: "text-sm" },
+                ` x ${node.attrs.amountOfCargoBox} SP`,
+              ]
+            : ["span"],
+        ],
+      ],
     ];
   },
   parseHTML() {
@@ -67,7 +143,7 @@ const ProductNode = TipTapNode.create({
             type: "product",
             attrs: {
               name: data.name,
-              url: data.url,
+              src: data.src,
               amount: data.amount.toString(),
               unit: data.unit,
               id: data.id,
@@ -93,7 +169,9 @@ const TiptapPage = () => {
   const editor = useEditor({
     immediatelyRender: false,
     extensions: [
-      StarterKit,
+      StarterKit.configure({
+        heading: false,
+      }),
       Heading.extend({
         renderHTML({ node, HTMLAttributes }) {
           const hasLevel = this.options.levels.includes(node.attrs.level);
@@ -121,6 +199,14 @@ const TiptapPage = () => {
       ProductNode,
     ],
     content: "<p></p>",
+    onUpdate: ({ editor }) => {
+      // console.log({
+      //   json: JSON.stringify(editor.getJSON()),
+      //   text: editor.getText(),
+      //   html: editor.getHTML(),
+      // });
+      console.log(editor.getHTML());
+    },
   });
 
   if (!editor) return;
@@ -131,20 +217,7 @@ const TiptapPage = () => {
         <NodeList editor={editor} />
         <GroupButtonAction editor={editor} />
         <MoreAction editor={editor} />
-
         <AddProductBtn editor={editor} />
-
-        {/* <Button
-          type="button"
-          size="icon"
-          className="rounded-md"
-          variant="ghost"
-          onClick={() => {
-            editor.commands.addProduct();
-          }}
-        >
-          <ImageIcon className="size-5" />
-        </Button> */}
       </div>
       <EditorContent
         className="p-2 [&>*]:outline-none [&>*]:whitespace-pre-wrap rounded border bg-white min-h-[200px] max-h-[500px] overflow-y-scroll"

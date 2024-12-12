@@ -100,3 +100,8 @@ body {
 ::-webkit-scrollbar-thumb {
   @apply bg-muted-foreground rounded-xl;
 }
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}

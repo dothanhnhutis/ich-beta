@@ -26,3 +26,14 @@ export function verifyJWT<T>(
     return null;
   }
 }
+
+export async function getBase64<T = unknown>(file: File) {
+  return new Promise<T>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => {
+      resolve(reader.result as T);
+    };
+    reader.onerror = reject;
+  });
+}

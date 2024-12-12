@@ -1,16 +1,18 @@
-import { PermissionError } from "@/error-handler";
+import { BadRequestError, PermissionError } from "@/error-handler";
 import { evaluateCondition } from "@/middlewares/checkpolicy";
-import { CreatePolicy } from "@/schemas/policies";
+import { CreatePolicyReq, UpdatePolicyByIdReq } from "@/schemas/policies";
 import {
   createPolicyService,
+  deletePolicyByIdService,
   readPoliciesService,
-  readRoleByIdService,
+  readPolicyByIdService,
+  updatePolicyByIdService,
 } from "@/services/policies";
 import { Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 
 export async function createPolicy(
-  req: Request<{}, {}, CreatePolicy["body"]>,
+  req: Request<{}, {}, CreatePolicyReq["body"]>,
   res: Response
 ) {
   const condition = req.condition;
@@ -29,22 +31,61 @@ export async function getPolicyById(
 ) {
   const condition = req.condition;
 
-  const role = await readRoleByIdService(req.params.id);
+  const policy = await readPolicyByIdService(req.params.id);
 
-  if (condition != null && !evaluateCondition(req.user!, condition, role))
+  if (condition != null && !evaluateCondition(req.user!, condition, policy))
     throw new PermissionError();
 
-  return res.status(StatusCodes.OK).json(role);
+  if (!policy) throw new BadRequestError("PolicyId không tồn tại");
+
+  return res.status(StatusCodes.OK).json(policy);
 }
 
 export async function getPolicies(req: Request, res: Response) {
   const condition = req.condition;
-  console.log(condition);
 
   if (condition != null && !evaluateCondition(req.user!, condition))
     throw new PermissionError();
 
-  const roles = await readPoliciesService();
+  const policies = await readPoliciesService();
 
-  return res.status(StatusCodes.OK).json(roles);
+  return res.status(StatusCodes.OK).json(policies);
+}
+
+export async function updatePolicyById(
+  req: Request<UpdatePolicyByIdReq["params"], {}, UpdatePolicyByIdReq["body"]>,
+  res: Response
+) {
+  const condition = req.condition;
+
+  const policy = await readPolicyByIdService(req.params.id);
+
+  if (condition != null && !evaluateCondition(req.user!, condition, policy))
+    throw new PermissionError();
+
+  if (!policy) throw new BadRequestError("PolicyId không tồn tại");
+
+  await updatePolicyByIdService(req.params.id, req.body);
+
+  return res.status(StatusCodes.OK).json({
+    message: "Cập nhật policy thành công",
+  });
+}
+
+export async function deletePolicyById(
+  req: Request<UpdatePolicyByIdReq["params"]>,
+  res: Response
+) {
+  const condition = req.condition;
+  const policy = await readPolicyByIdService(req.params.id);
+  if (condition != null && !evaluateCondition(req.user!, condition, policy))
+    throw new PermissionError();
+
+  if (!policy) throw new BadRequestError("PolicyId không tồn tại");
+
+  await deletePolicyByIdService(req.params.id);
+
+  return res.status(StatusCodes.OK).json({
+    message: "Xoá policy thành công",
+  });
 }

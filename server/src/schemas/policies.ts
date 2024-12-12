@@ -82,4 +82,29 @@ export const createPolicychema = z.object({
     .strict(),
 });
 
-export type CreatePolicy = z.infer<typeof createPolicychema>;
+export const updatePolicyByIdSchema = z.object({
+  params: z.object({
+    id: z.string(),
+  }),
+  body: z
+    .object({
+      action: z.string({
+        required_error: "action is required",
+        invalid_type_error: "action must be string",
+      }),
+      resource: z.string({
+        required_error: "resource is required",
+        invalid_type_error: "resource must be string",
+      }),
+      description: z.string({
+        required_error: "description is required",
+        invalid_type_error: "description must be string",
+      }),
+      condition: conditionSchema.optional(),
+    })
+    .strip()
+    .partial(),
+});
+
+export type CreatePolicyReq = z.infer<typeof createPolicychema>;
+export type UpdatePolicyByIdReq = z.infer<typeof updatePolicyByIdSchema>;

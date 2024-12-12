@@ -1,7 +1,7 @@
-import { CreatePolicy } from "@/schemas/policies";
+import { CreatePolicyReq, UpdatePolicyByIdReq } from "@/schemas/policies";
 import prisma from "./db";
 
-export async function createPolicyService(input: CreatePolicy["body"]) {
+export async function createPolicyService(input: CreatePolicyReq["body"]) {
   const policy = await prisma.policies.create({
     data: input,
   });
@@ -14,31 +14,30 @@ export async function readPoliciesByUserIdService(
   action: string,
   resource: string
 ) {
-  const policyOfUser = await prisma.usersPolicies.findFirst({
+  const policiesOfUser = await prisma.usersPolicies.findMany({
     where: {
       userId,
-      policy: {
-        action,
-        resource,
-      },
     },
-    select: {
-      policyId: true,
+    include: {
+      policy: true,
     },
   });
+  const validPolicy = policiesOfUser.find(
+    (p) => p.policy.action == action && p.policy.resource == resource
+  );
 
-  if (!policyOfUser) return;
+  if (!validPolicy) return;
 
   const policy = await prisma.policies.findUnique({
     where: {
-      id: policyOfUser.policyId,
+      id: validPolicy.policyId,
     },
   });
   if (!policy) return;
   return policy;
 }
 
-export async function readRoleByIdService(policyId: string) {
+export async function readPolicyByIdService(policyId: string) {
   const policy = await prisma.policies.findUnique({
     where: {
       id: policyId,
@@ -50,4 +49,26 @@ export async function readRoleByIdService(policyId: string) {
 
 export async function readPoliciesService() {
   return await prisma.policies.findMany();
+}
+
+export async function updatePolicyByIdService(
+  policyId: string,
+  input: UpdatePolicyByIdReq["body"]
+) {
+  const data = await prisma.policies.update({
+    where: {
+      id: policyId,
+    },
+    data: input,
+  });
+  return data;
+}
+
+export async function deletePolicyByIdService(policyId: string) {
+  const data = await prisma.policies.delete({
+    where: {
+      id: policyId,
+    },
+  });
+  return data;
 }

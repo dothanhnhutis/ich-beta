@@ -78,7 +78,6 @@ model Factorys {
   @@index([name, address])
 }
 
-// Role
 model UsersPolicies {
   userId   String
   policyId String
@@ -128,6 +127,7 @@ model Displays {
   id                  String                @id @default(uuid())
   content             String
   enable              Boolean               @default(true)
+  priority            Int                   @default(0)
   userId              String
   createdBy           Users                 @relation(fields: [userId], references: [id])
   createdAt           DateTime              @default(now())
@@ -137,67 +137,57 @@ model Displays {
   @@index([enable, userId])
 }
 
-model Plans {
-  id        String   @id @default(uuid())
-  name      String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  tasks     Tasks[]
-}
+// model Plans {
+//   id        String   @id @default(uuid())
+//   name      String
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+//   tasks     Tasks[]
+// }
 
-enum TaskProgress {
-  TO_DO
-  ON_PROGRESS
-  IN_REVIEW
-  COMPLETED
-}
+// enum TaskProgress {
+//   TO_DO
+//   ON_PROGRESS
+//   IN_REVIEW
+//   COMPLETED
+// }
 
-enum TaskPriority {
-  LOW
-  NORMAL
-  URGENT
-}
+// enum TaskPriority {
+//   LOW
+//   NORMAL
+//   URGENT
+// }
 
-model Tasks {
-  id        String       @id @default(uuid())
-  title     String
-  subTitle  String
-  priority  TaskPriority @default(NORMAL)
-  progress  TaskProgress @default(ON_PROGRESS)
-  plan      Plans        @relation(fields: [planId], references: [id], onDelete: Cascade)
-  planId    String
-  closeTask Boolean      @default(false)
-  createdAt DateTime     @default(now())
-  updatedAt DateTime     @updatedAt
-  subTasks  SubTasks[]
+// model Tasks {
+//   id        String       @id @default(uuid())
+//   title     String
+//   subTitle  String
+//   priority  TaskPriority @default(NORMAL)
+//   progress  TaskProgress @default(ON_PROGRESS)
+//   plan      Plans        @relation(fields: [planId], references: [id], onDelete: Cascade)
+//   planId    String
+//   closeTask Boolean      @default(false)
+//   createdAt DateTime     @default(now())
+//   updatedAt DateTime     @updatedAt
+//   subTasks  SubTasks[]
 
-  @@index([title, progress, priority, closeTask])
-}
+//   @@index([title, progress, priority, closeTask])
+// }
 
-enum SubTasksStatus {
-  ASSIGNED
-  ACCEPTED
-  REJECTED
-}
+// enum SubTasksStatus {
+//   ASSIGNED
+//   ACCEPTED
+//   REJECTED
+// }
 
-model SubTasks {
-  id           String         @id @default(uuid())
-  title        String         @default("")
-  parentTask   Tasks          @relation(fields: [parentTaskId], references: [id], onDelete: Cascade)
-  parentTaskId String
-  status       SubTasksStatus @default(ASSIGNED)
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
+// model SubTasks {
+//   id           String         @id @default(uuid())
+//   title        String         @default("")
+//   parentTask   Tasks          @relation(fields: [parentTaskId], references: [id], onDelete: Cascade)
+//   parentTaskId String
+//   status       SubTasksStatus @default(ASSIGNED)
+//   createdAt    DateTime       @default(now())
+//   updatedAt    DateTime       @updatedAt
 
-  @@index([title, parentTaskId])
-}
-
-model Roles1 {
-  id          String   @id @default(uuid())
-  name        String
-  permissions String[]
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  @@index([name])
-}
+//   @@index([title, parentTaskId])
+// }

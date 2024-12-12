@@ -118,12 +118,13 @@ export const checkPolicy =
   (action: string, resource: string): Middleware =>
   async (req, _, next) => {
     if (!req.user) throw new PermissionError();
-
     const policy = await readPoliciesByUserIdService(
       req.user.id,
       action,
       resource
     );
+
+    console.log(policy);
     if (!policy) throw new PermissionError();
 
     req.condition = policy.condition ? (policy.condition as Condition) : null;

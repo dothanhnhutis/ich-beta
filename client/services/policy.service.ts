@@ -19,6 +19,7 @@ export async function getPloliesMe(options?: Omit<RequestInit, "body">) {
     return data;
   } catch (error) {
     console.log("getPloliesMe method error:", error);
-    throw error;
+    // throw error;
+    return [];
   }
 }

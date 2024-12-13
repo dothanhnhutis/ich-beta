@@ -230,10 +230,7 @@ const TiptapPage = () => {
     e.preventDefault();
     createDisplayMutation.mutate({
       content,
-      departmentIds: [
-        "d5bc148b-4d5d-4816-8b18-4e533389367c",
-        "0a4e2152-851c-457c-b056-f93218bccd7c",
-      ],
+      departmentIds: ["e2405489-387a-4165-b949-a72dd0de5eab"],
       enable: true,
       priority: 0,
     });

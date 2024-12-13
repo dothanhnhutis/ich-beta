@@ -107,13 +107,8 @@ input::-webkit-inner-spin-button {
   margin: 0;
 }
 
-.card {
-  margin: 0 auto;
-  padding: 2em;
-
-  width: 300px;
-  background: #1c1f2b;
-  text-align: center;
+.animation-border {
+  margin: 4px;
   border-radius: 10px;
   position: relative;
 }
@@ -124,8 +119,8 @@ input::-webkit-inner-spin-button {
   inherits: false;
 }
 
-.card::after,
-.card::before {
+.animation-border::after,
+.animation-border::before {
   content: "";
   position: absolute;
   height: 100%;
@@ -143,10 +138,11 @@ input::-webkit-inner-spin-button {
   translate: -50% -50%;
   z-index: -1;
   padding: 3px;
+  box-sizing: content-box;
   border-radius: 10px;
-  animation: 3s spin1 linear infinite;
+  animation: 2s spin1 linear infinite;
 }
-.card::before {
+.animation-border::before {
   filter: blur(1.5rem);
   opacity: 0.5;
 }
@@ -157,38 +153,4 @@ input::-webkit-inner-spin-button {
   to {
     --angle: 360deg;
   }
-}
-
-.display-border {
-  position: relative;
-  border-radius: 10px;
-  padding: 20px;
-  background-color: white;
-  z-index: 2;
-}
-.display-border::before {
-  content: "";
-  position: absolute;
-  background-color: red;
-  width: 100%;
-  height: 100%;
-  top: 50%;
-  left: 50%;
-  translate: -50% -50%;
-  border-radius: 10px;
-  padding: 3px;
-  z-index: 1;
-}
-.display-border::after {
-  content: "";
-  position: absolute;
-  background-color: blue;
-  width: 100%;
-  height: 100%;
-  top: 50%;
-  left: 50%;
-  translate: -50% -50%;
-  border-radius: 10px;
-  padding: 3px;
-  z-index: 1;
 }

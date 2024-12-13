@@ -149,7 +149,6 @@ import TaskProvider from "@/components/providers/task-provider";
 
 const TaskPage = () => {
   const { selected } = useDepartment();
-
   return (
     <div
       className={`grid gap-2 `}

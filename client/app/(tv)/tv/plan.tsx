@@ -24,6 +24,7 @@ import CreateTaskModal from "./createTaskModal";
 import { EditorContent, useEditor } from "@tiptap/react";
 import { extensions } from "./tiptap/page";
 import { format } from "date-fns";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 const DisplayContainer = ({
   content,
@@ -39,30 +40,19 @@ const DisplayContainer = ({
   });
 
   return (
-    <div className="card">
-      <h1>Animate Borders</h1>
-      <p>
-        Lorem ipsum dolor sit amet, consectetur adipisicing elit. Atque ad
-        exercitationem voluptatem ullam et, natus impedit quae veniam optio a
-        doloremque officiis beatae, itaque nesciunt nostrum quasi molestiae
-        laudantium dolor asperiores soluta sint sed ratione cupiditate.
-        Laudantium earum reiciendis enim.
-      </p>
-      {/* <div className="bg-white relative w-full m-1">
-          <EditorContent editor={editor} />
-
-          <div className="flex justify-end gap-4 items-center">
-            <p className="text-xs text-muted-foreground">
-              {`Priority: ${priority}`}
-            </p>
-            <p className="text-xs text-muted-foreground">
-              {`CreateAt: ${format(createdAt, "dd/MM/yy HH:mm")}`}
-            </p>
-            <p className="text-xs text-muted-foreground">
-              {`UpdatedAt: ${format(updatedAt, "dd/MM/yy HH:mm")}`}
-            </p>
-          </div>
-        </div> */}
+    <div className="animation-border p-2 border bg-white rounded-[10px]">
+      <EditorContent editor={editor} />
+      <div className="flex justify-end gap-4 items-center">
+        <p className="text-xs text-muted-foreground">
+          {`Priority: ${priority}`}
+        </p>
+        <p className="text-xs text-muted-foreground">
+          {`CreateAt: ${format(createdAt, "dd/MM/yy HH:mm")}`}
+        </p>
+        <p className="text-xs text-muted-foreground">
+          {`UpdatedAt: ${format(updatedAt, "dd/MM/yy HH:mm")}`}
+        </p>
+      </div>
     </div>
   );
 };
@@ -74,9 +64,12 @@ const PlanContainer = (props: Department) => {
   const queryClient = useQueryClient();
 
   const { socket, connected, socketJoinPlan } = useTask();
+  const audio = new Audio("/mp3/bell.mp3");
 
   function onCreateTask() {
-    queryClient.invalidateQueries({ queryKey: ["plan", props.id] });
+    console.log("onCreateTask");
+    audio.play();
+    // queryClient.invalidateQueries({ queryKey: ["displays", props.id] });
   }
 
   React.useEffect(() => {
@@ -142,18 +135,17 @@ const PlanContainer = (props: Department) => {
         {/* <TaskFilter /> */}
       </div>
 
-      <main className="flex flex-col gap-2 p-1 h-full overflow-y-scroll relative">
-        {/* {planQuery.data ? (
-          planQuery.data.map((display) => (
-            <DisplayContainer key={display.id} {...display} />
-          ))
-        ) : (
-          <p>error</p>
-        )} */}
-        <div className="display-border">
-          <div className="relative z-10">asdasd</div>
-        </div>
-      </main>
+      <ScrollArea className="h-full">
+        <main className="flex flex-col gap-1 p-1 h-full relative z-0">
+          {planQuery.data ? (
+            planQuery.data.map((display) => (
+              <DisplayContainer key={display.id} {...display} />
+            ))
+          ) : (
+            <p>error</p>
+          )}
+        </main>
+      </ScrollArea>
     </div>
   );
 };

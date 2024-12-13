@@ -60,7 +60,7 @@ export default async function RootLayout({
     <html lang="en">
       <body
         // className={`${roboto.className} ${geistMono.variable}  antialiased`}
-        className={`${montserrat.className} antialiased`}
+        className={`${montserrat.className} antialiased bg-transparent`}
       >
         <TankStackProvider>
           {/* <SocketManagerProvider

@@ -3,6 +3,7 @@ import {
   deletePolicyById,
   getPolicies,
   getPolicyById,
+  getPolicyMe,
   updatePolicyById,
 } from "@/controllers/policies";
 import { checkPolicy } from "@/middlewares/checkpolicy";
@@ -13,6 +14,7 @@ import express, { type Router } from "express";
 
 const router: Router = express.Router();
 function roleRouter(): Router {
+  router.get("/policies/me", authMiddleware(), getPolicyMe);
   router.get(
     "/policies/:id",
     authMiddleware(),

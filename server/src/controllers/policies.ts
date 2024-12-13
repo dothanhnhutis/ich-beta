@@ -4,6 +4,7 @@ import { CreatePolicyReq, UpdatePolicyByIdReq } from "@/schemas/policies";
 import {
   createPolicyService,
   deletePolicyByIdService,
+  readPoliciesOfUserIdService,
   readPoliciesService,
   readPolicyByIdService,
   updatePolicyByIdService,
@@ -39,6 +40,12 @@ export async function getPolicyById(
   if (!policy) throw new BadRequestError("PolicyId không tồn tại");
 
   return res.status(StatusCodes.OK).json(policy);
+}
+
+export async function getPolicyMe(req: Request, res: Response) {
+  const { id } = req.user!;
+  const policies = await readPoliciesOfUserIdService(id);
+  return res.status(StatusCodes.OK).json(policies);
 }
 
 export async function getPolicies(req: Request, res: Response) {

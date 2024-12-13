@@ -35,9 +35,10 @@ const TaskLayout = async ({
         .join("; "),
     },
   });
+
   return (
     <PlanProvider selected={departments.length > 0 ? [departments[0]] : []}>
-      <SidebarProvider defaultOpen={defaultOpen} className="bg-gray-100">
+      <SidebarProvider defaultOpen={defaultOpen} className="bg-gray-100 z-[-2]">
         <Sidebar className="[&>div[data-sidebar='sidebar']]:bg-transparent bg-white">
           <SidebarHeader>
             <div className="flex items-center gap-2">
@@ -68,7 +69,7 @@ const TaskLayout = async ({
             </SidebarGroup>
           </SidebarContent>
           <SidebarFooter>
-            <div className="flex items-center flex-shrink-0 gap-2 bg-white rounded-md p-2">
+            <div className=" flex items-center flex-shrink-0 gap-2 bg-white rounded-md p-2">
               <Image
                 src="/logo.png"
                 alt="logo.png"

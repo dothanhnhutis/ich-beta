@@ -37,6 +37,19 @@ export async function readPoliciesByUserIdService(
   return policy;
 }
 
+export async function readPoliciesOfUserIdService(userId: string) {
+  const policiesOfUser = await prisma.usersPolicies.findMany({
+    where: {
+      userId,
+    },
+    include: {
+      policy: true,
+    },
+  });
+
+  return policiesOfUser.map(({ policy }) => policy);
+}
+
 export async function readPolicyByIdService(policyId: string) {
   const policy = await prisma.policies.findUnique({
     where: {

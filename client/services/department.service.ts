@@ -21,7 +21,7 @@ export async function getDepartments(options?: Omit<RequestInit, "body">) {
   }
 }
 
-type Display = {
+export type Display = {
   id: string;
   userId: string;
   content: string;

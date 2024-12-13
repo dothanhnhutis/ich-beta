@@ -13,11 +13,59 @@ import {
 import { Department } from "@/schema/department.schema";
 import Task, { TaskProps } from "./task";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { getDisplaysOfDepartment } from "@/services/department.service";
+import {
+  Display,
+  getDisplaysOfDepartment,
+} from "@/services/department.service";
 import { useTask } from "@/components/providers/task-provider";
 import { cn } from "@/lib/utils";
 
 import CreateTaskModal from "./createTaskModal";
+import { EditorContent, useEditor } from "@tiptap/react";
+import { extensions } from "./tiptap/page";
+import { format } from "date-fns";
+
+const DisplayContainer = ({
+  content,
+  createdAt,
+  updatedAt,
+  priority,
+}: Display) => {
+  const editor = useEditor({
+    editable: false,
+    immediatelyRender: false,
+    extensions,
+    content,
+  });
+
+  return (
+    <div className="card">
+      <h1>Animate Borders</h1>
+      <p>
+        Lorem ipsum dolor sit amet, consectetur adipisicing elit. Atque ad
+        exercitationem voluptatem ullam et, natus impedit quae veniam optio a
+        doloremque officiis beatae, itaque nesciunt nostrum quasi molestiae
+        laudantium dolor asperiores soluta sint sed ratione cupiditate.
+        Laudantium earum reiciendis enim.
+      </p>
+      {/* <div className="bg-white relative w-full m-1">
+          <EditorContent editor={editor} />
+
+          <div className="flex justify-end gap-4 items-center">
+            <p className="text-xs text-muted-foreground">
+              {`Priority: ${priority}`}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              {`CreateAt: ${format(createdAt, "dd/MM/yy HH:mm")}`}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              {`UpdatedAt: ${format(updatedAt, "dd/MM/yy HH:mm")}`}
+            </p>
+          </div>
+        </div> */}
+    </div>
+  );
+};
 
 const PlanContainer = (props: Department) => {
   const { selected, removeDepartment } = useDepartment();
@@ -57,9 +105,9 @@ const PlanContainer = (props: Department) => {
   });
 
   return (
-    <div className="flex flex-col relative h-screen overflow-hidden">
+    <div className="flex flex-col relative h-screen overflow-hidden ">
       <div className="bg-white p-2 rounded-md">
-        <div className="flex items-center gap-2 w-full">
+        <div className="flex items-center gap-2 w-full ">
           {selected.map((p) => p.id).indexOf(props.id) == 0 ? (
             <button type="button" onClick={toggleSidebar} className="p-2">
               <PanelLeftIcon className="size-6 shrink-0 text-muted-foreground" />
@@ -94,19 +142,17 @@ const PlanContainer = (props: Department) => {
         {/* <TaskFilter /> */}
       </div>
 
-      <main className="flex flex-col gap-2 p-1 h-full overflow-y-scroll">
-        {planQuery.data ? (
+      <main className="flex flex-col gap-2 p-1 h-full overflow-y-scroll relative">
+        {/* {planQuery.data ? (
           planQuery.data.map((display) => (
-            <div
-              className="bg-white p-2 rounded-md shadow-md"
-              dangerouslySetInnerHTML={{
-                __html: display.content,
-              }}
-            />
+            <DisplayContainer key={display.id} {...display} />
           ))
         ) : (
           <p>error</p>
-        )}
+        )} */}
+        <div className="display-border">
+          <div className="relative z-10">asdasd</div>
+        </div>
       </main>
     </div>
   );

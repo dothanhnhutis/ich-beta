@@ -1,9 +1,8 @@
 "use client";
-import { mainFetch } from "@/lib/custom-fetch";
-import { User } from "@/schema/user.schema";
-import { changeEmail, getCurrentUser, signOut } from "@/services/users.service";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
 import React from "react";
+import { User } from "@/schema/user.schema";
+import { changeEmail, signOut } from "@/services/users.service";
+import { useQueryClient } from "@tanstack/react-query";
 
 type AuthContext = {
   currentUser: User | null;
@@ -11,19 +10,21 @@ type AuthContext = {
   changeEmail: (email: string) => Promise<void>;
 };
 
-const authContext = React.createContext<AuthContext>({
+const AuthContext = React.createContext<AuthContext>({
   currentUser: null,
   signOut: async () => {},
   changeEmail: async (email: string) => {},
 });
 
-export const useAuth = () => React.useContext(authContext);
+export const useAuth = () => React.useContext(AuthContext);
 
 export const AuthProvider = ({
   initUser,
+  initPolicies,
   children,
 }: {
   initUser: User | null;
+  initPolicies: any | null;
   children: React.ReactNode;
 }) => {
   const queryClient = useQueryClient();
@@ -40,7 +41,7 @@ export const AuthProvider = ({
   };
 
   return (
-    <authContext.Provider
+    <AuthContext.Provider
       value={{
         currentUser: initUser,
         signOut: handleSignOut,
@@ -48,6 +49,6 @@ export const AuthProvider = ({
       }}
     >
       {children}
-    </authContext.Provider>
+    </AuthContext.Provider>
   );
 };

@@ -7,6 +7,7 @@ import { Toaster } from "sonner";
 import { cookies } from "next/headers";
 import { getCurrentUser } from "@/services/users.service";
 import { Montserrat } from "next/font/google";
+import { getPloliesMe } from "@/services/policy.service";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -40,11 +41,20 @@ export default async function RootLayout({
     .getAll()
     .map((c) => `${c.name}=${encodeURIComponent(c.value)}`)
     .join("; ");
+
   const user = await getCurrentUser({
     headers: {
       Cookie: allCookie,
     },
   });
+
+  const policies = await getPloliesMe({
+    headers: {
+      Cookie: allCookie,
+    },
+  });
+
+  console.log(policies);
 
   return (
     <html lang="en">
@@ -61,7 +71,9 @@ export default async function RootLayout({
               autoConnect: false,
             }}
           > */}
-          <AuthProvider initUser={user}>{children}</AuthProvider>
+          <AuthProvider initUser={user} initPolicies={policies}>
+            {children}
+          </AuthProvider>
           {/* </SocketManagerProvider> */}
           <Toaster visibleToasts={5} richColors />
         </TankStackProvider>

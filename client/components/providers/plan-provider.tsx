@@ -1,53 +1,58 @@
 "use client";
-import { Plan } from "@/schema/plan.schema";
+import { Department } from "@/schema/department.schema";
 import React from "react";
 
-type PlantContext = {
-  selected: Plan[];
-  addPlan: (plan: Plan) => void;
-  removePlan: (planId: string) => void;
+type DepartmentContext = {
+  selected: Department[];
+  addDepartment: (department: Department) => void;
+  removeDepartment: (departmentId: string) => void;
 };
-const PlantContext = React.createContext<PlantContext | null>(null);
+const DepartmentContext = React.createContext<DepartmentContext | null>(null);
 
-export const useplan = () => {
-  const context = React.useContext(PlantContext);
+export const useDepartment = () => {
+  const context = React.useContext(DepartmentContext);
   if (!context) {
-    throw new Error("useplan must be used within a PlanProvider.");
+    throw new Error("useDepartment must be used within a DepartmentProvider.");
   }
   return context;
 };
 
-type PlanProviderProps = {
-  selected?: Plan[];
+type DepartmentProviderProps = {
+  selected?: Department[];
   max?: number;
   children?: React.ReactNode;
   className?: string;
 };
-const PlanProvider = ({ selected, children, max = 4 }: PlanProviderProps) => {
-  const [planSelected, setPlanSelected] = React.useState<Plan[]>(
-    selected ?? []
-  );
+const DepartmentProvider = ({
+  selected,
+  children,
+  max = 4,
+}: DepartmentProviderProps) => {
+  const [departmentSelected, setDepartmentSelected] = React.useState<
+    Department[]
+  >(selected ?? []);
 
-  const handleAddPlan = (plan: Plan) => {
-    if (planSelected.length < max) setPlanSelected((prev) => [...prev, plan]);
+  const handleAddDepartment = (department: Department) => {
+    if (departmentSelected.length < max)
+      setDepartmentSelected((prev) => [...prev, department]);
   };
 
-  const handleRemovePlan = (planId: string) => {
-    if (planSelected.length > 1)
-      setPlanSelected((prev) => prev.filter((plan) => plan.id != planId));
+  const handleRemoveDepartment = (planId: string) => {
+    if (departmentSelected.length > 1)
+      setDepartmentSelected((prev) => prev.filter((plan) => plan.id != planId));
   };
 
   return (
-    <PlantContext.Provider
+    <DepartmentContext.Provider
       value={{
-        selected: planSelected,
-        addPlan: handleAddPlan,
-        removePlan: handleRemovePlan,
+        selected: departmentSelected,
+        addDepartment: handleAddDepartment,
+        removeDepartment: handleRemoveDepartment,
       }}
     >
       {children}
-    </PlantContext.Provider>
+    </DepartmentContext.Provider>
   );
 };
 
-export default PlanProvider;
+export default DepartmentProvider;

@@ -21,6 +21,14 @@ export async function createDisplay(
   if (condition != null && !evaluateCondition(req.user!, condition))
     throw new PermissionError();
 
+  if (req.body.departmentIds.length > 0) {
+    const departments = await getDepartmentsInListService(
+      req.body.departmentIds
+    );
+    if (departments.length != req.body.departmentIds.length)
+      throw new BadRequestError("departmentIds[?] không tồn tại");
+  }
+
   await createDisplayService({ ...req.body, userId: req.user!.id });
   return res.status(StatusCodes.CREATED).json({
     message: "create displays success",

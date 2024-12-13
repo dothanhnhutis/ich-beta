@@ -16,7 +16,7 @@ import {
 import React from "react";
 import Image from "next/image";
 import { cookies } from "next/headers";
-import { getPlans } from "@/services/plan.service";
+import { getDepartments } from "@/services/department.service";
 import PlanProvider from "@/components/providers/plan-provider";
 import PlanBtn from "./plan-btn";
 
@@ -27,10 +27,16 @@ const TaskLayout = async ({
 }>) => {
   const cookieStore = await cookies();
   const defaultOpen = cookieStore.get("sidebar:state")?.value === "true";
-  const tasks = await getPlans();
-
+  const departments = await getDepartments({
+    headers: {
+      cookie: cookieStore
+        .getAll()
+        .map(({ name, value }) => `${name}=${encodeURIComponent(value)}`)
+        .join("; "),
+    },
+  });
   return (
-    <PlanProvider selected={tasks.length > 0 ? [tasks[0]] : []}>
+    <PlanProvider selected={departments.length > 0 ? [departments[0]] : []}>
       <SidebarProvider defaultOpen={defaultOpen} className="bg-gray-100">
         <Sidebar className="[&>div[data-sidebar='sidebar']]:bg-transparent bg-white">
           <SidebarHeader>
@@ -49,10 +55,10 @@ const TaskLayout = async ({
           </SidebarHeader>
           <SidebarContent>
             <SidebarGroup>
-              <SidebarGroupLabel>Plans</SidebarGroupLabel>
+              <SidebarGroupLabel>Departments</SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenu>
-                  {tasks.map((item) => (
+                  {departments.map((item) => (
                     <SidebarMenuItem key={item.id}>
                       <PlanBtn {...item} />
                     </SidebarMenuItem>

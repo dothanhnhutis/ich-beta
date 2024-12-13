@@ -9,9 +9,9 @@ import TextAlign from "@tiptap/extension-text-align";
 import { MoreAction } from "./components/more-action";
 import { mergeAttributes, Node as TipTapNode } from "@tiptap/core";
 import { AddProductBtn, ProductNodeView } from "./components/product-view";
-import { Button } from "@/components/ui/button";
-import { ImageIcon } from "lucide-react";
 import Heading from "@tiptap/extension-heading";
+import { CreateDisplay, createNewDisplay } from "@/services/display.service";
+import { useMutation } from "@tanstack/react-query";
 
 declare module "@tiptap/core" {
   interface Commands<ReturnType> {
@@ -53,27 +53,28 @@ const ProductNode = TipTapNode.create({
               class:
                 "hidden sm:flex items-center border-2 border-dashed rounded-md shrink-0 size-[100px] text-center",
             },
-            [
-              "svg",
-              {
-                class:
-                  "lucide lucide-image shrink-0 size-8 text-muted-foreground mx-auto",
-                width: "24",
-                height: "24",
-                viewBox: "0 0 24 24",
-                fill: "none",
-                stroke: "currentColor",
-                "stroke-width": "2",
-                "stroke-linecap": "round",
-                "stroke-linejoin": "round",
-              },
-              [
-                "rect",
-                { width: "24", height: "24", x: "3", y: "3", rx: "2", ry: "2" },
-              ],
-              ["circle", { cx: "9", cy: "9", r: "2" }],
-              ["path", { d: "m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" }],
-            ],
+            `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-image shrink-0 size-8 text-muted-foreground mx-auto"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"></rect><circle cx="9" cy="9" r="2"></circle><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"></path></svg>`,
+            // [
+            //   "svg",
+            //   {
+            //     class:
+            //       "lucide lucide-image shrink-0 size-8 text-muted-foreground mx-auto",
+            //     width: "24",
+            //     height: "24",
+            //     viewBox: "0 0 24 24",
+            //     fill: "none",
+            //     stroke: "currentColor",
+            //     "stroke-width": "2",
+            //     "stroke-linecap": "round",
+            //     "stroke-linejoin": "round",
+            //   },
+            //   [
+            //     "rect",
+            //     { width: "24", height: "24", x: "3", y: "3", rx: "2", ry: "2" },
+            //   ],
+            //   ["circle", { cx: "9", cy: "9", r: "2" }],
+            //   ["path", { d: "m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" }],
+            // ],
           ]
         : [
             "div",
@@ -108,19 +109,23 @@ const ProductNode = TipTapNode.create({
         [
           "div",
           { class: "flex items-center gap-1" },
-          ["p", { class: "p-1 text-md" }],
           [
-            "span",
-            { class: "font-bold text-2xl" },
-            ` ${node.attrs.amount} ${node.attrs.unit}`,
+            "p",
+            { class: "p-1 text-md" },
+            ["span", {}, `SL:`],
+            [
+              "span",
+              { class: "font-bold text-2xl" },
+              ` ${node.attrs.amount} ${node.attrs.unit}`,
+            ],
+            node.attrs.amountOfCargoBox != "0"
+              ? [
+                  "span",
+                  { class: "text-sm" },
+                  ` x ${node.attrs.amountOfCargoBox} SP`,
+                ]
+              : ["span"],
           ],
-          node.attrs.amountOfCargoBox != "0"
-            ? [
-                "span",
-                { class: "text-sm" },
-                ` x ${node.attrs.amountOfCargoBox} SP`,
-              ]
-            : ["span"],
         ],
       ],
     ];
@@ -166,6 +171,7 @@ const classes: Record<Levels, string> = {
 };
 
 const TiptapPage = () => {
+  const [content, setContent] = React.useState<string>("");
   const editor = useEditor({
     immediatelyRender: false,
     extensions: [
@@ -200,19 +206,32 @@ const TiptapPage = () => {
     ],
     content: "<p></p>",
     onUpdate: ({ editor }) => {
-      // console.log({
-      //   json: JSON.stringify(editor.getJSON()),
-      //   text: editor.getText(),
-      //   html: editor.getHTML(),
-      // });
       console.log(editor.getHTML());
+      setContent(editor.getHTML());
     },
   });
+  const createDisplayMutation = useMutation({
+    mutationFn: async (input: CreateDisplay) => {
+      return await createNewDisplay(input);
+    },
+    onSuccess({ message }) {
+      console.log(message);
+    },
+    onSettled() {},
+  });
 
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    createDisplayMutation.mutate({
+      content,
+      departmentIds: ["d5bc148b-4d5d-4816-8b18-4e533389367c"],
+      enable: true,
+      priority: 0,
+    });
+  };
   if (!editor) return;
-
   return (
-    <div className="p-2 space-y-2">
+    <form onSubmit={handleSubmit} className="p-2 space-y-2">
       <div>
         <NodeList editor={editor} />
         <GroupButtonAction editor={editor} />
@@ -223,7 +242,8 @@ const TiptapPage = () => {
         className="p-2 [&>*]:outline-none [&>*]:whitespace-pre-wrap rounded border bg-white min-h-[200px] max-h-[500px] overflow-y-scroll"
         editor={editor}
       />
-    </div>
+      <button>add</button>
+    </form>
   );
 };
 

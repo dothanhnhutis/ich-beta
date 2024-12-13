@@ -5,6 +5,7 @@ import {
   authRoutes,
   COMPLETE_PROFILE_ROUTE,
   DEFAULT_LOGIN_REDIRECT,
+  DEFAULT_LOGOUT_REDIRECT,
   EMAIL_VERIFY_ROUTE,
   middleRoutes,
   privateRegexRoutes,
@@ -74,7 +75,9 @@ export async function middleware(request: NextRequest) {
         }
       }
     } else {
-      const response = NextResponse.redirect(new URL("/signin", request.url));
+      const response = NextResponse.redirect(
+        new URL(DEFAULT_LOGOUT_REDIRECT, request.url)
+      );
       response.cookies.delete("sid");
       return response;
     }

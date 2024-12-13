@@ -28,19 +28,19 @@ const listProductData = [
   {
     id: "2",
     name: "Sản Phẩm B",
-    src: "https://res.cloudinary.com/dr1ntj4ar/image/upload/v1733792755/ich/z6113933456466_e226585b670b0e7de7074471d135cc0a_fk2rtu.jpg",
+    src: "https://res.cloudinary.com/dr1ntj4ar/image/upload/v1733792756/ich/z6114016917424_fb687d45beb2bed71ca987e94c618893_offfni.jpg",
     amountOfCargoBox: 100,
   },
   {
     id: "3",
     name: "Sản Phẩm C",
-    src: "https://res.cloudinary.com/dr1ntj4ar/image/upload/v1733792755/ich/z6113933456466_e226585b670b0e7de7074471d135cc0a_fk2rtu.jpg",
+    src: "https://res.cloudinary.com/dr1ntj4ar/image/upload/v1733792754/ich/z6100125014020_bb33a1f31eb02b5fb7dbdb5c02c35ff9_fj3lij.jpg",
     amountOfCargoBox: 0,
   },
   {
     id: "4",
     name: "Sản Phẩm D",
-    src: "https://res.cloudinary.com/dr1ntj4ar/image/upload/v1733792755/ich/z6113933456466_e226585b670b0e7de7074471d135cc0a_fk2rtu.jpg",
+    src: "https://res.cloudinary.com/dr1ntj4ar/image/upload/v1733792753/ich/z6098129988173_773369cd8085d1852b6e652faf6e8940_fpdxaz.jpg",
     amountOfCargoBox: 500,
   },
 ];

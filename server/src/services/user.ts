@@ -23,7 +23,6 @@ const userSelectDefault = {
   updatedAt: true,
 };
 
-// done
 export async function readUserByEmail(email: string, cache?: boolean) {
   if (cache ?? true) {
     const userCache = await readUserCacheByEmail(email);
@@ -37,7 +36,6 @@ export async function readUserByEmail(email: string, cache?: boolean) {
   });
   if (!user) return;
   if (cache ?? true) {
-    console.log(user);
     await writeUserCache(user);
   }
   return user;
@@ -111,7 +109,6 @@ type WriteUserWithPassword = {
   birthDate?: string;
 };
 
-//done
 export async function writeUserWithPassword(
   input: WriteUserWithPassword,
   storeCache?: boolean
@@ -173,4 +170,24 @@ export async function editUserById(
     await writeUserCache(user);
   }
   return user;
+}
+
+export async function updateUserPoliciesByIdService(
+  userId: string,
+  policyIds: string[]
+) {
+  await prisma.usersPolicies.deleteMany({
+    where: {
+      userId,
+      policyId: { notIn: policyIds },
+    },
+  });
+
+  await prisma.usersPolicies.createMany({
+    data: policyIds.map((policyId) => ({
+      userId,
+      policyId,
+    })),
+    skipDuplicates: true,
+  });
 }

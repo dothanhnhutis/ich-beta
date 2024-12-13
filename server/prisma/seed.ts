@@ -50,6 +50,11 @@ const adminPolicies: Policy[] = [
     description: "delete user",
   },
   {
+    action: "read",
+    resource: "departments",
+    description: "read display",
+  },
+  {
     action: "create",
     resource: "displays",
     description: "create display",
@@ -64,6 +69,14 @@ const adminPolicies: Policy[] = [
     resource: "displays",
     description: "update display",
   },
+  {
+    action: "delete",
+    resource: "displays",
+    description: "delete display",
+  },
+];
+
+const factoryMember: Policy[] = [
   {
     action: "delete",
     resource: "displays",

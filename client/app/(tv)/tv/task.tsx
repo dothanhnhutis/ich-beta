@@ -33,10 +33,10 @@ const Task = ({
         "border rounded-lg p-2 bg-gradient-to-b space-y-1  bg-white"
       )}
     >
-      <TaskHeader title={title} subTitle={subTitle} />
-      <SubTasks subtasks={subTasks} />
+      {/* <TaskHeader title={title} subTitle={subTitle} />
+      <SubTasks subtasks={subTasks} /> */}
 
-      <TaskFooter
+      {/* <TaskFooter
         numberSubTask={subTasks.length}
         subTaskDone={subTasks.filter((s) => s.status == "ACCEPTED").length}
         dueDate={new Date(dueDate)}
@@ -44,7 +44,7 @@ const Task = ({
         progress={progress}
         priority={priority}
         tags={tags}
-      />
+      /> */}
     </div>
   );
 };

@@ -1,25 +1,25 @@
 "use client";
-import { useplan } from "@/components/providers/plan-provider";
+import { useDepartment } from "@/components/providers/plan-provider";
 import { SidebarMenuButton } from "@/components/ui/sidebar";
-import { Plan } from "@/schema/plan.schema";
+import { Department } from "@/schema/department.schema";
 import React from "react";
 
-const PlanBtn = (plan: Plan) => {
-  const { addPlan, removePlan, selected } = useplan();
+const PlanBtn = (department: Department) => {
+  const { addDepartment, removeDepartment, selected } = useDepartment();
   const handleToggle = () => {
-    if (selected.map((p) => p.id).includes(plan.id)) {
-      removePlan(plan.id);
+    if (selected.map((p) => p.id).includes(department.id)) {
+      removeDepartment(department.id);
     } else {
-      addPlan(plan);
+      addDepartment(department);
     }
   };
   return (
     <SidebarMenuButton
       onClick={handleToggle}
       asChild
-      isActive={selected.map((p) => p.id).includes(plan.id)}
+      isActive={selected.map((p) => p.id).includes(department.id)}
     >
-      <p>{plan.name}</p>
+      <p>{department.name}</p>
     </SidebarMenuButton>
   );
 };

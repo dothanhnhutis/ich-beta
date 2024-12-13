@@ -28,7 +28,6 @@ export const updateUserProfileSchema = z.object({
     .strip()
     .partial(),
 });
-export type UpdateProfileReq = z.infer<typeof updateUserProfileSchema>;
 
 export const changeEmailSchema = z.object({
   body: z
@@ -260,15 +259,57 @@ export const createUserSchema = z.object({
     }),
 });
 
+export const updateUserByIdSchema = z.object({
+  params: z.object({
+    userId: z.string(),
+  }),
+  body: z
+    .object({
+      username: z.string({
+        required_error: "tên người dùng là trường bắt buộc",
+        invalid_type_error: "tên người dùng phải là chuỗi",
+      }),
+      gender: z.enum(["MALE", "FEMALE", "OTHER"]).nullable(),
+      picture: z.string().url("hình đại diện phải là url"),
+      birthDate: z
+        .string()
+        .regex(
+          /^\d{2}\/\d{2}\/\d{4}$/,
+          "Ngày sinh không hợp lệ. Expected DD/MM/YYYY (30/10/2000)"
+        )
+        .refine((dateStr) => {
+          const [day, month, year] = dateStr.split("/").map(Number);
+          if (year < 1) return false;
+          if (month < 1 || month > 12) return false;
+          const daysInMonth = new Date(year, month, 0).getDate();
+          return day > 0 && day <= daysInMonth;
+        }, "Ngày sinh không hợp lệ."),
+      phoneNumber: z.string().length(10, "Số điện thoại không hợp lệ"),
+      status: z.enum(["ACTIVE", "SUSPENDED", "DISABLED"]),
+      policyIds: z.array(
+        z.string({ invalid_type_error: "policyId phải là chuỗi" }),
+        {
+          required_error: "policyIds là trường bắt buộc",
+          invalid_type_error: "policyIds phải là mãng chuỗi",
+        }
+      ),
+    })
+    .strip()
+    .partial(),
+});
+
 export type ChangeEmailReq = z.infer<typeof changeEmailSchema>;
 export type UpdateEmailReq = z.infer<typeof updateEmailSchema>;
 export type ReplaceEmailReq = z.infer<typeof replaceEmailSchema>;
 export type ChangePasswordReq = z.infer<typeof changePasswordSchema>;
 export type InitPasswordReq = z.infer<typeof initPasswordSchema>;
+export type UpdateProfileReq = z.infer<typeof updateUserProfileSchema>;
 
 export type SetupMFAReq = z.infer<typeof setupMFASchema>;
 export type EnableMFAReq = z.infer<typeof enableMFASchema>;
 export type CreateUserReq = z.infer<typeof createUserSchema>;
+
+export type UpdateUserByIdReq = z.infer<typeof updateUserByIdSchema>;
 
 type UserStatus = "ACTIVE" | "SUSPENDED" | "DISABLED";
 type UserGender = "MALE" | "FEMALE" | "OTHER" | null;

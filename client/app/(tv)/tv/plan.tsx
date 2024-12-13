@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import TaskFilter from "./task-filter";
-import { useplan } from "@/components/providers/plan-provider";
+import { useDepartment } from "@/components/providers/plan-provider";
 import { useSidebar } from "@/components/ui/sidebar";
 import {
   FilterIcon,
@@ -10,17 +10,17 @@ import {
   SlidersHorizontalIcon,
   XIcon,
 } from "lucide-react";
-import { Plan } from "@/schema/plan.schema";
+import { Department } from "@/schema/department.schema";
 import Task, { TaskProps } from "./task";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { getTaskOfPlan } from "@/services/plan.service";
+import { getDisplaysOfDepartment } from "@/services/department.service";
 import { useTask } from "@/components/providers/task-provider";
 import { cn } from "@/lib/utils";
 
 import CreateTaskModal from "./createTaskModal";
 
-const PlanContainer = (props: Plan) => {
-  const { selected, removePlan } = useplan();
+const PlanContainer = (props: Department) => {
+  const { selected, removeDepartment } = useDepartment();
   const { toggleSidebar } = useSidebar();
 
   const queryClient = useQueryClient();
@@ -50,9 +50,9 @@ const PlanContainer = (props: Plan) => {
   }, [socket]);
 
   const planQuery = useQuery({
-    queryKey: ["plan", props.id],
+    queryKey: ["displays", props.id],
     queryFn: async () => {
-      return await getTaskOfPlan(props.id);
+      return await getDisplaysOfDepartment(props.id);
     },
   });
 
@@ -67,7 +67,7 @@ const PlanContainer = (props: Plan) => {
           ) : (
             <button
               type="button"
-              onClick={() => removePlan(props.id)}
+              onClick={() => removeDepartment(props.id)}
               className="p-2"
             >
               <XIcon className="size-6 shrink-0 text-muted-foreground" />
@@ -95,22 +95,17 @@ const PlanContainer = (props: Plan) => {
       </div>
 
       <main className="flex flex-col gap-2 p-1 h-full overflow-y-scroll">
-        {planQuery.data && planQuery.data.length > 0 ? (
-          planQuery.data.map((task, idx) => (
-            <Task
-              key={idx}
-              title={task.title}
-              subTitle={task.subTitle}
-              tags={["Factory"]}
-              dueDate={task.createdAt}
-              startDate={task.createdAt}
-              priority={task.priority}
-              progress={task.progress}
-              subTasks={task.subTasks}
+        {planQuery.data ? (
+          planQuery.data.map((display) => (
+            <div
+              className="bg-white p-2 rounded-md shadow-md"
+              dangerouslySetInnerHTML={{
+                __html: display.content,
+              }}
             />
           ))
         ) : (
-          <div className="text-center text-xl">Chưa có đơn hàng</div>
+          <p>error</p>
         )}
       </main>
     </div>

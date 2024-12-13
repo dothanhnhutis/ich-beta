@@ -14,7 +14,9 @@ import {
   signOut,
   updateEmailByOTP,
   updateProfile,
+  updateUserById,
 } from "@/controllers/user";
+import { checkPolicy } from "@/middlewares/checkpolicy";
 import {
   rateLimitChangeEmail,
   rateLimitEmail,
@@ -31,6 +33,7 @@ import {
   updateUserProfileSchema,
   updateEmailSchema,
   replaceEmailSchema,
+  updateUserByIdSchema,
 } from "@/schemas/user";
 import express, { type Router } from "express";
 
@@ -77,6 +80,14 @@ function userRouter(): Router {
     authMiddleware(),
     validateResource(updateUserProfileSchema),
     updateProfile
+  );
+
+  router.put(
+    "/users/:userId",
+    authMiddleware(),
+    validateResource(updateUserByIdSchema),
+    checkPolicy("create", "users"),
+    updateUserById
   );
 
   router.patch(

@@ -32,7 +32,6 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import TipTap from "./tiptap/editor";
 
 const SortUrl = ({ data }: { data: { url: string; id: number } }) => {
   const { attributes, listeners, setNodeRef, transform, transition } =
@@ -110,7 +109,6 @@ const CreateTaskModal = ({
         <div className="grid grid-cols-2 gap-4 py-4">
           <div className="flex flex-col gap-2 col-span-2">
             <Label htmlFor="name">Tiêu đề</Label>
-            <TipTap />
           </div>
         </div>
         <DialogFooter className="gap-2">

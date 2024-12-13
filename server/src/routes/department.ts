@@ -21,6 +21,7 @@ function departmentRouter(): Router {
     checkPolicy("read", "departments"),
     getDepartments
   );
+
   return router;
 }
 

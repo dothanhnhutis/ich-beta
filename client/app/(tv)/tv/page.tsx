@@ -10,7 +10,7 @@ import { useSidebar } from "@/components/ui/sidebar";
 import Clock from "./clock";
 import Task, { TaskProps } from "./task";
 import TaskFilter from "./task-filter";
-import { useplan } from "@/components/providers/plan-provider";
+import { useDepartment } from "@/components/providers/plan-provider";
 import Plan from "./plan";
 import TaskProvider from "@/components/providers/task-provider";
 
@@ -148,7 +148,7 @@ import TaskProvider from "@/components/providers/task-provider";
 // };
 
 const TaskPage = () => {
-  const { selected } = useplan();
+  const { selected } = useDepartment();
 
   return (
     <div

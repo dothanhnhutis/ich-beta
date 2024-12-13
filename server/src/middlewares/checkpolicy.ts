@@ -124,7 +124,6 @@ export const checkPolicy =
       resource
     );
 
-    console.log(policy);
     if (!policy) throw new PermissionError();
 
     req.condition = policy.condition ? (policy.condition as Condition) : null;

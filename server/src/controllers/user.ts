@@ -1,5 +1,5 @@
 import env from "@/configs/env";
-import { BadRequestError } from "@/error-handler";
+import { BadRequestError, PermissionError } from "@/error-handler";
 import {
   readSessionCacheByKey,
   readSessionCacheOfUser,
@@ -22,9 +22,15 @@ import {
   SetupMFAReq,
   UpdateEmailReq,
   UpdateProfileReq,
+  UpdateUserByIdReq,
 } from "@/schemas/user";
 import { readMFA, removeMFA, writeMFA } from "@/services/mfa";
-import { editUserById, readUserByEmail } from "@/services/user";
+import {
+  editUserById,
+  readUserByEmail,
+  readUserById,
+  updateUserPoliciesByIdService,
+} from "@/services/user";
 import { validateMFA } from "@/utils/mfa";
 import { generateQRCode } from "@/utils/qrcode";
 import { Request, Response, RequestHandler } from "express";
@@ -38,6 +44,8 @@ import {
   writeChangeEmailSessionCache,
   writeUserTokenCache,
 } from "@/redis/user.cache";
+import { evaluateCondition } from "@/middlewares/checkpolicy";
+import { readPoliciesInRangeService } from "@/services/policies";
 
 export async function currentUser(req: Request, res: Response) {
   const { password, ...noPass } = req.user!;
@@ -377,5 +385,37 @@ export async function deleteSessionById(
   await removeSessionBySessionData(session);
   res.status(StatusCodes.OK).json({
     message: "Xoá phiên thành công",
+  });
+}
+
+// ------------------ admin ------------------
+
+export async function updateUserById(
+  req: Request<UpdateUserByIdReq["params"], {}, UpdateUserByIdReq["body"]>,
+  res: Response
+) {
+  const user = await readUserById(req.params.userId);
+  const condition = req.condition;
+  if (condition != null && !evaluateCondition(req.user!, condition, user))
+    throw new PermissionError();
+
+  if (!user) throw new BadRequestError("userId không tồn tại");
+
+  const { policyIds, ...data } = req.body;
+  await editUserById(req.params.userId, data);
+
+  if (policyIds) {
+    let policys = [];
+    if (policyIds.length > 0)
+      policys = await readPoliciesInRangeService(policyIds);
+
+    if (policys.length != policyIds.length)
+      throw new BadRequestError("policyIds[?] không tồn tại.");
+
+    await updateUserPoliciesByIdService(req.params.userId, policyIds);
+  }
+
+  res.status(StatusCodes.OK).json({
+    message: "Cập nhật user thành công",
   });
 }

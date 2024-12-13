@@ -51,6 +51,14 @@ export async function readPoliciesService() {
   return await prisma.policies.findMany();
 }
 
+export async function readPoliciesInRangeService(PolicyIds: string[]) {
+  return await prisma.policies.findMany({
+    where: {
+      id: { in: PolicyIds },
+    },
+  });
+}
+
 export async function updatePolicyByIdService(
   policyId: string,
   input: UpdatePolicyByIdReq["body"]

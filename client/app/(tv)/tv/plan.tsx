@@ -24,7 +24,7 @@ import CreateTaskModal from "./createTaskModal";
 import { EditorContent, useEditor } from "@tiptap/react";
 import { extensions } from "./tiptap/page";
 import { format } from "date-fns";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
 const DisplayContainer = ({
   content,
@@ -145,6 +145,7 @@ const PlanContainer = (props: Department) => {
             <p>error</p>
           )}
         </main>
+        <ScrollBar orientation="vertical" className="hover:hidden" />
       </ScrollArea>
     </div>
   );

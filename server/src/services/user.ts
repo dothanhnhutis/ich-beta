@@ -1,5 +1,6 @@
 import {
   readUserCacheByEmail,
+  readUserCacheById,
   readUserTokenCache,
   writeUserCache,
 } from "@/redis/user.cache";
@@ -41,7 +42,11 @@ export async function readUserByEmail(email: string, cache?: boolean) {
   return user;
 }
 
-export async function readUserById(id: string) {
+export async function readUserById(id: string, cache?: boolean) {
+  if (cache ?? true) {
+    const userCache = await readUserCacheById(id);
+    if (userCache) return userCache;
+  }
   const user = await prisma.users.findUnique({
     where: {
       id,
@@ -49,6 +54,9 @@ export async function readUserById(id: string) {
     select: userSelectDefault,
   });
   if (!user) return;
+  if (cache ?? true) {
+    await writeUserCache(user);
+  }
   return user;
 }
 

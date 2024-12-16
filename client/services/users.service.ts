@@ -31,7 +31,7 @@ export async function signOut(options?: Omit<RequestInit, "body">) {
 
 export async function reSendVerifyEmail() {
   try {
-    await userInstance.post("/confirm-email/send");
+    await userInstance.get("/verify-email");
   } catch (error) {
     console.log("reSendVerifyEmail method error:", error);
   }

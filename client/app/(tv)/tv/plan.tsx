@@ -64,11 +64,10 @@ const PlanContainer = (props: Department) => {
   const queryClient = useQueryClient();
 
   const { socket, connected, socketJoinPlan } = useTask();
-  const audio = new Audio("/mp3/bell.mp3");
 
   function onCreateTask() {
     console.log("onCreateTask");
-    audio.play();
+    // audio.play();
     // queryClient.invalidateQueries({ queryKey: ["displays", props.id] });
   }
 
@@ -76,26 +75,29 @@ const PlanContainer = (props: Department) => {
     socketJoinPlan(props.id);
   }, [socketJoinPlan, props.id]);
 
-  React.useEffect(() => {
-    if (socket) {
-      socket.on("createTask", onCreateTask);
-      socket.on("emptyTask", onCreateTask);
-    }
+  // React.useEffect(() => {
+  //   if (socket) {
+  //     socket.on("createTask", onCreateTask);
+  //     socket.on("emptyTask", onCreateTask);
+  //   }
 
-    return () => {
-      if (socket) {
-        socket.off("createTask", onCreateTask);
-        socket.off("emptyTask", onCreateTask);
-      }
-    };
-  }, [socket]);
+  //   return () => {
+  //     if (socket) {
+  //       socket.off("createTask", onCreateTask);
+  //       socket.off("emptyTask", onCreateTask);
+  //     }
+  //   };
+  // }, [socket]);
 
   const planQuery = useQuery({
     queryKey: ["displays", props.id],
     queryFn: async () => {
+      // console.log(audio);
+      // audio.play();
       return await getDisplaysOfDepartment(props.id);
     },
   });
+  const audio = new Audio("/mp3/bell.mp3");
 
   return (
     <div className="flex flex-col relative h-screen overflow-hidden ">

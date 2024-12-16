@@ -112,7 +112,7 @@ function userRouter(): Router {
   );
 
   router.patch(
-    "/users/email/replace",
+    "/users/replace-email",
     authMiddleware({ emailVerified: false }),
     validateResource(replaceEmailSchema),
     replaceEmail

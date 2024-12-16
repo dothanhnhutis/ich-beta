@@ -16,6 +16,7 @@ const deserializeUser: Middleware = async (req, res, next) => {
   req.user =
     (await readUserCacheById(req.sessionData.userId)) ||
     (await readUserById(req.sessionData.userId));
+
   next();
 };
 export default deserializeUser;

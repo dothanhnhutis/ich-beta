@@ -154,3 +154,11 @@ export async function removeChangeEmailSessionCache(sessionId: string) {
     console.log(`removeChangeEmailSessionCache() method error: `, error);
   }
 }
+
+export async function removeEmailCache(email: string) {
+  try {
+    await redisClient.del(`users:email:${email}`);
+  } catch (error: unknown) {
+    console.log(`removeEmailCache() method error: `, error);
+  }
+}

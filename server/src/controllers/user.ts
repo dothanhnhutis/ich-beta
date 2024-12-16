@@ -41,6 +41,7 @@ import { sendEmailProducer } from "@/rabbitmq/mail";
 import {
   readChangeEmailSessionCache,
   removeChangeEmailSessionCache,
+  removeEmailCache,
   writeChangeEmailSessionCache,
   writeUserTokenCache,
 } from "@/redis/user.cache";
@@ -191,6 +192,8 @@ export async function changeEmail(
   const { email: newEmail } = req.body;
   const { id, email } = req.user!;
 
+  console.log(req.user!);
+
   if (newEmail == email)
     throw new BadRequestError("Email mới không thể giống với email hiện tại");
 
@@ -271,6 +274,7 @@ export async function replaceEmail(
   );
 
   await Promise.all([
+    removeEmailCache(email),
     editUserById(id, {
       email: newEmail,
       emailVerificationToken: session,

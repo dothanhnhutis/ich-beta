@@ -28,6 +28,7 @@ type SignInFormProps = {
 export const SignInForm = ({ email }: SignInFormProps) => {
   const router = useRouter();
 
+  const [signInPending, signMutation] = React.useTransition();
   const [signInformData, setSignInFormData] = React.useState<SignIn>({
     email: email || "",
     password: "",
@@ -39,28 +40,28 @@ export const SignInForm = ({ email }: SignInFormProps) => {
     sessionId: "",
   });
 
-  const signinMutation = useMutation({
-    mutationFn: async (input: SignIn) => {
-      return await signIn(input);
-    },
-    onSuccess({ session }) {
-      if (session) {
-        setSignInMFAFormData((prev) => ({
-          ...prev,
-          sessionId: session.sessionId,
-        }));
-      } else {
-        router.push(DEFAULT_LOGIN_REDIRECT);
-        router.refresh();
-      }
-    },
-    onSettled() {
-      setSignInFormData({
-        email: "",
-        password: "",
-      });
-    },
-  });
+  // const signinMutation = useMutation({
+  //   mutationFn: async (input: SignIn) => {
+  //     return await signIn(input);
+  //   },
+  //   onSuccess({ session }) {
+  //     if (session) {
+  //       setSignInMFAFormData((prev) => ({
+  //         ...prev,
+  //         sessionId: session.sessionId,
+  //       }));
+  //     } else {
+  //       router.push(DEFAULT_LOGIN_REDIRECT);
+  //       router.refresh();
+  //     }
+  //   },
+  //   onSettled() {
+  //     setSignInFormData({
+  //       email: "",
+  //       password: "",
+  //     });
+  //   },
+  // });
 
   const signinMFAMutation = useMutation({
     mutationFn: async (input: SignInMFA) => {
@@ -91,7 +92,31 @@ export const SignInForm = ({ email }: SignInFormProps) => {
     e.preventDefault();
     const parse = signInSchema.safeParse(signInformData);
     if (!parse.success) return;
-    signinMutation.mutate(signInformData);
+    // signinMutation.mutate(signInformData);
+
+    signMutation(async () => {
+      setSignInFormData({
+        email: "",
+        password: "",
+      });
+
+      try {
+        const { session, message } = await signIn(parse.data);
+
+        if (session) {
+          setSignInMFAFormData((prev) => ({
+            ...prev,
+            sessionId: session.sessionId,
+          }));
+          toast.success(message);
+        } else {
+          router.push(DEFAULT_LOGIN_REDIRECT);
+          router.refresh();
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    });
   };
 
   const handleCancel = () => {

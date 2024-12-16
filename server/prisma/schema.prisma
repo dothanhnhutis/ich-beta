@@ -81,7 +81,7 @@ model Factorys {
 model UsersPolicies {
   userId   String
   policyId String
-  user     Users    @relation(fields: [userId], references: [id])
+  user     Users    @relation(fields: [userId], references: [id], onDelete: Cascade)
   policy   Policies @relation(fields: [policyId], references: [id], onDelete: Cascade)
 
   @@id([userId, policyId])

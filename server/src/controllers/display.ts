@@ -10,6 +10,7 @@ import {
   getDisplaysService,
   updateDisplayService,
 } from "@/services/display";
+import { createDisplaySender } from "@/socket/display";
 import { Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 
@@ -29,7 +30,15 @@ export async function createDisplay(
       throw new BadRequestError("departmentIds[?] không tồn tại");
   }
 
-  await createDisplayService({ ...req.body, userId: req.user!.id });
+  const display = await createDisplayService({
+    ...req.body,
+    userId: req.user!.id,
+  });
+
+  for (const id of req.body.departmentIds) {
+    createDisplaySender(id, display);
+  }
+
   return res.status(StatusCodes.CREATED).json({
     message: "create displays success",
   });

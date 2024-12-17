@@ -2,7 +2,7 @@ import http from "http";
 import app from "./app";
 import SocketServer from "./socket/init";
 import { Server } from "socket.io";
-import { taskListener } from "./socket/task";
+import { departmentListener } from "./socket/display";
 import { initRedis } from "./redis/connection";
 import { Amqp } from "./rabbitmq/connect";
 import env from "./configs/env";
@@ -42,7 +42,7 @@ const startServer = async () => {
     const socketIO: Server = new SocketServer(httpServer, {
       path: "/api/v1/socket.io",
     });
-    taskListener(socketIO);
+    departmentListener(socketIO);
 
     await startHttpServer(httpServer);
   } catch (error) {

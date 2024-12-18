@@ -10,7 +10,10 @@ import {
   getDisplaysService,
   updateDisplayService,
 } from "@/services/display";
-import { createDisplaySender } from "@/socket/display";
+import {
+  createDisplaySocketSender,
+  updateDisplaySocketSender,
+} from "@/socket/display";
 import { Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 
@@ -36,7 +39,7 @@ export async function createDisplay(
   });
 
   for (const id of req.body.departmentIds) {
-    createDisplaySender(id, display);
+    createDisplaySocketSender(id, display);
   }
 
   return res.status(StatusCodes.CREATED).json({
@@ -61,7 +64,7 @@ export async function updateDisplayById(
 
   if (!display) throw new BadRequestError("displayId không tồn tại");
 
-  await updateDisplayService(req.params.id, {
+  const newDisplay = await updateDisplayService(req.params.id, {
     ...displaydata,
   });
 
@@ -72,9 +75,10 @@ export async function updateDisplayById(
     if (departments.length != departmentIds.length)
       throw new BadRequestError("DepartmentId[?] không tồn tại.");
     await createOrDeleteDisplaysService(display.id, departmentIds);
+    updateDisplaySocketSender(departmentIds, newDisplay);
   }
 
-  return res.status(StatusCodes.CREATED).json({
+  return res.status(StatusCodes.OK).json({
     message: "Cập nhật displays thành công",
   });
 }

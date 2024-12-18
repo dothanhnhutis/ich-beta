@@ -1,9 +1,9 @@
 import { Server, Socket } from "socket.io";
 import SocketServer from "./init";
 import { CreateTaskReq } from "@/schemas/task";
-import { createDisplayService } from "@/services/display";
+import { createDisplayService, updateDisplayService } from "@/services/display";
 
-export const departmentListener = (io: Server) => {
+export const departmentSocketListener = (io: Server) => {
   const departmentNamespace = io.of("/department");
   departmentNamespace.on("connection", (socket) => {
     console.log("A client connected:", socket.id);
@@ -30,7 +30,7 @@ export const departmentListener = (io: Server) => {
   });
 };
 
-export const createDisplaySender = (
+export const createDisplaySocketSender = (
   departmentId: string,
   data: Awaited<ReturnType<typeof createDisplayService>>
 ) => {
@@ -39,7 +39,12 @@ export const createDisplaySender = (
   factoryNamespace.to(departmentId).emit("createDisplay", data);
 };
 
-// export const emptyTask = (planId: string) => {
-//   const factoryNamespace = SocketServer.getInstance().of("/department");
-//   factoryNamespace.to(planId).emit("emptyTask", []);
-// };
+export const updateDisplaySocketSender = (
+  departmentIds: string[],
+  data: Awaited<ReturnType<typeof updateDisplayService>>
+) => {
+  const factoryNamespace = SocketServer.getInstance().of("/department");
+  for (const id of departmentIds) {
+    factoryNamespace.to(id).emit("updateDisplay", data);
+  }
+};

@@ -38,7 +38,7 @@ export async function getDisplaysOfDepartmentService(departmentId: string) {
         priority: "desc",
       },
       {
-        createdAt: "desc",
+        updatedAt: "desc",
       },
     ],
   });

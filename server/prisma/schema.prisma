@@ -137,6 +137,15 @@ model Displays {
   @@index([enable, userId])
 }
 
+model Product {
+  id               String   @id @default(uuid())
+  name             String
+  image            String
+  amountOfCargoBox Int
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
 // model Plans {
 //   id        String   @id @default(uuid())
 //   name      String

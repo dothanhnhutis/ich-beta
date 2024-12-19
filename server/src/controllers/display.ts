@@ -38,8 +38,10 @@ export async function createDisplay(
     userId: req.user!.id,
   });
 
-  for (const id of req.body.departmentIds) {
-    createDisplaySocketSender(id, display);
+  if (req.body.enable) {
+    for (const id of req.body.departmentIds) {
+      createDisplaySocketSender(id, display);
+    }
   }
 
   return res.status(StatusCodes.CREATED).json({

@@ -1,13 +1,17 @@
 import { BadRequestError, PermissionError } from "@/error-handler";
 import { evaluateCondition } from "@/middlewares/checkpolicy";
-import { CreateDisplayReq, UpdateDisplayByIdReq } from "@/schemas/display";
+import {
+  CreateDisplayReq,
+  queryDisplaysSchema,
+  UpdateDisplayByIdReq,
+} from "@/schemas/display";
 import { getDepartmentsInListService } from "@/services/department";
 import {
   createDisplayService,
   createOrDeleteDisplaysService,
   deleteDisplayByIdService,
   getDisplayByIdService,
-  getDisplaysService,
+  queryDisplaysService,
   updateDisplayService,
 } from "@/services/display";
 import {
@@ -15,8 +19,10 @@ import {
   deleteDisplaySocketSender,
   updateDisplaySocketSender,
 } from "@/socket/display";
+import { create } from "domain";
 import { Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
+import { z } from "zod";
 
 export async function createDisplay(
   req: Request<{}, {}, CreateDisplayReq["body"]>,
@@ -106,9 +112,9 @@ export async function getDisplays(req: Request, res: Response) {
   const condition = req.condition;
   if (condition != null && !evaluateCondition(req.user!, condition))
     throw new PermissionError();
+  const { success, data } = queryDisplaysSchema.safeParse(req.query);
 
-  const displays = await getDisplaysService();
-
+  const displays = await queryDisplaysService(success ? data : {});
   return res.status(StatusCodes.OK).json(displays);
 }
 

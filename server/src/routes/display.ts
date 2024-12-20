@@ -36,6 +36,8 @@ function displayRouter(): Router {
     "/displays",
     authMiddleware(),
     checkPolicy("read", "displays"),
+    // validateResource(searchDisplaySchema),
+
     getDisplays
   );
 

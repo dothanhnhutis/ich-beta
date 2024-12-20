@@ -1,5 +1,5 @@
-import { Department } from "@/services/department";
 import * as z from "zod";
+import { Department } from "./department";
 
 export const createDisplaySchema = z.object({
   body: z
@@ -83,7 +83,7 @@ export type Display = {
   enable: boolean;
   priority: number;
   userId: string;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: Date;
+  updatedAt: Date;
   departments: Department[];
 };

@@ -65,10 +65,6 @@ export async function updateDisplayById(
 
   if (!display) throw new BadRequestError("displayId không tồn tại");
 
-  const newDisplay = await updateDisplayService(req.params.id, {
-    ...displaydata,
-  });
-
   if (departmentIds) {
     let departments = [];
     if (departmentIds.length > 0)
@@ -77,34 +73,15 @@ export async function updateDisplayById(
       throw new BadRequestError("DepartmentId[?] không tồn tại.");
     await createOrDeleteDisplaysService(display.id, departmentIds);
   }
-
-  const oldDepartmentIds = display.departments.map((d) => d.id);
-  const newDepartmentIds = departmentIds || [];
-
+  const newDisplay = await updateDisplayService(req.params.id, {
+    ...displaydata,
+  });
+  console.log(newDisplay);
   const senToDepartments = display.departments
     .map((d) => d.id)
     .concat(departmentIds || [])
     .filter((value, index, array) => array.indexOf(value) === index);
-
-  updateDisplaySocketSender(
-    senToDepartments.filter(
-      (id) => oldDepartmentIds.includes(id) && newDepartmentIds.includes(id)
-    ),
-    newDisplay
-  );
-  createDisplaySocketSender(
-    senToDepartments.filter(
-      (id) => !oldDepartmentIds.includes(id) && newDepartmentIds.includes(id)
-    ),
-    newDisplay
-  );
-
-  deleteDisplaySocketSender(
-    senToDepartments.filter(
-      (id) => oldDepartmentIds.includes(id) && !newDepartmentIds.includes(id)
-    ),
-    newDisplay
-  );
+  updateDisplaySocketSender(senToDepartments, newDisplay);
 
   return res.status(StatusCodes.OK).json({
     message: "Cập nhật displays thành công",

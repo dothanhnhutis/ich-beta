@@ -1,5 +1,5 @@
-import { CreateDisplayReq, UpdateDisplayByIdReq } from "@/schemas/display";
 import prisma from "./db";
+import { CreateDisplayReq, UpdateDisplayByIdReq } from "@/schemas/display";
 
 export async function createDisplayService(
   input: CreateDisplayReq["body"] & { userId: string }

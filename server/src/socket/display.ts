@@ -2,6 +2,7 @@ import { Server, Socket } from "socket.io";
 import SocketServer from "./init";
 import { CreateTaskReq } from "@/schemas/task";
 import { createDisplayService, updateDisplayService } from "@/services/display";
+import { Display } from "@/schemas/display";
 
 export const departmentSocketListener = (io: Server) => {
   const departmentNamespace = io.of("/department");
@@ -31,20 +32,31 @@ export const departmentSocketListener = (io: Server) => {
 };
 
 export const createDisplaySocketSender = (
-  departmentId: string,
-  data: Awaited<ReturnType<typeof createDisplayService>>
+  departmentIds: string[],
+  data: Display
 ) => {
   const factoryNamespace = SocketServer.getInstance().of("/department");
-
-  factoryNamespace.to(departmentId).emit("createDisplay", data);
+  for (const id of departmentIds) {
+    factoryNamespace.to(id).emit("createDisplay", data);
+  }
 };
 
 export const updateDisplaySocketSender = (
   departmentIds: string[],
-  data: Awaited<ReturnType<typeof updateDisplayService>>
+  data: Display
 ) => {
   const factoryNamespace = SocketServer.getInstance().of("/department");
   for (const id of departmentIds) {
     factoryNamespace.to(id).emit("updateDisplay", data);
+  }
+};
+
+export const deleteDisplaySocketSender = (
+  departmentIds: string[],
+  display: Display
+) => {
+  const factoryNamespace = SocketServer.getInstance().of("/department");
+  for (const id of departmentIds) {
+    factoryNamespace.to(id).emit("deleteDisplay", display);
   }
 };

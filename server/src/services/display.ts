@@ -15,9 +15,18 @@ export async function createDisplayService(
         },
       },
     },
+    include: {
+      departmentsDisplays: {
+        select: {
+          department: true,
+        },
+      },
+    },
   });
 
-  return display;
+  const departments = display.departmentsDisplays.map((d) => d.department);
+  const { departmentsDisplays, ...props } = display;
+  return { ...props, departments };
 }
 
 export async function updateDisplayService(
@@ -29,9 +38,18 @@ export async function updateDisplayService(
       id: displayId,
     },
     data: input,
+    include: {
+      departmentsDisplays: {
+        select: {
+          department: true,
+        },
+      },
+    },
   });
 
-  return display;
+  const departments = display.departmentsDisplays.map((d) => d.department);
+  const { departmentsDisplays, ...props } = display;
+  return { ...props, departments };
 }
 
 export async function getDisplayByIdService(displayId: string) {
@@ -39,16 +57,36 @@ export async function getDisplayByIdService(displayId: string) {
     where: {
       id: displayId,
     },
+    include: {
+      departmentsDisplays: {
+        select: {
+          department: true,
+        },
+      },
+    },
   });
 
   if (!display) return;
-
-  return display;
+  const departments = display.departmentsDisplays.map((d) => d.department);
+  const { departmentsDisplays, ...props } = display;
+  return { ...props, departments };
 }
 
 export async function getDisplaysService() {
-  const display = await prisma.displays.findMany({});
-  return display;
+  const displays = await prisma.displays.findMany({
+    include: {
+      departmentsDisplays: {
+        select: {
+          department: true,
+        },
+      },
+    },
+  });
+
+  return displays.map(({ departmentsDisplays, ...props }) => {
+    const departments = departmentsDisplays.map((d) => d.department);
+    return { ...props, departments };
+  });
 }
 
 export async function createOrDeleteDisplaysService(

@@ -12,6 +12,7 @@ import {
 } from "@/services/display";
 import {
   createDisplaySocketSender,
+  deleteDisplaySocketSender,
   updateDisplaySocketSender,
 } from "@/socket/display";
 import { Request, Response } from "express";
@@ -39,9 +40,7 @@ export async function createDisplay(
   });
 
   if (req.body.enable) {
-    for (const id of req.body.departmentIds) {
-      createDisplaySocketSender(id, display);
-    }
+    createDisplaySocketSender(req.body.departmentIds, display);
   }
 
   return res.status(StatusCodes.CREATED).json({
@@ -77,8 +76,35 @@ export async function updateDisplayById(
     if (departments.length != departmentIds.length)
       throw new BadRequestError("DepartmentId[?] không tồn tại.");
     await createOrDeleteDisplaysService(display.id, departmentIds);
-    updateDisplaySocketSender(departmentIds, newDisplay);
   }
+
+  const oldDepartmentIds = display.departments.map((d) => d.id);
+  const newDepartmentIds = departmentIds || [];
+
+  const senToDepartments = display.departments
+    .map((d) => d.id)
+    .concat(departmentIds || [])
+    .filter((value, index, array) => array.indexOf(value) === index);
+
+  updateDisplaySocketSender(
+    senToDepartments.filter(
+      (id) => oldDepartmentIds.includes(id) && newDepartmentIds.includes(id)
+    ),
+    newDisplay
+  );
+  createDisplaySocketSender(
+    senToDepartments.filter(
+      (id) => !oldDepartmentIds.includes(id) && newDepartmentIds.includes(id)
+    ),
+    newDisplay
+  );
+
+  deleteDisplaySocketSender(
+    senToDepartments.filter(
+      (id) => oldDepartmentIds.includes(id) && !newDepartmentIds.includes(id)
+    ),
+    newDisplay
+  );
 
   return res.status(StatusCodes.OK).json({
     message: "Cập nhật displays thành công",
@@ -96,7 +122,7 @@ export async function getDisplayById(
 
   if (!display) throw new BadRequestError("displayId không tồn tại");
 
-  return res.status(StatusCodes.CREATED).json(display);
+  return res.status(StatusCodes.OK).json(display);
 }
 
 export async function getDisplays(req: Request, res: Response) {
@@ -106,7 +132,7 @@ export async function getDisplays(req: Request, res: Response) {
 
   const displays = await getDisplaysService();
 
-  return res.status(StatusCodes.CREATED).json(displays);
+  return res.status(StatusCodes.OK).json(displays);
 }
 
 export async function deleteDisplayById(
@@ -122,5 +148,5 @@ export async function deleteDisplayById(
 
   await deleteDisplayByIdService(req.params.id);
 
-  return res.status(StatusCodes.CREATED).json(display);
+  return res.status(StatusCodes.OK).json(display);
 }

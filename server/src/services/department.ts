@@ -45,3 +45,10 @@ export async function getDisplaysOfDepartmentService(departmentId: string) {
 
   return displays;
 }
+export type Department = {
+  id: string;
+  name: string;
+  factoryId: string;
+  createdAt: string;
+  updatedAt: string;
+};

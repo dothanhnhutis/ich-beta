@@ -1,3 +1,4 @@
+import { Department } from "@/services/department";
 import * as z from "zod";
 
 export const createDisplaySchema = z.object({
@@ -76,3 +77,13 @@ export const updateDisplayByIdSchema = z.object({
 
 export type CreateDisplayReq = z.infer<typeof createDisplaySchema>;
 export type UpdateDisplayByIdReq = z.infer<typeof updateDisplayByIdSchema>;
+export type Display = {
+  id: string;
+  content: string;
+  enable: boolean;
+  priority: number;
+  userId: string;
+  createdAt: string;
+  updatedAt: string;
+  departments: Department[];
+};

@@ -1,10 +1,6 @@
 import { Prisma } from "@prisma/client";
 import prisma from "./db";
-import {
-  CreateDisplayReq,
-  QueryDisplay,
-  UpdateDisplayByIdReq,
-} from "@/schemas/display";
+import { CreateDisplayReq, UpdateDisplayByIdReq } from "@/schemas/display";
 import { number } from "zod";
 
 export async function createDisplayService(
@@ -132,33 +128,25 @@ export async function deleteDisplayByIdService(displayId: string) {
   return display;
 }
 
-// type QueryDisplay = {
-//   enable?: boolean;
-//   priority?: [number, number] | number;
-//   createdAt?: [string, string] | string;
-//   orderBy?: OrderByDisplay[];
-//   take?: number;
-//   page?: number;
-// };
-
-// type OrderByDisplay =
-//   | {
-//       priority: "asc" | "desc";
-//     }
-//   | { enable: "asc" | "desc" }
-//   | { createdAt: "asc" | "desc" }
-//   | { updatedAt: "asc" | "desc" };
+export type QueryDisplay = {
+  enable?: boolean;
+  priority?: [number, number] | number;
+  createdAt?: [string, string];
+  orderBy?: {
+    column: "priority" | "enable" | "createdAt" | "updatedAt";
+    order: "asc" | "desc";
+  }[];
+  take?: number;
+  page?: number;
+};
 
 export async function queryDisplaysService({
   priority,
   createdAt,
-  orderBy,
-  take = 10,
-  page = 1,
   ...props
 }: QueryDisplay) {
   let where: Prisma.DisplaysWhereInput = {
-    ...props,
+    enable: props.enable,
   };
 
   if (priority) {
@@ -175,21 +163,25 @@ export async function queryDisplaysService({
   }
 
   if (createdAt) {
-    if (typeof createdAt == "string") {
-      where.createdAt = createdAt;
-    } else {
-      if (createdAt.length == 2 && createdAt[0] <= createdAt[1]) {
-        where.createdAt = {
-          gte: createdAt[0],
-          lte: createdAt[1],
-        };
-      }
+    if (
+      createdAt.length == 2 &&
+      new Date(createdAt[0]).getTime() <= new Date(createdAt[1]).getTime()
+    ) {
+      where.createdAt = {
+        gte: createdAt[0],
+        lte: createdAt[1],
+      };
     }
   }
 
+  // page
+  const page: number = props.page && props.page > 0 ? props.page : 1;
+  const take: number = props.take && props.take > 0 ? props.take : 10;
   const skip = (page - 1) * take;
-
   const count = await prisma.displays.count({ where });
+
+  let orderBy: Prisma.DisplaysOrderByWithAggregationInput[] =
+    props.orderBy?.map((o) => ({ [o.column]: o.order })) || [];
 
   const displays = await prisma.displays.findMany({
     where,
@@ -219,9 +211,11 @@ export async function queryDisplaysService({
       const departments = departmentsDisplays.map((d) => d.department);
       return { ...props, departments };
     }),
-    count,
-    page,
-    hasNext,
-    totalPages,
+    pagination: {
+      count,
+      page,
+      hasNext,
+      totalPages,
+    },
   };
 }

@@ -11,6 +11,7 @@ import {
   createOrDeleteDisplaysService,
   deleteDisplayByIdService,
   getDisplayByIdService,
+  QueryDisplay,
   queryDisplaysService,
   updateDisplayService,
 } from "@/services/display";
@@ -114,7 +115,49 @@ export async function getDisplays(req: Request, res: Response) {
     throw new PermissionError();
   const { success, data } = queryDisplaysSchema.safeParse(req.query);
 
-  const displays = await queryDisplaysService(success ? data : {});
+  let query: QueryDisplay = {};
+  if (data) {
+    const {
+      priority,
+      enable,
+      createdAt,
+      maxPriority,
+      minPriority,
+      createdAtFrom,
+      createdAtTo,
+      orderBy,
+      ...props
+    } = data;
+
+    query = {
+      ...props,
+    };
+
+    if (priority) {
+      query.priority = priority;
+    } else if (minPriority && maxPriority && maxPriority >= minPriority) {
+      query.priority = [minPriority, maxPriority];
+    }
+
+    if (enable != undefined) {
+      query.enable = enable;
+    }
+
+    if (createdAt) {
+      query.createdAt = createdAt;
+    } else if (
+      createdAtFrom &&
+      createdAtTo &&
+      new Date(createdAtTo).getTime() >= new Date(createdAtFrom).getTime()
+    ) {
+      query.createdAt = [createdAtFrom, createdAtTo];
+    }
+
+    if (orderBy) {
+      query.orderBy = orderBy as QueryDisplay["orderBy"];
+    }
+  }
+  const displays = await queryDisplaysService(query);
   return res.status(StatusCodes.OK).json(displays);
 }
 

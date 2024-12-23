@@ -1,5 +1,6 @@
 import * as z from "zod";
 import { Department } from "./department";
+import { validDataSchema } from "./user";
 
 export const createDisplaySchema = z.object({
   body: z
@@ -82,7 +83,7 @@ export const queryDisplaysSchema = z
       .optional()
       .transform((v) => {
         if (v === undefined) return;
-        const regex = /true|false|0|1/;
+        const regex = /^(true|false|0|1)$/;
         const data = Array.isArray(v) ? v[v.length - 1] : v;
         if (!regex.test(data)) return;
         return data === "true" || data == "1" ? true : false;
@@ -91,32 +92,65 @@ export const queryDisplaysSchema = z
       .union([z.string(), z.array(z.string())])
       .optional()
       .transform((v) => {
-        if (
-          Array.isArray(v) &&
-          v.length == 2 &&
-          /\d+/.test(v[0]) &&
-          /\d+/.test(v[1]) &&
-          parseInt(v[0]) >= 0 &&
-          parseInt(v[1]) >= parseInt(v[0])
-        )
-          return [parseInt(v[0]), parseInt(v[1])];
-        if (typeof v === "string" && /\d+/.test(v) && parseInt(v) >= 0)
-          return parseInt(v);
-        return undefined;
+        if (v === undefined) return;
+        const data = Array.isArray(v) ? v[v.length - 1] : v;
+        if (!/^d+$/.test(data)) return;
+        return parseInt(data);
       }),
+    minPriority: z
+      .union([z.string(), z.array(z.string())])
+      .optional()
+      .transform((v) => {
+        if (v === undefined) return;
+        const data = Array.isArray(v) ? v[v.length - 1] : v;
+        if (!/^d+$/.test(data)) return;
+        return parseInt(data);
+      }),
+    maxPriority: z
+      .union([z.string(), z.array(z.string())])
+      .optional()
+      .transform((v) => {
+        if (v === undefined) return;
+        const data = Array.isArray(v) ? v[v.length - 1] : v;
+        if (!/^d+$/.test(data)) return;
+        return parseInt(data);
+      }),
+
     createdAt: z
       .union([z.string(), z.array(z.string())])
       .optional()
       .transform((v) => {
-        if (!Array.isArray(v)) return;
-        const dateSchema = z.string().datetime();
-        if (
-          v.length == 2 &&
-          dateSchema.safeParse(v[0]).success &&
-          dateSchema.safeParse(v[1]).success &&
-          new Date(v[0]).getTime() <= new Date(v[1]).getTime()
-        )
-          return [v[0], v[1]];
+        if (v === undefined) return;
+        const data = Array.isArray(v) ? v[v.length - 1] : v;
+        if (!validDataSchema.safeParse(data).success) return;
+        const [day, month, year] = data.split("/");
+        const isoString = new Date(`${year}-${month}-${day}`).toISOString();
+        return [isoString, `${year}-${month}-${day}T23:59:59.999Z`] as [
+          string,
+          string
+        ];
+      }),
+
+    createdAtFrom: z
+      .union([z.string(), z.array(z.string())])
+      .optional()
+      .transform((v) => {
+        if (v === undefined) return;
+        const data = Array.isArray(v) ? v[v.length - 1] : v;
+        if (!validDataSchema.safeParse(data).success) return;
+        const [day, month, year] = data.split("/");
+        return `${year}-${month}-${day}T00:00:00.000Z`;
+      }),
+
+    createdAtTo: z
+      .union([z.string(), z.array(z.string())])
+      .optional()
+      .transform((v) => {
+        if (v === undefined) return;
+        const data = Array.isArray(v) ? v[v.length - 1] : v;
+        if (!validDataSchema.safeParse(data).success) return;
+        const [day, month, year] = data.split("/");
+        return `${year}-${month}-${day}T23:59:59.999Z`;
       }),
 
     orderBy: z
@@ -128,7 +162,8 @@ export const queryDisplaysSchema = z
           const data = v.split(".");
           return [
             {
-              [data[0]]: data[1],
+              column: data[0],
+              order: data[1],
             },
           ];
         }
@@ -139,7 +174,8 @@ export const queryDisplaysSchema = z
             .map((data) => {
               const dataSplit = data.split(".");
               return {
-                [dataSplit[0]]: dataSplit[1],
+                column: dataSplit[0],
+                order: dataSplit[1],
               };
             });
         }

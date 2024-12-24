@@ -148,8 +148,7 @@ export async function queryDisplaysService({
   let where: Prisma.DisplaysWhereInput = {
     enable: props.enable,
   };
-
-  if (priority) {
+  if (priority != undefined) {
     if (typeof priority == "number") {
       where.priority = priority;
     } else {
@@ -162,7 +161,7 @@ export async function queryDisplaysService({
     }
   }
 
-  if (createdAt) {
+  if (createdAt != undefined) {
     if (
       createdAt.length == 2 &&
       new Date(createdAt[0]).getTime() <= new Date(createdAt[1]).getTime()

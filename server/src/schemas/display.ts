@@ -94,7 +94,7 @@ export const queryDisplaysSchema = z
       .transform((v) => {
         if (v === undefined) return;
         const data = Array.isArray(v) ? v[v.length - 1] : v;
-        if (!/^d+$/.test(data)) return;
+        if (!/^\d+$/.test(data)) return;
         return parseInt(data);
       }),
     minPriority: z
@@ -103,7 +103,7 @@ export const queryDisplaysSchema = z
       .transform((v) => {
         if (v === undefined) return;
         const data = Array.isArray(v) ? v[v.length - 1] : v;
-        if (!/^d+$/.test(data)) return;
+        if (!/^\d+$/.test(data)) return;
         return parseInt(data);
       }),
     maxPriority: z
@@ -112,7 +112,7 @@ export const queryDisplaysSchema = z
       .transform((v) => {
         if (v === undefined) return;
         const data = Array.isArray(v) ? v[v.length - 1] : v;
-        if (!/^d+$/.test(data)) return;
+        if (!/^\d+$/.test(data)) return;
         return parseInt(data);
       }),
 

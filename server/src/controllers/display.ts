@@ -133,9 +133,13 @@ export async function getDisplays(req: Request, res: Response) {
       ...props,
     };
 
-    if (priority) {
+    if (priority != undefined) {
       query.priority = priority;
-    } else if (minPriority && maxPriority && maxPriority >= minPriority) {
+    } else if (
+      minPriority != undefined &&
+      maxPriority != undefined &&
+      maxPriority >= minPriority
+    ) {
       query.priority = [minPriority, maxPriority];
     }
 
@@ -143,20 +147,20 @@ export async function getDisplays(req: Request, res: Response) {
       query.enable = enable;
     }
 
-    if (createdAt) {
+    if (createdAt != undefined) {
       query.createdAt = createdAt;
     } else if (
-      createdAtFrom &&
-      createdAtTo &&
+      createdAtFrom != undefined &&
+      createdAtTo != undefined &&
       new Date(createdAtTo).getTime() >= new Date(createdAtFrom).getTime()
     ) {
       query.createdAt = [createdAtFrom, createdAtTo];
     }
-
     if (orderBy) {
       query.orderBy = orderBy as QueryDisplay["orderBy"];
     }
   }
+  console.log(query);
   const displays = await queryDisplaysService(query);
   return res.status(StatusCodes.OK).json(displays);
 }

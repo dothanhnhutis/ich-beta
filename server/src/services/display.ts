@@ -180,7 +180,6 @@ export async function queryDisplaysService({
   const take = props.limit || 10;
   const page = (!props.page || props.page <= 0 ? 1 : props.page) - 1;
   const skip = page * take;
-  console.log(page, take, skip);
 
   let orderBy: Prisma.DisplaysOrderByWithAggregationInput[] =
     props.orderBy?.map((o) => ({ [o.column]: o.order })) || [];

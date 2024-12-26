@@ -374,6 +374,10 @@ export async function getSessionOfUser(req: Request, res: Response) {
   res.status(StatusCodes.OK).json(sessions);
 }
 
+export async function currentSession(req: Request, res: Response) {
+  res.status(StatusCodes.OK).json(req.sessionData);
+}
+
 export async function deleteSessionById(
   req: Request<{ sessionId: string }>,
   res: Response

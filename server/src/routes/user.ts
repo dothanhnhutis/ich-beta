@@ -2,6 +2,7 @@ import {
   changeEmail,
   changePassword,
   createMFA,
+  currentSession,
   currentUser,
   deleteSessionById,
   disableMFA,
@@ -44,6 +45,7 @@ function userRouter(): Router {
     authMiddleware({ emailVerified: false }),
     currentUser
   );
+  router.get("/users/sessions/me", authMiddleware(), currentSession);
   router.get("/users/sessions", authMiddleware(), getSessionOfUser);
 
   router.get(

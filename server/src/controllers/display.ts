@@ -83,7 +83,6 @@ export async function updateDisplayById(
   const newDisplay = await updateDisplayService(req.params.id, {
     ...displaydata,
   });
-  console.log(newDisplay);
   const senToDepartments = display.departments
     .map((d) => d.id)
     .concat(departmentIds || [])
@@ -160,7 +159,6 @@ export async function getDisplays(req: Request, res: Response) {
       query.orderBy = orderBy as QueryDisplay["orderBy"];
     }
   }
-  console.log(query.page);
   const displays = await queryDisplaysService(query);
   return res.status(StatusCodes.OK).json(displays);
 }

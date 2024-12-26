@@ -192,8 +192,6 @@ export async function changeEmail(
   const { email: newEmail } = req.body;
   const { id, email } = req.user!;
 
-  console.log(req.user!);
-
   if (newEmail == email)
     throw new BadRequestError("Email mới không thể giống với email hiện tại");
 
@@ -385,7 +383,8 @@ export async function deleteSessionById(
   const { id } = req.user!;
   const key = `${env.SESSION_KEY_NAME}:${id}:${req.params.sessionId}`;
   const session = await readSessionCacheByKey(key);
-  if (!session) throw new BadRequestError("Phiên không tồn tại");
+  if (!session || session.userId != id)
+    throw new BadRequestError("Phiên không tồn tại");
 
   if (req.sessionData!.id == session.id)
     throw new BadRequestError("Không thể xoá phiên hiện tại");

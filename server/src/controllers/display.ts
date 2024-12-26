@@ -160,7 +160,7 @@ export async function getDisplays(req: Request, res: Response) {
       query.orderBy = orderBy as QueryDisplay["orderBy"];
     }
   }
-  console.log(query);
+  console.log(query.page);
   const displays = await queryDisplaysService(query);
   return res.status(StatusCodes.OK).json(displays);
 }

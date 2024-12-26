@@ -181,7 +181,7 @@ export const queryDisplaysSchema = z
         }
       }),
 
-    take: z
+    limit: z
       .union([z.string(), z.array(z.string())])
       .optional()
       .transform((v) => {

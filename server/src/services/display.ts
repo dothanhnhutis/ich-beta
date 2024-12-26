@@ -136,18 +136,21 @@ export type QueryDisplay = {
     column: "priority" | "enable" | "createdAt" | "updatedAt";
     order: "asc" | "desc";
   }[];
-  take?: number;
+  limit?: number;
   page?: number;
 };
 
 export async function queryDisplaysService({
   priority,
   createdAt,
+  enable,
   ...props
 }: QueryDisplay) {
-  let where: Prisma.DisplaysWhereInput = {
-    enable: props.enable,
-  };
+  let where: Prisma.DisplaysWhereInput = {};
+  if (enable != undefined) {
+    where.enable = enable;
+  }
+
   if (priority != undefined) {
     if (typeof priority == "number") {
       where.priority = priority;
@@ -174,47 +177,47 @@ export async function queryDisplaysService({
   }
 
   // page
-  const page: number = props.page && props.page > 0 ? props.page : 1;
-  const take: number = props.take && props.take > 0 ? props.take : 10;
-  const skip = (page - 1) * take;
-  const count = await prisma.displays.count({ where });
+  const take = props.limit || 10;
+  const page = (!props.page || props.page <= 0 ? 1 : props.page) - 1;
+  const skip = page * take;
+  console.log(page, take, skip);
 
   let orderBy: Prisma.DisplaysOrderByWithAggregationInput[] =
     props.orderBy?.map((o) => ({ [o.column]: o.order })) || [];
 
-  const displays = await prisma.displays.findMany({
-    where,
-    orderBy,
-    take,
-    skip,
-    include: {
-      departmentsDisplays: {
-        select: {
-          department: true,
+  const [displays, total] = await prisma.$transaction([
+    prisma.displays.findMany({
+      where,
+      orderBy,
+      take,
+      skip,
+      include: {
+        departmentsDisplays: {
+          select: {
+            department: true,
+          },
+        },
+        createdBy: {
+          select: {
+            id: true,
+            email: true,
+            picture: true,
+            username: true,
+          },
         },
       },
-      createdBy: {
-        select: {
-          id: true,
-          email: true,
-          picture: true,
-          username: true,
-        },
-      },
-    },
-  });
-  const hasNext = count > page * take;
-  const totalPages = Math.ceil(count / take);
+    }),
+    prisma.displays.count({ where }),
+  ]);
   return {
     displays: displays.map(({ departmentsDisplays, ...props }) => {
       const departments = departmentsDisplays.map((d) => d.department);
       return { ...props, departments };
     }),
     pagination: {
-      count,
-      page,
-      hasNext,
-      totalPages,
+      hasNextPage: skip + take < total,
+      totalPage: Math.ceil(total / take),
+      totalItem: total,
     },
   };
 }

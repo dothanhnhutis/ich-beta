@@ -15,13 +15,10 @@ export async function getDepartmentsService() {
   return departments;
 }
 
-export async function getDepartmentByIdService(departmentId: string) {
-  const department = await prisma.departments.findUnique({
+export async function readDepartmentById(departmentId: string) {
+  return await prisma.departments.findUnique({
     where: { id: departmentId },
   });
-  if (!department) return;
-
-  return department;
 }
 
 export async function getDisplaysOfDepartmentService(departmentId: string) {

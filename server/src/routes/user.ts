@@ -17,7 +17,7 @@ import {
   updateProfile,
   updateUserById,
 } from "@/controllers/user";
-import { checkPolicy } from "@/middlewares/checkpolicy";
+import { checkPermission } from "@/middlewares/checkPermission";
 import {
   rateLimitChangeEmail,
   rateLimitEmail,
@@ -88,7 +88,7 @@ function userRouter(): Router {
     "/users/:userId",
     authMiddleware(),
     validateResource(updateUserByIdSchema),
-    checkPolicy("create", "users"),
+    checkPermission("create:users"),
     updateUserById
   );
 

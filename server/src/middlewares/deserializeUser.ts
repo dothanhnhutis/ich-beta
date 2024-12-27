@@ -6,7 +6,7 @@ import { RequestHandler as Middleware } from "express";
 declare global {
   namespace Express {
     interface Request {
-      user?: User | undefined;
+      user: User | null;
     }
   }
 }

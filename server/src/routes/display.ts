@@ -5,8 +5,7 @@ import {
   getDisplays,
   updateDisplayById,
 } from "@/controllers/display";
-import { health } from "@/controllers/health";
-import { checkPolicy } from "@/middlewares/checkpolicy";
+import { checkPermission } from "@/middlewares/checkPermission";
 import { authMiddleware } from "@/middlewares/requiredAuth";
 import validateResource from "@/middlewares/validateResource";
 import {
@@ -21,21 +20,20 @@ function displayRouter(): Router {
     "/displays",
     authMiddleware(),
     validateResource(createDisplaySchema),
-    checkPolicy("create", "displays"),
     createDisplay
   );
 
   router.get(
     "/displays/:id",
     authMiddleware(),
-    checkPolicy("read", "displays"),
+    checkPermission("read:displays"),
     getDisplayById
   );
 
   router.get(
     "/displays",
     authMiddleware(),
-    checkPolicy("read", "displays"),
+    checkPermission("read:displays"),
     // validateResource(searchDisplaySchema),
 
     getDisplays
@@ -45,14 +43,14 @@ function displayRouter(): Router {
     "/displays/:id",
     authMiddleware(),
     validateResource(updateDisplayByIdSchema),
-    checkPolicy("update", "displays"),
+    checkPermission("update:displays"),
     updateDisplayById
   );
 
   router.put(
     "/displays",
     authMiddleware(),
-    checkPolicy("delete", "displays"),
+    checkPermission("delete:displays"),
     deleteDisplayById
   );
   return router;

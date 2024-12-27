@@ -1,11 +1,27 @@
 import { Prisma } from "@prisma/client";
 import prisma from "./db";
-import { CreateDisplayReq, UpdateDisplayByIdReq } from "@/schemas/display";
-import { number } from "zod";
+import {
+  CreateDisplayReq,
+  Display,
+  DisplayAttributeFilter,
+  UpdateDisplayByIdReq,
+} from "@/schemas/display";
 
-export async function createDisplayService(
-  input: CreateDisplayReq["body"] & { userId: string }
-) {
+const displayAttributeFilter = (display: DisplayAttributeFilter): Display => {
+  const departments = display.departmentsDisplays.map(
+    ({ department }) => department
+  );
+  const { departmentsDisplays, ...props } = display;
+  return { ...props, departments };
+};
+
+export async function writeNewDisplay(input: {
+  content: string;
+  enable: boolean;
+  priority: number;
+  departmentIds: string[];
+  userId: string;
+}) {
   const { departmentIds, ...data } = input;
 
   const display = await prisma.displays.create({
@@ -34,20 +50,24 @@ export async function createDisplayService(
     },
   });
 
-  const departments = display.departmentsDisplays.map((d) => d.department);
-  const { departmentsDisplays, ...props } = display;
-  return { ...props, departments };
+  return displayAttributeFilter(display);
 }
 
-export async function updateDisplayService(
+export async function editDisplayById(
   displayId: string,
-  input: Omit<UpdateDisplayByIdReq["body"], "departmentIds">
+  input: {
+    content?: string;
+    enable?: boolean;
+    priority?: number;
+    departmentIds?: string[];
+  }
 ) {
+  const { departmentIds, ...props } = input;
   const display = await prisma.displays.update({
     where: {
       id: displayId,
     },
-    data: input,
+    data: props,
     include: {
       departmentsDisplays: {
         select: {
@@ -64,13 +84,41 @@ export async function updateDisplayService(
       },
     },
   });
+  if (departmentIds) {
+    const oldDepartmentsDisplays = await prisma.departmentsDisplays.findMany({
+      where: {
+        displayId,
+      },
+    });
+    const oldDepartments = oldDepartmentsDisplays.map(
+      ({ departmentId }) => departmentId
+    );
+    const createList = departmentIds
+      .filter((id) => !oldDepartments.includes(id))
+      .map((id) => ({
+        departmentId: id,
+        displayId,
+      }));
+    const deleteList = oldDepartments.filter(
+      (id) => !departmentIds.includes(id)
+    );
 
-  const departments = display.departmentsDisplays.map((d) => d.department);
-  const { departmentsDisplays, ...props } = display;
-  return { ...props, departments };
+    const createDepartmentsDisplays = prisma.departmentsDisplays.createMany({
+      data: createList,
+    });
+    const deleteDepartmentsDisplays = prisma.departmentsDisplays.deleteMany({
+      where: {
+        displayId,
+        departmentId: { in: deleteList },
+      },
+    });
+    await Promise.all([createDepartmentsDisplays, deleteDepartmentsDisplays]);
+  }
+
+  return displayAttributeFilter(display);
 }
 
-export async function getDisplayByIdService(displayId: string) {
+export async function readDisplayById(displayId: string) {
   const display = await prisma.displays.findUnique({
     where: {
       id: displayId,
@@ -92,39 +140,33 @@ export async function getDisplayByIdService(displayId: string) {
     },
   });
 
-  if (!display) return;
-  const departments = display.departmentsDisplays.map((d) => d.department);
-  const { departmentsDisplays, ...props } = display;
-  return { ...props, departments };
+  if (display) return displayAttributeFilter(display);
+  return display;
 }
 
-export async function createOrDeleteDisplaysService(
-  displayId: string,
-  departments: string[]
-) {
-  await prisma.departmentsDisplays.deleteMany({
-    where: {
-      displayId,
-      departmentId: { notIn: departments },
-    },
-  });
-
-  await prisma.departmentsDisplays.createMany({
-    data: departments.map((departmentId) => ({
-      departmentId,
-      displayId,
-    })),
-    skipDuplicates: true,
-  });
-}
-
-export async function deleteDisplayByIdService(displayId: string) {
+export async function removeDisplayById(displayId: string) {
   const display = await prisma.displays.delete({
     where: {
       id: displayId,
     },
+    include: {
+      departmentsDisplays: {
+        select: {
+          department: true,
+        },
+      },
+      createdBy: {
+        select: {
+          id: true,
+          email: true,
+          picture: true,
+          username: true,
+        },
+      },
+    },
   });
 
+  if (display) return displayAttributeFilter(display);
   return display;
 }
 

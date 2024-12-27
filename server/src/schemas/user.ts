@@ -300,13 +300,12 @@ export const updateUserByIdSchema = z.object({
         }, "Ngày sinh không hợp lệ."),
       phoneNumber: z.string().length(10, "Số điện thoại không hợp lệ"),
       status: z.enum(["ACTIVE", "SUSPENDED", "DISABLED"]),
-      policyIds: z.array(
-        z.string({ invalid_type_error: "policyId phải là chuỗi" }),
-        {
-          required_error: "policyIds là trường bắt buộc",
-          invalid_type_error: "policyIds phải là mãng chuỗi",
-        }
-      ),
+      roleIds: z
+        .array(z.string({ invalid_type_error: "roleIds phải là chuỗi" }), {
+          required_error: "roleIds là trường bắt buộc",
+          invalid_type_error: "roleIds phải là mãng chuỗi",
+        })
+        .nonempty("roleIds không được bỏ trống"),
     })
     .strip()
     .partial(),
@@ -328,7 +327,7 @@ export type UpdateUserByIdReq = z.infer<typeof updateUserByIdSchema>;
 type UserStatus = "ACTIVE" | "SUSPENDED" | "DISABLED";
 type UserGender = "MALE" | "FEMALE" | "OTHER" | null;
 
-export type User = {
+export type BaseUser = {
   id: string;
   email: string;
   emailVerified: boolean;
@@ -346,4 +345,35 @@ export type User = {
 export type UserToken = {
   type: "emailVerification" | "recover" | "reActivate";
   session: string;
+};
+
+export type UserAttributeFilterProps = BaseUser & {
+  emailVerificationExpires: Date | null;
+  emailVerificationToken: string | null;
+  passwordResetToken: string | null;
+  passwordResetExpires: Date | null;
+  reActiveToken: string | null;
+  reActiveExpires: Date | null;
+  usersRoles: {
+    createdAt: Date;
+    userId: string;
+    roleId: string;
+    role: {
+      id: string;
+      createdAt: Date;
+      updatedAt: Date;
+      name: string;
+      permissions: string[];
+    };
+  }[];
+};
+
+export type User = BaseUser & {
+  roles: {
+    id: string;
+    createdAt: Date;
+    updatedAt: Date;
+    name: string;
+    permissions: string[];
+  }[];
 };

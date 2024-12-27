@@ -1,5 +1,4 @@
 import { PermissionError } from "@/error-handler";
-import { readPoliciesByUserIdService } from "@/services/policies";
 import { RequestHandler as Middleware } from "express";
 type Operator =
   | "equals"
@@ -106,26 +105,26 @@ export function evaluateCondition(
   }
 }
 
-declare global {
-  namespace Express {
-    interface Request {
-      condition: Condition | null;
-    }
-  }
-}
+// declare global {
+//   namespace Express {
+//     interface Request {
+//       condition: Condition | null;
+//     }
+//   }
+// }
 
-export const checkPolicy =
-  (action: string, resource: string): Middleware =>
-  async (req, _, next) => {
-    if (!req.user) throw new PermissionError();
-    const policy = await readPoliciesByUserIdService(
-      req.user.id,
-      action,
-      resource
-    );
+// export const checkPolicy =
+//   (action: string, resource: string): Middleware =>
+//   async (req, _, next) => {
+//     if (!req.user) throw new PermissionError();
+//     const policy = await readPoliciesByUserIdService(
+//       req.user.id,
+//       action,
+//       resource
+//     );
 
-    if (!policy) throw new PermissionError();
+//     if (!policy) throw new PermissionError();
 
-    req.condition = policy.condition ? (policy.condition as Condition) : null;
-    next();
-  };
+//     req.condition = policy.condition ? (policy.condition as Condition) : null;
+//     next();
+//   };

@@ -17,10 +17,10 @@ export async function readUserCacheByEmail(email: string) {
 export async function readUserCacheById(id: string) {
   try {
     const user = await redisClient.get(`users:${id}`);
-    if (!user) return;
-    return JSON.parse(user) as User;
+    return user == null ? null : (JSON.parse(user) as User);
   } catch (error: unknown) {
     console.log(`readUserCacheById() method error: `, error);
+    return null;
   }
 }
 

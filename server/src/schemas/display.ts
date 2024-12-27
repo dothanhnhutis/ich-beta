@@ -1,6 +1,6 @@
 import * as z from "zod";
 import { Department } from "./department";
-import { validDataSchema } from "./user";
+import { User, validDataSchema } from "./user";
 
 export const createDisplaySchema = z.object({
   body: z
@@ -227,4 +227,18 @@ export type Display = {
   createdAt: Date;
   updatedAt: Date;
   departments: Department[];
+};
+
+export type DisplayAttributeFilter = {
+  id: string;
+  content: string;
+  enable: boolean;
+  priority: number;
+  userId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  departmentsDisplays: {
+    department: Department;
+  }[];
+  createdBy: Pick<User, "id" | "email" | "username" | "picture">;
 };

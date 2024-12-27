@@ -1,47 +1,44 @@
 import { BadRequestError, PermissionError } from "@/error-handler";
-import { evaluateCondition } from "@/middlewares/checkpolicy";
+import { checkPermission, hasPermission } from "@/middlewares/checkPermission";
 import {
   CreateDisplayReq,
   queryDisplaysSchema,
   UpdateDisplayByIdReq,
 } from "@/schemas/display";
-import { getDepartmentsInListService } from "@/services/department";
 import {
-  createDisplayService,
-  createOrDeleteDisplaysService,
-  deleteDisplayByIdService,
-  getDisplayByIdService,
+  getDepartmentsInListService,
+  readDepartmentById,
+} from "@/services/department";
+import {
+  removeDisplayById,
+  readDisplayById,
   QueryDisplay,
   queryDisplaysService,
-  updateDisplayService,
+  editDisplayById,
+  writeNewDisplay,
 } from "@/services/display";
 import {
   createDisplaySocketSender,
   deleteDisplaySocketSender,
   updateDisplaySocketSender,
 } from "@/socket/display";
-import { create } from "domain";
 import { Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
-import { z } from "zod";
 
 export async function createDisplay(
   req: Request<{}, {}, CreateDisplayReq["body"]>,
   res: Response
 ) {
-  const condition = req.condition;
-  if (condition != null && !evaluateCondition(req.user!, condition))
-    throw new PermissionError();
+  const isValidAccess = hasPermission(req.user, "read:displays");
+  if (!isValidAccess) throw new PermissionError();
 
-  if (req.body.departmentIds.length > 0) {
-    const departments = await getDepartmentsInListService(
-      req.body.departmentIds
-    );
-    if (departments.length != req.body.departmentIds.length)
-      throw new BadRequestError("departmentIds[?] không tồn tại");
+  for (const departmentId of req.body.departmentIds) {
+    const department = await readDepartmentById(departmentId);
+    if (department) continue;
+    throw new BadRequestError(`Mã phòng ban id=${departmentId} không tồn tại`);
   }
 
-  const display = await createDisplayService({
+  const display = await writeNewDisplay({
     ...req.body,
     userId: req.user!.id,
   });
@@ -51,7 +48,8 @@ export async function createDisplay(
   }
 
   return res.status(StatusCodes.CREATED).json({
-    message: "create displays success",
+    message: "Tạo hiển thị thành công",
+    display,
   });
 }
 
@@ -63,26 +61,24 @@ export async function updateDisplayById(
   >,
   res: Response
 ) {
-  const condition = req.condition;
-  const display = await getDisplayByIdService(req.params.id);
+  const isValidAccess = hasPermission(req.user, "update:displays");
+  if (!isValidAccess) throw new PermissionError();
 
-  const { departmentIds, ...displaydata } = req.body;
-  if (condition != null && !evaluateCondition(req.user!, condition, display))
-    throw new PermissionError();
-
+  const display = await readDisplayById(req.params.id);
   if (!display) throw new BadRequestError("displayId không tồn tại");
 
+  const { departmentIds, ...displaydata } = req.body;
+
   if (departmentIds) {
-    let departments = [];
-    if (departmentIds.length > 0)
-      departments = await getDepartmentsInListService(departmentIds);
-    if (departments.length != departmentIds.length)
-      throw new BadRequestError("DepartmentId[?] không tồn tại.");
-    await createOrDeleteDisplaysService(display.id, departmentIds);
+    for (const departmentId of departmentIds) {
+      const department = await readDepartmentById(departmentId);
+      if (department) continue;
+      throw new BadRequestError(`Phòng ban id=${departmentId} không tồn tại}`);
+    }
   }
-  const newDisplay = await updateDisplayService(req.params.id, {
-    ...displaydata,
-  });
+
+  const newDisplay = await editDisplayById(req.params.id, req.body);
+
   const senToDepartments = display.departments
     .map((d) => d.id)
     .concat(departmentIds || [])
@@ -98,20 +94,23 @@ export async function getDisplayById(
   req: Request<{ id: string }>,
   res: Response
 ) {
-  const condition = req.condition;
-  const display = await getDisplayByIdService(req.params.id);
-  if (condition != null && !evaluateCondition(req.user!, condition, display))
-    throw new PermissionError();
+  const isValidAccess = hasPermission(req.user, "read:displays");
 
-  if (!display) throw new BadRequestError("displayId không tồn tại");
+  const display = await readDisplayById(req.params.id);
+
+  if (!isValidAccess) {
+    if (!display || display.userId != req.user!.id) {
+      throw new PermissionError();
+    }
+  }
+
+  if (!display)
+    throw new BadRequestError(`Hiển thị id=${req.params.id} không tồn tại`);
 
   return res.status(StatusCodes.OK).json(display);
 }
 
 export async function getDisplays(req: Request, res: Response) {
-  const condition = req.condition;
-  if (condition != null && !evaluateCondition(req.user!, condition))
-    throw new PermissionError();
   const { success, data } = queryDisplaysSchema.safeParse(req.query);
 
   let query: QueryDisplay = {};
@@ -167,14 +166,23 @@ export async function deleteDisplayById(
   req: Request<{ id: string }>,
   res: Response
 ) {
-  const condition = req.condition;
-  const display = await getDisplayByIdService(req.params.id);
-  if (condition != null && !evaluateCondition(req.user!, condition, display))
-    throw new PermissionError();
+  const isValidAccess = hasPermission(req.user, "delete:displays");
 
-  if (!display) throw new BadRequestError("displayId không tồn tại");
+  const display = await readDisplayById(req.params.id);
 
-  await deleteDisplayByIdService(req.params.id);
+  if (!isValidAccess) {
+    if (!display || display.userId != req.user!.id) {
+      throw new PermissionError();
+    }
+  }
 
-  return res.status(StatusCodes.OK).json(display);
+  if (!display)
+    throw new BadRequestError(`Hiển thị id=${req.params.id} không tồn tại`);
+
+  const deleteDisplay = await removeDisplayById(req.params.id);
+
+  return res.status(StatusCodes.OK).json({
+    message: "Xoá hiển thị thành công",
+    display: deleteDisplay,
+  });
 }

@@ -5,23 +5,25 @@ import {
   writeUserCache,
 } from "@/redis/user.cache";
 import prisma from "./db";
-import { User, UserToken } from "@/schemas/user";
+import { User, UserAttributeFilterProps, UserToken } from "@/schemas/user";
 import { Prisma } from "@prisma/client";
 import { hashData } from "@/utils/helper";
 
-const userSelectDefault = {
-  id: true,
-  email: true,
-  emailVerified: true,
-  status: true,
-  password: true,
-  username: true,
-  gender: true,
-  picture: true,
-  phoneNumber: true,
-  birthDate: true,
-  createdAt: true,
-  updatedAt: true,
+const userAttributeFilter = (user: UserAttributeFilterProps): User => {
+  const {
+    emailVerificationExpires,
+    emailVerificationToken,
+    passwordResetExpires,
+    passwordResetToken,
+    reActiveExpires,
+    reActiveToken,
+    usersRoles,
+    ...props
+  } = user;
+  const roles = usersRoles.map(({ role }) => role);
+  const newUser = { ...props, roles };
+
+  return newUser;
 };
 
 export async function readUserByEmail(email: string, cache?: boolean) {
@@ -33,11 +35,22 @@ export async function readUserByEmail(email: string, cache?: boolean) {
     where: {
       email,
     },
-    select: userSelectDefault,
+    include: {
+      usersRoles: {
+        include: {
+          role: true,
+        },
+      },
+    },
   });
-  if (!user) return;
-  if (cache ?? true) {
-    await writeUserCache(user);
+
+  if (user) {
+    const afterUser = userAttributeFilter(user);
+
+    if (cache ?? true) {
+      await writeUserCache(afterUser);
+    }
+    return afterUser;
   }
   return user;
 }
@@ -51,17 +64,27 @@ export async function readUserById(id: string, cache?: boolean) {
     where: {
       id,
     },
-    select: userSelectDefault,
+    include: {
+      usersRoles: {
+        include: {
+          role: true,
+        },
+      },
+    },
   });
-  if (!user) return;
-  if (cache ?? true) {
-    await writeUserCache(user);
+  if (user) {
+    const afterUser = userAttributeFilter(user);
+
+    if (cache ?? true) {
+      await writeUserCache(afterUser);
+    }
+    return afterUser;
   }
   return user;
 }
 
 export async function readUserByToken(token: UserToken, cache?: boolean) {
-  let user: User | null = null;
+  let user = null;
 
   if (cache ?? true) {
     const userCache = await readUserTokenCache(token);
@@ -74,7 +97,13 @@ export async function readUserByToken(token: UserToken, cache?: boolean) {
           emailVerificationToken: token.session,
           emailVerificationExpires: { gte: new Date() },
         },
-        select: userSelectDefault,
+        include: {
+          usersRoles: {
+            include: {
+              role: true,
+            },
+          },
+        },
       });
       break;
 
@@ -84,7 +113,13 @@ export async function readUserByToken(token: UserToken, cache?: boolean) {
           passwordResetToken: token.session,
           passwordResetExpires: { gte: new Date() },
         },
-        select: userSelectDefault,
+        include: {
+          usersRoles: {
+            include: {
+              role: true,
+            },
+          },
+        },
       });
       break;
 
@@ -94,14 +129,40 @@ export async function readUserByToken(token: UserToken, cache?: boolean) {
           reActiveToken: token.session,
           reActiveExpires: { gte: new Date() },
         },
-        select: userSelectDefault,
+        include: {
+          usersRoles: {
+            include: {
+              role: true,
+            },
+          },
+        },
       });
       break;
   }
 
-  if (!user) return;
+  if (user) {
+    const afterUser = userAttributeFilter(user);
 
+    if (cache ?? true) {
+      await writeUserCache(afterUser);
+    }
+    return afterUser;
+  }
   return user;
+}
+
+export async function readUserRolesById(userId: string) {
+  const usersRoles = await prisma.usersRoles.findMany({
+    where: {
+      userId,
+    },
+    include: {
+      role: true,
+    },
+  });
+
+  if (usersRoles.length == 0) return [];
+  return usersRoles.map(({ role }) => role);
 }
 
 type WriteUserWithPassword = {
@@ -127,14 +188,21 @@ export async function writeUserWithPassword(
 
   const user = await prisma.users.create({
     data,
-    select: userSelectDefault,
+    include: {
+      usersRoles: {
+        include: {
+          role: true,
+        },
+      },
+    },
   });
 
-  if (storeCache ?? true) {
-    await writeUserCache(user);
-  }
+  const afterUser = userAttributeFilter(user);
 
-  return user;
+  if (storeCache ?? true) {
+    await writeUserCache(afterUser);
+  }
+  return afterUser;
 }
 
 type EditUser = {
@@ -153,6 +221,7 @@ type EditUser = {
   picture: string;
   birthDate: string;
   phoneNumber: string;
+  roleIds: string[];
 };
 
 export async function editUserById(
@@ -160,8 +229,9 @@ export async function editUserById(
   input: Partial<EditUser>,
   storeCache?: boolean
 ) {
+  const { roleIds, ...props } = input;
   const data: Prisma.UsersUpdateInput = {
-    ...input,
+    ...props,
   };
 
   if (input.password) {
@@ -171,31 +241,50 @@ export async function editUserById(
   const user = await prisma.users.update({
     where: { id: userId },
     data,
-    select: userSelectDefault,
-  });
-
-  if (storeCache ?? true) {
-    await writeUserCache(user);
-  }
-  return user;
-}
-
-export async function updateUserPoliciesByIdService(
-  userId: string,
-  policyIds: string[]
-) {
-  await prisma.usersPolicies.deleteMany({
-    where: {
-      userId,
-      policyId: { notIn: policyIds },
+    include: {
+      usersRoles: {
+        include: {
+          role: true,
+        },
+      },
     },
   });
 
-  await prisma.usersPolicies.createMany({
-    data: policyIds.map((policyId) => ({
-      userId,
-      policyId,
-    })),
-    skipDuplicates: true,
-  });
+  if (roleIds) {
+    const userRoles = await prisma.usersRoles.findMany({
+      where: {
+        userId,
+      },
+    });
+    const oldRoles = userRoles.map(({ roleId }) => roleId);
+    const createList = roleIds
+      .filter((id) => !oldRoles.includes(id))
+      .map((id) => ({
+        roleId: id,
+        userId,
+      }));
+    const deleteList = oldRoles.filter((id) => !roleIds.includes(id));
+    const createUsersRoles = prisma.usersRoles.createMany({
+      data: createList,
+    });
+
+    const deleteUsersRoles = prisma.usersRoles.deleteMany({
+      where: {
+        userId,
+        roleId: { in: deleteList },
+      },
+    });
+
+    await Promise.all([createUsersRoles, deleteUsersRoles]);
+  }
+
+  if (user) {
+    const afterUser = userAttributeFilter(user);
+
+    if (storeCache ?? true) {
+      await writeUserCache(afterUser);
+    }
+    return afterUser;
+  }
+  return user;
 }

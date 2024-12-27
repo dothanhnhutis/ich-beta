@@ -7,6 +7,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// User 
 enum UserStatus {
   ACTIVE
   SUSPENDED
@@ -19,7 +20,6 @@ enum Gender {
   OTHER
 }
 
-// User 
 model Users {
   id                       String           @id @default(uuid())
   email                    String           @unique
@@ -42,7 +42,7 @@ model Users {
   mfa                      MFA?
   oauthProviders           OauthProviders[]
   displays                 Displays[]
-  usersPolicies            UsersPolicies[]
+  usersRoles               UsersRoles[]
 }
 
 model OauthProviders {
@@ -67,6 +67,50 @@ model MFA {
   @@id([userId])
 }
 
+// Role
+model UsersRoles {
+  userId    String
+  roleId    String
+  user      Users    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role      Roles    @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@id([userId, roleId])
+}
+
+model Roles {
+  id          String       @id @default(uuid())
+  name        String
+  permissions String[]     @default([])
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  UsersRoles  UsersRoles[]
+}
+
+// model UsersPolicies {
+//   userId   String
+//   policyId String
+//   user     Users    @relation(fields: [userId], references: [id], onDelete: Cascade)
+//   policy   Policies @relation(fields: [policyId], references: [id], onDelete: Cascade)
+
+//   @@id([userId, policyId])
+// }
+
+// model Policies {
+//   id            String          @id @default(uuid())
+//   description   String
+//   action        String
+//   resource      String
+//   condition     Json?
+//   createdAt     DateTime        @default(now())
+//   updatedAt     DateTime        @updatedAt
+//   usersPolicies UsersPolicies[]
+
+//   @@index([action, resource])
+// }
+
+// Display TV
+
 model Factorys {
   id          String        @id @default(uuid())
   name        String
@@ -78,29 +122,6 @@ model Factorys {
   @@index([name, address])
 }
 
-model UsersPolicies {
-  userId   String
-  policyId String
-  user     Users    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  policy   Policies @relation(fields: [policyId], references: [id], onDelete: Cascade)
-
-  @@id([userId, policyId])
-}
-
-model Policies {
-  id            String          @id @default(uuid())
-  description   String
-  action        String
-  resource      String
-  condition     Json?
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt
-  usersPolicies UsersPolicies[]
-
-  @@index([action, resource])
-}
-
-// Display TV
 model Departments {
   id                  String                @id @default(uuid())
   name                String

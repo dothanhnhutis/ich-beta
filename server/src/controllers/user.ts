@@ -40,7 +40,7 @@ import {
   writeChangeEmailSessionCache,
   writeUserTokenCache,
 } from "@/redis/user.cache";
-import { readRoleById } from "@/services/role";
+import { getRoleById } from "@/services/role";
 
 export async function currentUser(req: Request, res: Response) {
   const { password, ...noPass } = req.user!;
@@ -403,8 +403,8 @@ export async function updateUserById(
 
   if (roleIds) {
     for (const id of roleIds) {
-      const role = await readRoleById(id);
-      if (!role) throw new BadRequestError(`roleId ${id} không tồn tại.`);
+      const role = await getRoleById(id);
+      if (!role) throw new BadRequestError(`Vai trò id=${id} không tồn tại.`);
     }
   }
   await editUserById(req.params.userId, req.body);

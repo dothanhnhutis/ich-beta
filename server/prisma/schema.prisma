@@ -84,7 +84,7 @@ model Roles {
   permissions String[]     @default([])
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
-  UsersRoles  UsersRoles[]
+  usersRoles  UsersRoles[]
 }
 
 // Display TV

@@ -4,7 +4,10 @@ import { readUserRolesById } from "@/services/user";
 import { User } from "@/schemas/user";
 import { permissions } from "@/configs/constants";
 
-export function hasPermission(user: User | null, permission: string) {
+export function hasPermission(
+  user: User | null,
+  permission: (typeof permissions)[number]
+) {
   if (!user) return false;
   return user.roles.some(({ permissions }) => permissions.includes(permission));
 }

@@ -25,7 +25,7 @@ function displayRouter(): Router {
 
   router.get("/displays/:id", authMiddleware(), getDisplayById);
 
-  router.get("/displays", authMiddleware(), queryDisplays);
+  router.get("/displays/search", authMiddleware(), queryDisplays);
 
   router.put(
     "/displays/:id",

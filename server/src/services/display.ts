@@ -1,12 +1,11 @@
 import { Prisma } from "@prisma/client";
 import prisma from "./db";
 import {
-  CreateDisplayReq,
   Display,
   DisplayAttributeFilter,
-  UpdateDisplayByIdReq,
+  QueryDisplay,
 } from "@/schemas/display";
-import { readDepartmentById } from "./department";
+import { getDepartmentById } from "./department";
 
 const displayAttributeFilter = (display: DisplayAttributeFilter): Display => {
   const departments = display.departmentsDisplays.map(
@@ -171,29 +170,22 @@ export async function removeDisplayById(displayId: string) {
   return display;
 }
 
-export type QueryDisplay = {
-  enable?: boolean;
-  priority?: [number, number] | number;
-  createdAt?: [string, string];
-  departmentIds?: string[];
-  userId?: string;
-  orderBy?: {
-    column: "priority" | "enable" | "createdAt" | "updatedAt";
-    order: "asc" | "desc";
-  }[];
-  limit?: number;
-  page?: number;
-};
-
 export async function queryDisplaysService({
   priority,
   createdAt,
   enable,
   departmentIds,
-  userId,
+  userIds,
   ...props
 }: QueryDisplay) {
   let where: Prisma.DisplaysWhereInput = {};
+
+  if (userIds != undefined && userIds.length > 0) {
+    where.userId = {
+      in: userIds,
+    };
+  }
+
   if (enable != undefined) {
     where.enable = enable;
   }
@@ -225,7 +217,7 @@ export async function queryDisplaysService({
 
   if (departmentIds != undefined && departmentIds.length > 0) {
     const existsdepartments = departmentIds.filter(
-      async (departmentId) => (await readDepartmentById(departmentId)) != null
+      async (departmentId) => (await getDepartmentById(departmentId)) != null
     );
     where.departmentsDisplays = {
       some: {
@@ -236,14 +228,12 @@ export async function queryDisplaysService({
     };
   }
 
-  if (userId != undefined) {
-    where.userId = userId;
-  }
-
   // page
   const take = props.limit || 10;
   const page = (!props.page || props.page <= 0 ? 1 : props.page) - 1;
   const skip = page * take;
+
+  console.log(where);
 
   let orderBy: Prisma.DisplaysOrderByWithAggregationInput[] =
     props.orderBy?.map((o) => ({ [o.column]: o.order })) || [];

@@ -104,3 +104,17 @@ export type DisplayAttributeFilter = {
   }[];
   createdBy: Pick<User, "id" | "email" | "username" | "picture">;
 };
+
+export type QueryDisplay = {
+  enable?: boolean;
+  priority?: [number, number] | number;
+  createdAt?: [string, string];
+  departmentIds?: string[];
+  userIds?: string[];
+  orderBy?: {
+    column: "priority" | "enable" | "createdAt" | "updatedAt";
+    order: "asc" | "desc";
+  }[];
+  limit?: number;
+  page?: number;
+};

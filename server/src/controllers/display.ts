@@ -1,15 +1,15 @@
 import { dateRegex, displayRegex, trueFalseList } from "@/configs/constants";
 import { BadRequestError, PermissionError } from "@/error-handler";
 import { hasPermission } from "@/middlewares/checkPermission";
-import { CreateDisplayReq, UpdateDisplayByIdReq } from "@/schemas/display";
 import {
-  getDepartmentsInListService,
-  readDepartmentById,
-} from "@/services/department";
+  CreateDisplayReq,
+  QueryDisplay,
+  UpdateDisplayByIdReq,
+} from "@/schemas/display";
+import { getDepartmentById } from "@/services/department";
 import {
   removeDisplayById,
   readDisplayById,
-  QueryDisplay,
   queryDisplaysService,
   editDisplayById,
   writeNewDisplay,
@@ -31,7 +31,7 @@ export async function createDisplay(
   if (!isValidAccess) throw new PermissionError();
 
   for (const departmentId of req.body.departmentIds) {
-    const department = await readDepartmentById(departmentId);
+    const department = await getDepartmentById(departmentId);
     if (department) continue;
     throw new BadRequestError(`Mã phòng ban id=${departmentId} không tồn tại`);
   }
@@ -69,7 +69,7 @@ export async function updateDisplayById(
 
   if (departmentIds) {
     for (const departmentId of departmentIds) {
-      const department = await readDepartmentById(departmentId);
+      const department = await getDepartmentById(departmentId);
       if (department) continue;
       throw new BadRequestError(`Phòng ban id=${departmentId} không tồn tại}`);
     }
@@ -109,7 +109,6 @@ export async function getDisplayById(
 }
 
 export async function queryDisplays(req: Request, res: Response) {
-  const { id } = req.user!;
   let query: QueryDisplay = {};
 
   const {
@@ -128,13 +127,14 @@ export async function queryDisplays(req: Request, res: Response) {
   } = req.query;
 
   const isValidAccess = hasPermission(req.user, "read:displays");
+  if (!isValidAccess) throw new PermissionError();
 
-  // if (!isValidAccess) {
-  //   query.userId = id;
-
-  //   const displays = await queryDisplaysService(query);
-  //   return res.status(StatusCodes.OK).json(displays);
-  // }
+  if (
+    typeof userId == "string" ||
+    (Array.isArray(userId) && userId.every((u) => typeof u == "string"))
+  ) {
+    query.userIds = Array.isArray(userId) ? userId : [userId];
+  }
 
   if (
     typeof priority == "string" &&
@@ -229,7 +229,7 @@ export async function queryDisplays(req: Request, res: Response) {
   if (typeof page == "string") {
     const intRegex = /\d+/;
     if (intRegex.test(page) && parseInt(page) > 0) {
-      query.limit = parseInt(page);
+      query.page = parseInt(page);
     }
   }
 

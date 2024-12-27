@@ -1,24 +1,46 @@
 import {
-  getDepartments,
-  getDisplaysOfDepartment,
+  createDepartmentHandler,
+  deleteDepartmentByIdHandler,
+  getDepartmentByIdHandler,
+  getDepartmentsHandler,
+  updateDepartmentHandler,
 } from "@/controllers/department";
-import { checkPermission } from "@/middlewares/checkPermission";
 import { authMiddleware } from "@/middlewares/requiredAuth";
+import validateResource from "@/middlewares/validateResource";
+import {
+  createDepartmentSchema,
+  updateDepartmentSchema,
+} from "@/schemas/department";
 import express, { type Router } from "express";
 
 const router: Router = express.Router();
 function departmentRouter(): Router {
-  router.get(
-    "/departments/:id/displays",
-    authMiddleware(),
-    getDisplaysOfDepartment
-  );
+  router.get("/departments", authMiddleware(), getDepartmentsHandler);
 
   router.get(
+    "/departments/:departmentId",
+    authMiddleware(),
+    getDepartmentByIdHandler
+  );
+
+  router.post(
     "/departments",
     authMiddleware(),
-    checkPermission("read:departments"),
-    getDepartments
+    validateResource(createDepartmentSchema),
+    createDepartmentHandler
+  );
+
+  router.put(
+    "/departments",
+    authMiddleware(),
+    validateResource(updateDepartmentSchema),
+    updateDepartmentHandler
+  );
+
+  router.delete(
+    "/departments/:departmentId",
+    authMiddleware(),
+    deleteDepartmentByIdHandler
   );
 
   return router;

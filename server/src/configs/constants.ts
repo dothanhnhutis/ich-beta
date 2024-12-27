@@ -9,6 +9,11 @@ export const permissions = [
   "update:users",
   "delete:users",
 
+  "write:factories",
+  "read:factories",
+  "update:factories",
+  "delete:factories",
+
   "write:displays",
   "read:displays",
   "update:displays",

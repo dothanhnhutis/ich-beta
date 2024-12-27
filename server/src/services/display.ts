@@ -6,6 +6,7 @@ import {
   DisplayAttributeFilter,
   UpdateDisplayByIdReq,
 } from "@/schemas/display";
+import { readDepartmentById } from "./department";
 
 const displayAttributeFilter = (display: DisplayAttributeFilter): Display => {
   const departments = display.departmentsDisplays.map(
@@ -174,6 +175,8 @@ export type QueryDisplay = {
   enable?: boolean;
   priority?: [number, number] | number;
   createdAt?: [string, string];
+  departmentIds?: string[];
+  userId?: string;
   orderBy?: {
     column: "priority" | "enable" | "createdAt" | "updatedAt";
     order: "asc" | "desc";
@@ -186,6 +189,8 @@ export async function queryDisplaysService({
   priority,
   createdAt,
   enable,
+  departmentIds,
+  userId,
   ...props
 }: QueryDisplay) {
   let where: Prisma.DisplaysWhereInput = {};
@@ -216,6 +221,23 @@ export async function queryDisplaysService({
         lte: createdAt[1],
       };
     }
+  }
+
+  if (departmentIds != undefined && departmentIds.length > 0) {
+    const existsdepartments = departmentIds.filter(
+      async (departmentId) => (await readDepartmentById(departmentId)) != null
+    );
+    where.departmentsDisplays = {
+      some: {
+        departmentId: {
+          in: existsdepartments,
+        },
+      },
+    };
+  }
+
+  if (userId != undefined) {
+    where.userId = userId;
   }
 
   // page
@@ -251,10 +273,7 @@ export async function queryDisplaysService({
     prisma.displays.count({ where }),
   ]);
   return {
-    displays: displays.map(({ departmentsDisplays, ...props }) => {
-      const departments = departmentsDisplays.map((d) => d.department);
-      return { ...props, departments };
-    }),
+    displays: displays.map(displayAttributeFilter),
     pagination: {
       hasNextPage: skip + take < total,
       totalPage: Math.ceil(total / take),

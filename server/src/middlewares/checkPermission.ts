@@ -2,7 +2,7 @@ import { RequestHandler as Middleware } from "express";
 import { PermissionError } from "@/error-handler";
 import { readUserRolesById } from "@/services/user";
 import { User } from "@/schemas/user";
-import { permissions } from "@/configs/permission";
+import { permissions } from "@/configs/constants";
 
 export function hasPermission(user: User | null, permission: string) {
   if (!user) return false;

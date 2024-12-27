@@ -87,30 +87,7 @@ model Roles {
   UsersRoles  UsersRoles[]
 }
 
-// model UsersPolicies {
-//   userId   String
-//   policyId String
-//   user     Users    @relation(fields: [userId], references: [id], onDelete: Cascade)
-//   policy   Policies @relation(fields: [policyId], references: [id], onDelete: Cascade)
-
-//   @@id([userId, policyId])
-// }
-
-// model Policies {
-//   id            String          @id @default(uuid())
-//   description   String
-//   action        String
-//   resource      String
-//   condition     Json?
-//   createdAt     DateTime        @default(now())
-//   updatedAt     DateTime        @updatedAt
-//   usersPolicies UsersPolicies[]
-
-//   @@index([action, resource])
-// }
-
 // Display TV
-
 model Factorys {
   id          String        @id @default(uuid())
   name        String

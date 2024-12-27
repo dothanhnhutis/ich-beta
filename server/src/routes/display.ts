@@ -2,7 +2,7 @@ import {
   createDisplay,
   deleteDisplayById,
   getDisplayById,
-  getDisplays,
+  queryDisplays,
   updateDisplayById,
 } from "@/controllers/display";
 import { checkPermission } from "@/middlewares/checkPermission";
@@ -23,36 +23,18 @@ function displayRouter(): Router {
     createDisplay
   );
 
-  router.get(
-    "/displays/:id",
-    authMiddleware(),
-    checkPermission("read:displays"),
-    getDisplayById
-  );
+  router.get("/displays/:id", authMiddleware(), getDisplayById);
 
-  router.get(
-    "/displays",
-    authMiddleware(),
-    checkPermission("read:displays"),
-    // validateResource(searchDisplaySchema),
-
-    getDisplays
-  );
+  router.get("/displays", authMiddleware(), queryDisplays);
 
   router.put(
     "/displays/:id",
     authMiddleware(),
     validateResource(updateDisplayByIdSchema),
-    checkPermission("update:displays"),
     updateDisplayById
   );
 
-  router.put(
-    "/displays",
-    authMiddleware(),
-    checkPermission("delete:displays"),
-    deleteDisplayById
-  );
+  router.delete("/displays", authMiddleware(), deleteDisplayById);
   return router;
 }
 

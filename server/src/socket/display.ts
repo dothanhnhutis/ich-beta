@@ -1,7 +1,5 @@
-import { Server, Socket } from "socket.io";
+import { Server } from "socket.io";
 import SocketServer from "./init";
-import { CreateTaskReq } from "@/schemas/task";
-import { createDisplayService, updateDisplayService } from "@/services/display";
 import { Display } from "@/schemas/display";
 
 export const departmentSocketListener = (io: Server) => {

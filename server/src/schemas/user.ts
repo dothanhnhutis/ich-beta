@@ -1,4 +1,3 @@
-import { SYSTEM_PERMISSIONS } from "@/configs/permission";
 import * as z from "zod";
 
 export const validDataSchema = z
@@ -205,66 +204,7 @@ export const createUserSchema = z.object({
         required_error: "Xác nhận mật khẩu là bắt buộc",
         invalid_type_error: "Xác nhận mật khẩu phải là chuỗi",
       }),
-      roles: z
-        .array(
-          z.union(
-            [
-              z.string({
-                invalid_type_error:
-                  "vai trò phải là string hoặc { name: string; permissions: SYSTEM_PERMISSIONS[] }",
-              }),
-              z
-                .object(
-                  {
-                    name: z.string({
-                      required_error: "name là bắt buộc",
-                      invalid_type_error: "name phải là chuỗi",
-                    }),
-                    permissions: z.array(z.enum(SYSTEM_PERMISSIONS), {
-                      invalid_type_error:
-                        "vai trò phải là string hoặc { name: string; permissions: SYSTEM_PERMISSIONS[] }",
-                      required_error:
-                        "vai trò phải là string hoặc { name: string; permissions: SYSTEM_PERMISSIONS[] }",
-                    }),
-                  },
-                  {
-                    invalid_type_error:
-                      "vai trò phải là string hoặc { name: string; permissions: SYSTEM_PERMISSIONS[] }",
-                    required_error:
-                      "vai trò phải là string hoặc { name: string; permissions: SYSTEM_PERMISSIONS[] }",
-                  }
-                )
-                .strict(),
-            ],
-            {
-              errorMap: (e) => {
-                if (e.code === z.ZodIssueCode.invalid_union) {
-                  const reverted = [
-                    ...[...e.unionErrors].reverse()[0].issues,
-                  ].reverse()[0];
-                  reverted.path.shift();
-                  return {
-                    message:
-                      `${reverted.message}. Hint: Error at ${reverted.path
-                        .map((p) => (typeof p === "number" ? `[${p}]` : p))
-                        .join(".")}` ||
-                      `vai trò phải là string hoặc { name: string; permissions: SYSTEM_PERMISSIONS[] }`,
-                  };
-                } else {
-                  return {
-                    message:
-                      "vai trò phải là string hoặc { name: string; permissions: SYSTEM_PERMISSIONS[] }",
-                  };
-                }
-              },
-            }
-          ),
-          {
-            invalid_type_error:
-              "vai trò phải là string hoặc { name: string; permissions: SYSTEM_PERMISSIONS[] }",
-          }
-        )
-        .optional(),
+      roleIds: z.array(z.string()).optional(),
     })
     .strict()
     .refine((data) => data.confirmPassword == data.password, {

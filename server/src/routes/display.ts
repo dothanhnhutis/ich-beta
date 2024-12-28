@@ -1,9 +1,9 @@
 import {
-  createDisplay,
-  deleteDisplayById,
-  getDisplayById,
-  queryDisplays,
-  updateDisplayById,
+  createDisplayHandler,
+  deleteDisplayByIdHandler,
+  getDisplayByIdHandler,
+  searchDisplaysHandler,
+  updateDisplayByIdHandler,
 } from "@/controllers/display";
 import { checkPermission } from "@/middlewares/checkPermission";
 import { authMiddleware } from "@/middlewares/requiredAuth";
@@ -20,21 +20,21 @@ function displayRouter(): Router {
     "/displays",
     authMiddleware(),
     validateResource(createDisplaySchema),
-    createDisplay
+    createDisplayHandler
   );
 
-  router.get("/displays/:id", authMiddleware(), getDisplayById);
+  router.get("/displays/:id", authMiddleware(), getDisplayByIdHandler);
 
-  router.get("/displays/search", authMiddleware(), queryDisplays);
+  router.get("/displays/search", authMiddleware(), searchDisplaysHandler);
 
   router.put(
     "/displays/:id",
     authMiddleware(),
     validateResource(updateDisplayByIdSchema),
-    updateDisplayById
+    updateDisplayByIdHandler
   );
 
-  router.delete("/displays", authMiddleware(), deleteDisplayById);
+  router.delete("/displays", authMiddleware(), deleteDisplayByIdHandler);
   return router;
 }
 

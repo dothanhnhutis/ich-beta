@@ -6,7 +6,7 @@ import {
   deleteDepartmentById,
   getDepartmentById,
   getDepartments,
-  queryDepartment,
+  searchDepartment,
   updateDepartmentById,
 } from "@/services/department";
 import { getFactoryById } from "@/services/factory";
@@ -43,7 +43,7 @@ export async function createDepartmentHandler(
       `Mã nhà máy id=${req.body.factoryId} không tồn tại.`
     );
 
-  const departmentExists = await queryDepartment(req.body);
+  const departmentExists = await searchDepartment(req.body);
   if (departmentExists.pagination.totalItem > 0)
     throw new BadRequestError(`Tên phòng ban đã tồn tại.`);
 
@@ -73,7 +73,7 @@ export async function updateDepartmentHandler(
       `Mã nhà máy id=${req.body.factoryId} không tồn tại.`
     );
 
-  const departmentExists = await queryDepartment(req.body);
+  const departmentExists = await searchDepartment(req.body);
   if (departmentExists.pagination.totalItem > 0)
     throw new BadRequestError(`Tên phòng ban đã tồn tại.`);
 

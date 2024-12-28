@@ -43,6 +43,8 @@ model Users {
   oauthProviders           OauthProviders[]
   displays                 Displays[]
   usersRoles               UsersRoles[]
+  images                   Images[]
+  products                 Products[]
 }
 
 model OauthProviders {
@@ -135,13 +137,42 @@ model Displays {
   @@index([enable, userId])
 }
 
-model Product {
-  id               String   @id @default(uuid())
+model Products {
+  id               String          @id @default(uuid())
   name             String
-  image            String
-  amountOfCargoBox Int
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  images           String[]        @default([])
+  innerBoxQuantity Int             @default(0)
+  userId           String
+  user             Users           @relation(fields: [userId], references: [id])
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  productImages    ProductImages[]
+
+  @@index([name])
+}
+
+model ProductImages {
+  productId String
+  imageId   String
+  product   Products @relation(fields: [productId], references: [id], onDelete: Cascade)
+  image     Images   @relation(fields: [imageId], references: [id], onDelete: Cascade)
+
+  @@id([productId, imageId])
+}
+
+model Images {
+  id            String          @id @default(uuid())
+  url           String
+  name          String
+  altText       String          @default("")
+  uploadedAt    DateTime        @default(now())
+  size          Int
+  format        String
+  userId        String
+  user          Users           @relation(fields: [userId], references: [id])
+  productImages ProductImages[]
+
+  @@index([url, name])
 }
 
 // model Plans {

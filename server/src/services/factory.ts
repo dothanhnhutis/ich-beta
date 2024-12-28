@@ -1,4 +1,4 @@
-import { CreateFactory, UpdateFactory } from "@/schemas/factory";
+import { CreateFactoryData, UpdateFactoryData } from "@/schemas/factory";
 import prisma from "./db";
 
 export async function getFactoryById(factoryId: string) {
@@ -13,7 +13,7 @@ export async function getFactorys() {
   return prisma.factorys.findMany();
 }
 
-export async function createFactory(data: CreateFactory) {
+export async function createFactory(data: CreateFactoryData) {
   return prisma.factorys.create({
     data,
   });
@@ -21,7 +21,7 @@ export async function createFactory(data: CreateFactory) {
 
 export async function updateFactoryById(
   factoryId: string,
-  data: UpdateFactory
+  data: UpdateFactoryData
 ) {
   return prisma.factorys.update({
     where: {

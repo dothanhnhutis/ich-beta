@@ -7,7 +7,9 @@ export const createRoleSchema = z.object({
       required_error: "Tên vai trò là bất buộc",
       invalid_type_error: "Tên vai trò là chuỗi",
     }),
-    permissions: z.array(z.enum(permissions)),
+    permissions: z.array(z.enum(permissions)).transform((v) => {
+      return v.filter((value, idx, array) => array.indexOf(value) === idx);
+    }),
   }),
 });
 
@@ -20,7 +22,9 @@ export const updateRoleSchema = z.object({
       required_error: "Tên vai trò là bất buộc",
       invalid_type_error: "Tên vai trò là chuỗi",
     }),
-    permissions: z.array(z.enum(permissions)),
+    permissions: z.array(z.enum(permissions)).transform((v) => {
+      return v.filter((value, idx, array) => array.indexOf(value) === idx);
+    }),
   }),
 });
 

@@ -23,6 +23,11 @@ export const permissions = [
   "read:departments",
   "update:departments",
   "delete:departments",
+
+  "write:products",
+  "read:products",
+  "update:products",
+  "delete:products",
 ] as const;
 
 export const dateRegex =
@@ -30,3 +35,5 @@ export const dateRegex =
 export const displayRegex =
   /^(createdAt|updatedAt|priority|enable)\.(asc|desc)$/;
 export const trueFalseList: string[] = ["1", "0", "true", "false"];
+
+export const productRegex = /^(name|innerBoxQuantity)\.(asc|desc)$/;

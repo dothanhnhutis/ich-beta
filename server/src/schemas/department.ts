@@ -27,7 +27,7 @@ export type UpdateDepartmentData = {
   name: string;
   factoryId: string;
 };
-export type QueryDepartment = {
+export type SearchDepartment = {
   name?: string;
   factoryId?: string;
   orderBy?: {

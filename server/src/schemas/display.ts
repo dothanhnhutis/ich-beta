@@ -1,6 +1,6 @@
 import * as z from "zod";
 import { Department } from "./department";
-import { User, validDataSchema } from "./user";
+import { User } from "./user";
 
 export const createDisplaySchema = z.object({
   body: z
@@ -80,6 +80,13 @@ export const updateDisplayByIdSchema = z.object({
 
 export type CreateDisplayReq = z.infer<typeof createDisplaySchema>;
 export type UpdateDisplayByIdReq = z.infer<typeof updateDisplayByIdSchema>;
+
+export type CreateDisplayData = CreateDisplayReq["body"] & {
+  userId: string;
+};
+
+export type EditDisplayData = UpdateDisplayByIdReq["body"];
+
 export type Display = {
   id: string;
   content: string;
@@ -105,7 +112,7 @@ export type DisplayAttributeFilter = {
   createdBy: Pick<User, "id" | "email" | "username" | "picture">;
 };
 
-export type QueryDisplay = {
+export type SearchDisplay = {
   enable?: boolean;
   priority?: [number, number] | number;
   createdAt?: [string, string];

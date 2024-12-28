@@ -1,6 +1,6 @@
 import {
   CreateDepartmentData,
-  QueryDepartment,
+  SearchDepartment,
   UpdateDepartmentData,
 } from "@/schemas/department";
 import prisma from "./db";
@@ -17,7 +17,7 @@ export async function getDepartmentById(departmentId: string) {
   });
 }
 
-export async function queryDepartment(data: QueryDepartment) {
+export async function searchDepartment(data: SearchDepartment) {
   const where: Prisma.DepartmentsWhereInput = {
     ...data,
   };

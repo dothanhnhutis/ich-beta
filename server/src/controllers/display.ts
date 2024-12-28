@@ -3,16 +3,16 @@ import { BadRequestError, PermissionError } from "@/error-handler";
 import { hasPermission } from "@/middlewares/checkPermission";
 import {
   CreateDisplayReq,
-  QueryDisplay,
+  SearchDisplay,
   UpdateDisplayByIdReq,
 } from "@/schemas/display";
 import { getDepartmentById } from "@/services/department";
 import {
-  removeDisplayById,
-  readDisplayById,
-  queryDisplaysService,
-  editDisplayById,
-  writeNewDisplay,
+  deleteDisplayById,
+  getDisplayById,
+  searchDisplaysService,
+  updateDisplayById,
+  createDisplay,
 } from "@/services/display";
 import {
   createDisplaySocketSender,
@@ -23,7 +23,7 @@ import { isValidDate } from "@/utils/helper";
 import { Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 
-export async function createDisplay(
+export async function createDisplayHandler(
   req: Request<{}, {}, CreateDisplayReq["body"]>,
   res: Response
 ) {
@@ -36,7 +36,7 @@ export async function createDisplay(
     throw new BadRequestError(`Mã phòng ban id=${departmentId} không tồn tại`);
   }
 
-  const display = await writeNewDisplay({
+  const display = await createDisplay({
     ...req.body,
     userId: req.user!.id,
   });
@@ -51,7 +51,7 @@ export async function createDisplay(
   });
 }
 
-export async function updateDisplayById(
+export async function updateDisplayByIdHandler(
   req: Request<
     UpdateDisplayByIdReq["params"],
     {},
@@ -62,7 +62,7 @@ export async function updateDisplayById(
   const isValidAccess = hasPermission(req.user, "update:displays");
   if (!isValidAccess) throw new PermissionError();
 
-  const display = await readDisplayById(req.params.id);
+  const display = await getDisplayById(req.params.id);
   if (!display) throw new BadRequestError("displayId không tồn tại");
 
   const { departmentIds, ...displaydata } = req.body;
@@ -75,7 +75,7 @@ export async function updateDisplayById(
     }
   }
 
-  const newDisplay = await editDisplayById(req.params.id, req.body);
+  const newDisplay = await updateDisplayById(req.params.id, req.body);
 
   const senToDepartments = display.departments
     .map((d) => d.id)
@@ -88,13 +88,13 @@ export async function updateDisplayById(
   });
 }
 
-export async function getDisplayById(
+export async function getDisplayByIdHandler(
   req: Request<{ id: string }>,
   res: Response
 ) {
   const isValidAccess = hasPermission(req.user, "read:displays");
 
-  const display = await readDisplayById(req.params.id);
+  const display = await getDisplayById(req.params.id);
 
   if (!isValidAccess) {
     if (!display || display.userId != req.user!.id) {
@@ -108,8 +108,8 @@ export async function getDisplayById(
   return res.status(StatusCodes.OK).json(display);
 }
 
-export async function queryDisplays(req: Request, res: Response) {
-  let query: QueryDisplay = {};
+export async function searchDisplaysHandler(req: Request, res: Response) {
+  let query: SearchDisplay = {};
 
   const {
     priority,
@@ -209,7 +209,7 @@ export async function queryDisplays(req: Request, res: Response) {
         };
       });
 
-    query.orderBy = orderBys as QueryDisplay["orderBy"];
+    query.orderBy = orderBys as SearchDisplay["orderBy"];
   }
 
   if (
@@ -233,17 +233,17 @@ export async function queryDisplays(req: Request, res: Response) {
     }
   }
 
-  const displays = await queryDisplaysService(query);
+  const displays = await searchDisplaysService(query);
   return res.status(StatusCodes.OK).json(displays);
 }
 
-export async function deleteDisplayById(
+export async function deleteDisplayByIdHandler(
   req: Request<{ id: string }>,
   res: Response
 ) {
   const isValidAccess = hasPermission(req.user, "delete:displays");
 
-  const display = await readDisplayById(req.params.id);
+  const display = await getDisplayById(req.params.id);
 
   if (!isValidAccess) {
     if (!display || display.userId != req.user!.id) {
@@ -254,7 +254,7 @@ export async function deleteDisplayById(
   if (!display)
     throw new BadRequestError(`Hiển thị id=${req.params.id} không tồn tại`);
 
-  const deleteDisplay = await removeDisplayById(req.params.id);
+  const deleteDisplay = await deleteDisplayById(req.params.id);
 
   return res.status(StatusCodes.OK).json({
     message: "Xoá hiển thị thành công",

@@ -1,9 +1,11 @@
 import { Prisma } from "@prisma/client";
 import prisma from "./db";
 import {
+  CreateDisplayData,
   Display,
   DisplayAttributeFilter,
-  QueryDisplay,
+  EditDisplayData,
+  SearchDisplay,
 } from "@/schemas/display";
 import { getDepartmentById } from "./department";
 
@@ -15,18 +17,12 @@ const displayAttributeFilter = (display: DisplayAttributeFilter): Display => {
   return { ...props, departments };
 };
 
-export async function writeNewDisplay(input: {
-  content: string;
-  enable: boolean;
-  priority: number;
-  departmentIds: string[];
-  userId: string;
-}) {
-  const { departmentIds, ...data } = input;
+export async function createDisplay(data: CreateDisplayData) {
+  const { departmentIds, ...props } = data;
 
   const display = await prisma.displays.create({
     data: {
-      ...data,
+      ...props,
       departmentsDisplays: {
         createMany: {
           data: departmentIds.map((d) => ({ departmentId: d })),
@@ -53,16 +49,11 @@ export async function writeNewDisplay(input: {
   return displayAttributeFilter(display);
 }
 
-export async function editDisplayById(
+export async function updateDisplayById(
   displayId: string,
-  input: {
-    content?: string;
-    enable?: boolean;
-    priority?: number;
-    departmentIds?: string[];
-  }
+  data: EditDisplayData
 ) {
-  const { departmentIds, ...props } = input;
+  const { departmentIds, ...props } = data;
   const display = await prisma.displays.update({
     where: {
       id: displayId,
@@ -118,7 +109,7 @@ export async function editDisplayById(
   return displayAttributeFilter(display);
 }
 
-export async function readDisplayById(displayId: string) {
+export async function getDisplayById(displayId: string) {
   const display = await prisma.displays.findUnique({
     where: {
       id: displayId,
@@ -144,7 +135,7 @@ export async function readDisplayById(displayId: string) {
   return display;
 }
 
-export async function removeDisplayById(displayId: string) {
+export async function deleteDisplayById(displayId: string) {
   const display = await prisma.displays.delete({
     where: {
       id: displayId,
@@ -170,14 +161,14 @@ export async function removeDisplayById(displayId: string) {
   return display;
 }
 
-export async function queryDisplaysService({
+export async function searchDisplaysService({
   priority,
   createdAt,
   enable,
   departmentIds,
   userIds,
   ...props
-}: QueryDisplay) {
+}: SearchDisplay) {
   let where: Prisma.DisplaysWhereInput = {};
 
   if (userIds != undefined && userIds.length > 0) {
@@ -232,8 +223,6 @@ export async function queryDisplaysService({
   const take = props.limit || 10;
   const page = (!props.page || props.page <= 0 ? 1 : props.page) - 1;
   const skip = page * take;
-
-  console.log(where);
 
   let orderBy: Prisma.DisplaysOrderByWithAggregationInput[] =
     props.orderBy?.map((o) => ({ [o.column]: o.order })) || [];

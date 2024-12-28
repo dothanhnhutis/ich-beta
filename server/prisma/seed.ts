@@ -1,113 +1,104 @@
-import { Condition } from "@/middlewares/checkpolicy";
+import { permissions } from "@/configs/constants";
 import prisma from "@/services/db";
 import { hashData } from "@/utils/helper";
 
-type Policy = {
-  action: string;
-  resource: string;
-  description: string;
-  condition?: Condition;
-};
-const adminPolicies: Policy[] = [
-  {
-    action: "create",
-    resource: "policies",
-    description: "create policy",
-  },
-  {
-    action: "read",
-    resource: "policies",
-    description: "read policy",
-  },
-  {
-    action: "update",
-    resource: "policies",
-    description: "update policy",
-  },
-  {
-    action: "delete",
-    resource: "policies",
-    description: "delete policy",
-  },
-  {
-    action: "create",
-    resource: "users",
-    description: "create user",
-  },
-  {
-    action: "read",
-    resource: "users",
-    description: "read user",
-  },
-  {
-    action: "update",
-    resource: "users",
-    description: "update user",
-  },
-  {
-    action: "delete",
-    resource: "users",
-    description: "delete user",
-  },
-  {
-    action: "read",
-    resource: "departments",
-    description: "read display",
-  },
-  {
-    action: "create",
-    resource: "displays",
-    description: "create display",
-  },
-  {
-    action: "read",
-    resource: "displays",
-    description: "read display",
-  },
-  {
-    action: "update",
-    resource: "displays",
-    description: "update display",
-  },
-  {
-    action: "delete",
-    resource: "displays",
-    description: "delete display",
-  },
-];
-
-const factoryMember: Policy[] = [
-  {
-    action: "delete",
-    resource: "displays",
-    description: "delete display",
-  },
-];
-
 async function initDB() {
-  await prisma.policies.deleteMany();
-  await prisma.users.deleteMany();
+  const superAdminRole = await prisma.roles.create({
+    data: {
+      name: "super admin",
+      permissions: permissions.map((r) => r),
+    },
+  });
+  const adminRole = await prisma.roles.create({
+    data: {
+      name: "admin",
+      permissions: [
+        "write:users",
+        "read:users",
+        "update:users",
+        "delete:users",
+
+        "write:departments",
+        "read:departments",
+        "update:departments",
+        "delete:departments",
+
+        "write:displays",
+        "read:displays",
+        "update:displays",
+        "delete:displays",
+
+        "write:products",
+        "read:products",
+        "update:products",
+        "delete:products",
+      ],
+    },
+  });
+
+  const workerRole = await prisma.roles.create({
+    data: {
+      name: "worker",
+      permissions: ["read:displays", "read:departments", "read:products"],
+    },
+  });
 
   await prisma.users.create({
     data: {
-      email: "gaconght@gmail.com",
+      email: "dothanhnhutis@gmail.com",
       password: await hashData("@Abc123123"),
-      username: "ICH",
-      birthDate: "30/11/2024",
+      username: "Thanh Nhựt",
+      birthDate: "09/10/1999",
       gender: "MALE",
-      phoneNumber: "0707000004",
+      phoneNumber: "0948548844",
       emailVerified: true,
-      usersPolicies: {
-        create: adminPolicies.map((p) => ({
-          policy: {
-            create: p,
+      usersRoles: {
+        create: [
+          {
+            roleId: superAdminRole.id,
           },
-        })),
+        ],
       },
     },
   });
 
-  await prisma.factorys.deleteMany();
+  await prisma.users.create({
+    data: {
+      email: "i.c.h.vietnam2020@gmail.com",
+      password: await hashData("@Abc123123"),
+      username: "ICH",
+      birthDate: "24/12/1989",
+      gender: "MALE",
+      phoneNumber: "0707000004",
+      emailVerified: true,
+      usersRoles: {
+        create: [
+          {
+            roleId: adminRole.id,
+          },
+        ],
+      },
+    },
+  });
+
+  await prisma.users.create({
+    data: {
+      email: "gaconght001@gmail.com",
+      password: await hashData("@Abc123123"),
+      username: "Nhân viên nhà máy I.C.H",
+      birthDate: "24/12/2020",
+      gender: "MALE",
+      phoneNumber: "0906640464",
+      emailVerified: true,
+      usersRoles: {
+        create: [
+          {
+            roleId: workerRole.id,
+          },
+        ],
+      },
+    },
+  });
 
   const factory = await prisma.factorys.create({
     data: {
@@ -117,7 +108,7 @@ async function initDB() {
     },
   });
 
-  const department = await prisma.departments.createMany({
+  await prisma.departments.createMany({
     data: [
       {
         name: "Phòng 1",

@@ -10,7 +10,7 @@ import { getDepartmentById } from "@/services/department";
 import {
   deleteDisplayById,
   getDisplayById,
-  searchDisplaysService,
+  searchDisplays,
   updateDisplayById,
   createDisplay,
 } from "@/services/display";
@@ -120,7 +120,7 @@ export async function searchDisplaysHandler(req: Request, res: Response) {
     createdAtFrom,
     createdAtTo,
     orderBy,
-    departmentIds,
+    departmentId,
     limit,
     page,
     userId,
@@ -195,7 +195,16 @@ export async function searchDisplaysHandler(req: Request, res: Response) {
       ];
     }
   }
-  if (
+
+  if (typeof orderBy == "string") {
+    const dataSplit = orderBy.split(".");
+    query.orderBy = [
+      {
+        column: dataSplit[0],
+        order: dataSplit[1],
+      },
+    ] as SearchDisplay["orderBy"];
+  } else if (
     Array.isArray(orderBy) &&
     orderBy.every((item) => typeof item === "string")
   ) {
@@ -212,11 +221,13 @@ export async function searchDisplaysHandler(req: Request, res: Response) {
     query.orderBy = orderBys as SearchDisplay["orderBy"];
   }
 
-  if (
-    Array.isArray(departmentIds) &&
-    departmentIds.every((item) => typeof item === "string")
+  if (typeof departmentId == "string") {
+    query.departmentId = [departmentId];
+  } else if (
+    Array.isArray(departmentId) &&
+    departmentId.every((item) => typeof item === "string")
   ) {
-    query.departmentIds = departmentIds;
+    query.departmentId = departmentId;
   }
 
   if (typeof limit == "string") {
@@ -233,7 +244,7 @@ export async function searchDisplaysHandler(req: Request, res: Response) {
     }
   }
 
-  const displays = await searchDisplaysService(query);
+  const displays = await searchDisplays(query);
   return res.status(StatusCodes.OK).json(displays);
 }
 

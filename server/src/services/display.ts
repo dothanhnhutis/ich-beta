@@ -161,11 +161,11 @@ export async function deleteDisplayById(displayId: string) {
   return display;
 }
 
-export async function searchDisplaysService({
+export async function searchDisplays({
   priority,
   createdAt,
   enable,
-  departmentIds,
+  departmentId,
   userIds,
   ...props
 }: SearchDisplay) {
@@ -206,9 +206,9 @@ export async function searchDisplaysService({
     }
   }
 
-  if (departmentIds != undefined && departmentIds.length > 0) {
-    const existsdepartments = departmentIds.filter(
-      async (departmentId) => (await getDepartmentById(departmentId)) != null
+  if (departmentId != undefined && departmentId.length > 0) {
+    const existsdepartments = departmentId.filter(
+      async (id) => (await getDepartmentById(id)) != null
     );
     where.departmentsDisplays = {
       some: {

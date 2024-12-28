@@ -22,10 +22,9 @@ function displayRouter(): Router {
     validateResource(createDisplaySchema),
     createDisplayHandler
   );
+  router.get("/displays/search", authMiddleware(), searchDisplaysHandler);
 
   router.get("/displays/:id", authMiddleware(), getDisplayByIdHandler);
-
-  router.get("/displays/search", authMiddleware(), searchDisplaysHandler);
 
   router.put(
     "/displays/:id",

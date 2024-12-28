@@ -116,7 +116,7 @@ export type SearchDisplay = {
   enable?: boolean;
   priority?: [number, number] | number;
   createdAt?: [string, string];
-  departmentIds?: string[];
+  departmentId?: string[];
   userIds?: string[];
   orderBy?: {
     column: "priority" | "enable" | "createdAt" | "updatedAt";

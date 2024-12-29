@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { mainFetch } from "@/lib/custom-fetch";
 import { DEFAULT_LOGIN_REDIRECT } from "@/routes";
 import {
   SignIn,
@@ -13,13 +12,12 @@ import {
   signInSchema,
   signInWithMFASchema,
 } from "@/schema/auth.schema";
-import { signIn } from "@/services/auth.service";
-import { useMutation } from "@tanstack/react-query";
+import { signIn, signInWithMFA } from "@/services/auth.service";
+import { FetchApiError } from "@/services/fetch-api";
 import { LoaderCircleIcon } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React from "react";
-import { toast } from "sonner";
 
 type SignInFormProps = {
   email?: string;
@@ -27,61 +25,28 @@ type SignInFormProps = {
 
 export const SignInForm = ({ email }: SignInFormProps) => {
   const router = useRouter();
-
-  const [signInPending, signMutation] = React.useTransition();
+  const [signInIsPending, startSignIn] = React.useTransition();
+  const [signInError, setSignInError] = React.useState<{
+    error: null | boolean;
+    message: string;
+  }>({
+    error: null,
+    message: "",
+  });
   const [signInformData, setSignInFormData] = React.useState<SignIn>({
     email: email || "",
     password: "",
   });
 
+  const [signInMFAIsPending, startSignInMFA] = React.useTransition();
+  const [signInMFAErrorMessage, setSignInMFAErrorMessage] =
+    React.useState<string>("");
+
+  const [signInMFAError, setSignInMFAError] = React.useState<boolean>(false);
   const [signInMFAformData, setSignInMFAFormData] = React.useState<SignInMFA>({
     code: "",
     isBackupCode: false,
     sessionId: "",
-  });
-
-  // const signinMutation = useMutation({
-  //   mutationFn: async (input: SignIn) => {
-  //     return await signIn(input);
-  //   },
-  //   onSuccess({ session }) {
-  //     if (session) {
-  //       setSignInMFAFormData((prev) => ({
-  //         ...prev,
-  //         sessionId: session.sessionId,
-  //       }));
-  //     } else {
-  //       router.push(DEFAULT_LOGIN_REDIRECT);
-  //       router.refresh();
-  //     }
-  //   },
-  //   onSettled() {
-  //     setSignInFormData({
-  //       email: "",
-  //       password: "",
-  //     });
-  //   },
-  // });
-
-  const signinMFAMutation = useMutation({
-    mutationFn: async (input: SignInMFA) => {
-      return await mainFetch.post<{ message: string }>(
-        "/auth/signin/mfa",
-        input
-      );
-    },
-    onMutate() {
-      setSignInMFAFormData((prev) => ({
-        ...prev,
-        code: "",
-      }));
-    },
-    onSuccess({ data: { message } }) {
-      toast.success(message);
-    },
-    onError(error) {
-      console.log(error.message);
-    },
   });
 
   const handleSignInOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -91,30 +56,42 @@ export const SignInForm = ({ email }: SignInFormProps) => {
   const handleSignInSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const parse = signInSchema.safeParse(signInformData);
-    if (!parse.success) return;
-    // signinMutation.mutate(signInformData);
+    if (signInformData.email == "" || signInformData.password == "") return;
+    setSignInError({
+      error: null,
+      message: "",
+    });
+    setSignInFormData({
+      email: "",
+      password: "",
+    });
 
-    signMutation(async () => {
-      setSignInFormData({
-        email: "",
-        password: "",
+    if (!parse.success) {
+      setSignInError({
+        error: true,
+        message: "Email và mật khẩu không hợp lệ",
       });
+      return;
+    }
 
+    startSignIn(async () => {
       try {
-        const { session, message } = await signIn(parse.data);
-
-        if (session) {
-          setSignInMFAFormData((prev) => ({
-            ...prev,
-            sessionId: session.sessionId,
-          }));
-          toast.success(message);
-        } else {
-          router.push(DEFAULT_LOGIN_REDIRECT);
-          router.refresh();
+        await signIn(signInformData);
+        router.push(DEFAULT_LOGIN_REDIRECT);
+        router.refresh();
+      } catch (error: unknown) {
+        if (error instanceof FetchApiError) {
+          setSignInError({
+            error: true,
+            message: error.message,
+          });
+        } else if (error instanceof TypeError) {
+          console.log(error.message);
+          setSignInError({
+            error: true,
+            message: "Email và mật khẩu không hợp lệ",
+          });
         }
-      } catch (error) {
-        console.log(error);
       }
     });
   };
@@ -125,15 +102,29 @@ export const SignInForm = ({ email }: SignInFormProps) => {
       isBackupCode: false,
       sessionId: "",
     });
-    signinMutation.reset();
-    signinMFAMutation.reset();
   };
 
   const handleSiginMFASubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const parse = signInWithMFASchema.safeParse(signInMFAformData);
     if (!parse.success) return;
-    signinMFAMutation.mutate(signInMFAformData);
+
+    startSignInMFA(async () => {
+      setSignInMFAError(false);
+      setSignInMFAFormData((prev) => ({
+        ...prev,
+        code: "",
+      }));
+      try {
+        await signInWithMFA(parse.data);
+        router.push(DEFAULT_LOGIN_REDIRECT);
+        router.refresh();
+      } catch (error: unknown) {
+        console.log(error);
+        if (error instanceof Error) setSignInMFAErrorMessage(error.message);
+        setSignInMFAError(true);
+      }
+    });
   };
 
   return (
@@ -165,7 +156,7 @@ export const SignInForm = ({ email }: SignInFormProps) => {
               <div className="grid gap-2">
                 <div className="flex items-center">
                   <Label htmlFor="password">Mật khẩu</Label>
-                  {/* <Link
+                  <Link
                     prefetch
                     href={`/recover${
                       signInformData.email == ""
@@ -175,7 +166,7 @@ export const SignInForm = ({ email }: SignInFormProps) => {
                     className="ml-auto inline-block text-sm underline "
                   >
                     Bạn quên mật khẩu?
-                  </Link> */}
+                  </Link>
                 </div>
                 <PasswordInput
                   id="password"
@@ -185,27 +176,27 @@ export const SignInForm = ({ email }: SignInFormProps) => {
                   value={signInformData.password}
                   onChange={handleSignInOnChange}
                 />
-                {signinMutation.isError && (
+                {signInError.error && (
                   <p className="text-red-500 text-xs font-bold">
-                    Email và mật khẩu không hợp lệ
+                    {signInError.message}
                   </p>
                 )}
               </div>
 
-              <Button variant="default" disabled={signinMutation.isPending}>
-                {signinMutation.isPending && (
+              <Button variant="default" disabled={signInIsPending}>
+                {signInIsPending && (
                   <LoaderCircleIcon className="h-4 w-4 animate-spin flex-shrink-0 mr-1" />
                 )}
                 Đăng nhập
               </Button>
-              {/* <ContinueBtn label="Đăng nhập với Google" redir="/login" /> */}
+              <ContinueBtn label="Đăng nhập với Google" redir="/login" />
             </div>
-            {/* <div className="mt-4 text-center text-sm">
+            <div className="mt-4 text-center text-sm">
               Bạn chưa có tài khoản?{" "}
               <Link prefetch className="underline" href="/signup">
                 Đăng ký
               </Link>
-            </div> */}
+            </div>
           </div>
         </form>
       ) : (
@@ -268,15 +259,15 @@ export const SignInForm = ({ email }: SignInFormProps) => {
                   </label>
                 </div>
 
-                {signinMFAMutation.isError && (
+                {signInMFAError && (
                   <p className="text-red-500 text-xs font-bold">
-                    {signinMFAMutation.error.message}
+                    {signInMFAErrorMessage}
                   </p>
                 )}
               </div>
 
-              <Button variant="default" disabled={signinMFAMutation.isPending}>
-                {signinMFAMutation.isPending && (
+              <Button variant="default" disabled={signInMFAIsPending}>
+                {signInMFAIsPending && (
                   <LoaderCircleIcon className="h-4 w-4 animate-spin flex-shrink-0 mr-1" />
                 )}
                 Xác thực
@@ -284,7 +275,7 @@ export const SignInForm = ({ email }: SignInFormProps) => {
               <Button
                 variant={"outline"}
                 onClick={handleCancel}
-                disabled={signinMFAMutation.isPending}
+                disabled={signInMFAIsPending}
               >
                 Hủy bỏ
               </Button>
@@ -349,7 +340,7 @@ export const SignInForm = ({ email }: SignInFormProps) => {
               <Button
                 variant={"outline"}
                 onClick={handleCancel}
-                disabled={signinMFAMutation.isPending}
+                disabled={signInMFAIsPending}
               >
                 Hủy bỏ
               </Button>

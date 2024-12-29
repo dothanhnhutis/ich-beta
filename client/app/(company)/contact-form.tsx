@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { toast } from "sonner";
+// import { toast } from "sonner";
 import { Loader2Icon } from "lucide-react";
 import crypto from "crypto-js";
 
@@ -45,7 +45,7 @@ export const ContactForm = () => {
   ) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
-  const [isPending, startTransistion] = React.useTransition();
+  const [isPending] = React.useTransition();
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();

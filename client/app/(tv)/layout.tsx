@@ -8,8 +8,6 @@ import {
   SidebarHeader,
   SidebarInset,
   SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
   SidebarProvider,
   SidebarRail,
 } from "@/components/ui/sidebar";
@@ -17,8 +15,8 @@ import React from "react";
 import Image from "next/image";
 import { cookies } from "next/headers";
 import { getDepartments } from "@/services/department.service";
-import PlanProvider from "@/components/providers/plan-provider";
-import PlanBtn from "./plan-btn";
+import { TVProvider } from "@/components/providers/tv-provider";
+import DepartmentItem from "./department-item";
 
 const TaskLayout = async ({
   children,
@@ -36,8 +34,10 @@ const TaskLayout = async ({
     },
   });
 
+  const pinDepartmentId = cookieStore.get("deparment:pin")?.value;
+
   return (
-    <PlanProvider selected={departments.length > 0 ? [departments[0]] : []}>
+    <TVProvider defaultPinId={pinDepartmentId} departments={departments}>
       <SidebarProvider defaultOpen={defaultOpen} className="bg-gray-100 z-[-2]">
         <Sidebar className="[&>div[data-sidebar='sidebar']]:bg-transparent bg-white">
           <SidebarHeader>
@@ -56,13 +56,11 @@ const TaskLayout = async ({
           </SidebarHeader>
           <SidebarContent>
             <SidebarGroup>
-              <SidebarGroupLabel>Departments</SidebarGroupLabel>
+              <SidebarGroupLabel>Phòng ban</SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenu>
-                  {departments.map((item) => (
-                    <SidebarMenuItem key={item.id}>
-                      <PlanBtn {...item} />
-                    </SidebarMenuItem>
+                  {departments.map((d) => (
+                    <DepartmentItem key={d.id} name={d.name} id={d.id} />
                   ))}
                 </SidebarMenu>
               </SidebarGroupContent>
@@ -87,7 +85,7 @@ const TaskLayout = async ({
         </Sidebar>
         <SidebarInset className="bg-transparent">{children}</SidebarInset>
       </SidebarProvider>
-    </PlanProvider>
+    </TVProvider>
   );
 };
 

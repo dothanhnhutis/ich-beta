@@ -1,13 +1,14 @@
 import { StatusCodes } from "http-status-codes";
 
-export interface IErrorResponse {
-  message: string;
-  statusCode: number;
-  serializeErrors(): IError;
-}
+// interface IErrorResponse {
+//   message: string;
+//   statusCode: number;
+//   serializeErrors(): IError;
+// }
 
 export interface IError {
   message: string;
+  statusCode: number;
 }
 
 export abstract class CustomError extends Error {
@@ -18,6 +19,7 @@ export abstract class CustomError extends Error {
   serializeErrors(): IError {
     return {
       message: this.message,
+      statusCode: this.statusCode,
     };
   }
 }

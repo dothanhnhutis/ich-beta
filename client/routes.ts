@@ -2,7 +2,7 @@ export const EMAIL_VERIFY_ROUTE: string = "/verify-email";
 export const COMPLETE_PROFILE_ROUTE: string = "/last-step";
 
 export const apiAuthPrefix: string = "/api";
-export const DEFAULT_LOGIN_REDIRECT: string = "/tv";
+export const DEFAULT_LOGIN_REDIRECT: string = "/profile";
 export const DEFAULT_LOGOUT_REDIRECT: string = "/signin";
 
 export const authRoutes: RegExp = /^\/(signin|signup|recover)$/;
@@ -13,6 +13,7 @@ const postsRoutes: RegExp = /^\/manager\/posts(\/create|.+\/edit)?$/;
 const productsRoutes: RegExp = /^\/manager\/products(\/create|.+\/edit)?$/;
 const usersRoutes: RegExp = /^\/manager\/users(\/create|.+\/edit)?$/;
 const tvRoutes: RegExp = /^\/tv$/;
+const adminRoutes: RegExp = /^\/admin/;
 
 export const privateRegexRoutes = [
   userRoutes,
@@ -21,6 +22,7 @@ export const privateRegexRoutes = [
   usersRoutes,
   middleRoutes,
   tvRoutes,
+  adminRoutes,
 ];
 
 // export const privateRegExpRoutes = [

@@ -111,7 +111,6 @@ input::-webkit-inner-spin-button {
   margin: 4px;
   border-radius: 10px;
   position: relative;
-  flex-shrink: 0;
 }
 
 @property --angle {
@@ -142,7 +141,6 @@ input::-webkit-inner-spin-button {
   box-sizing: content-box;
   border-radius: 10px;
   animation: 2s spin1 linear infinite;
-  flex-shrink: 0;
 }
 .animation-border::before {
   filter: blur(1.5rem);

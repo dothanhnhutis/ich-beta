@@ -1,8 +1,6 @@
 "use client";
 import { useWindowDimensions } from "@/hooks/useWindowDimensions";
-import { cn } from "@/lib/utils";
 import React from "react";
-import { Sheet, SheetContent } from "../ui/sheet";
 
 const SIDEBAR_COOKIE_NAME = "userSidebar:state";
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
@@ -47,21 +45,19 @@ export const UserSidebarProvider = ({
   const frame = useWindowDimensions();
 
   const [mobile, setIsMobile] = React.useState<boolean>();
-
-  React.useEffect(() => {
-    if (frame) {
-      if (frame.width < minMobileBreackPoint) handleSetState(false);
-    }
-    setIsMobile(frame ? frame.width < minMobileBreackPoint : false);
-  }, [frame]);
-
   const handleSetState = React.useCallback(
     (value: boolean) => {
       document.cookie = `${siderbarCookieName}=${value}; path=/; max-age=${siderbarCookieMaxAge}`;
       setState(value);
     },
-    [state]
+    [siderbarCookieMaxAge, siderbarCookieName]
   );
+  React.useEffect(() => {
+    if (frame) {
+      if (frame.width < minMobileBreackPoint) handleSetState(false);
+    }
+    setIsMobile(frame ? frame.width < minMobileBreackPoint : false);
+  }, [frame, handleSetState, minMobileBreackPoint]);
 
   const handleOnOpenChange = () => {
     handleSetState(!state);

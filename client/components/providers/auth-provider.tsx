@@ -1,43 +1,41 @@
 "use client";
 import React from "react";
-import { User } from "@/schema/user.schema";
+import { User, UserSession } from "@/schema/user.schema";
 import { changeEmail, signOut } from "@/services/users.service";
-import { useQueryClient } from "@tanstack/react-query";
 
 type AuthContext = {
   currentUser: User | null;
+  currentSession: UserSession | null;
   signOut: () => Promise<void>;
   changeEmail: (email: string) => Promise<void>;
 };
 
-const AuthContext = React.createContext<AuthContext>({
-  currentUser: null,
-  signOut: async () => {},
-  changeEmail: async (email: string) => {},
-});
+const AuthContext = React.createContext<AuthContext | null>(null);
 
-export const useAuth = () => React.useContext(AuthContext);
+export const useAuth = () => {
+  const context = React.useContext(AuthContext);
+  if (!context) {
+    throw new Error("useAuth must be used within a AuthProvider.");
+  }
+  return context;
+};
 
 export const AuthProvider = ({
   initUser,
-  initPolicies,
+  initSession,
   children,
 }: {
   initUser: User | null;
-  initPolicies: any | null;
+  initSession: UserSession | null;
   children: React.ReactNode;
 }) => {
-  const queryClient = useQueryClient();
-
   const handleSignOut = async () => {
     if (!initUser) return;
     await signOut();
-    queryClient.clear();
   };
 
   const handleChangeEmail = async (email: string) => {
     await changeEmail(email);
-    queryClient.invalidateQueries({ queryKey: ["me"] });
   };
 
   return (
@@ -46,6 +44,7 @@ export const AuthProvider = ({
         currentUser: initUser,
         signOut: handleSignOut,
         changeEmail: handleChangeEmail,
+        currentSession: initSession,
       }}
     >
       {children}

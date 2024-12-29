@@ -1,8 +1,9 @@
 import envs from "@/configs/envs";
-import { CutomFetch } from "@/lib/custom-fetch";
+import { FetchApi } from "./fetch-api";
 import { Department } from "@/schema/department.schema";
+// import { Display } from "@/schema/display.schema";
 
-const departmentInstance = new CutomFetch({
+const departmentInstance = new FetchApi({
   baseUrl: envs.NEXT_PUBLIC_SERVER_URL + "/api/v1/departments",
   credentials: "include",
   headers: {
@@ -15,30 +16,20 @@ export async function getDepartments(options?: Omit<RequestInit, "body">) {
   try {
     const { data } = await departmentInstance.get<Department[]>("", options);
     return data;
-  } catch (error) {
-    console.log("getDepartments method error:", error);
+  } catch (error: unknown) {
+    console.log(error);
     return [];
   }
 }
 
-export type Display = {
-  id: string;
-  userId: string;
-  content: string;
-  priority: number;
-  enable: boolean;
-  createdAt: string;
-  updatedAt: string;
-};
-
-export async function getDisplaysOfDepartment(departmentId: string) {
-  try {
-    const { data } = await departmentInstance.get<Display[]>(
-      `/${departmentId}/displays`
-    );
-    return data;
-  } catch (error) {
-    console.log("getTaskOfPlan method error:", error);
-    return [];
-  }
-}
+// export async function getDisplaysOfDepartment(displayId: string) {
+//   try {
+//     const { data } = await departmentInstance.get<Display[]>(
+//       `${displayId}/displays`
+//     );
+//     return data;
+//   } catch (error: unknown) {
+//     console.log(error);
+//     return [];
+//   }
+// }

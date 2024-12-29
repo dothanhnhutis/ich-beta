@@ -1,6 +1,9 @@
 import React from "react";
 import LastStepForm from "./form";
-
+import { Metadata } from "next";
+export const metadata: Metadata = {
+  title: "Hoàn Thành Hồ Sơ",
+};
 const LastStepPage = () => {
   return (
     <div className="flex flex-col flex-grow sm:flex-grow-0 sm:grid grid-cols-12 transition-all">

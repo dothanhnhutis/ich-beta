@@ -1,8 +1,8 @@
 import envs from "@/configs/envs";
-import { CutomFetch } from "@/lib/custom-fetch";
+import { FetchApi } from "./fetch-api";
 import { SignIn, SignInMFA } from "@/schema/auth.schema";
 
-const authInstance = new CutomFetch({
+const authInstance = new FetchApi({
   baseUrl: envs.NEXT_PUBLIC_SERVER_URL + "/api/v1/auth",
   credentials: "include",
   headers: {
@@ -23,9 +23,7 @@ export async function checkToken(token: string) {
 
 export async function confirmEmail(token: string) {
   try {
-    await authInstance.get("/confirm-email?token=" + token, {
-      cache: "no-cache",
-    });
+    await authInstance.get("/confirm-email?token=" + token);
     return true;
   } catch (error) {
     console.log("confirmEmail method error:", error);
@@ -50,5 +48,6 @@ export async function signInWithMFA(input: SignInMFA) {
     return data;
   } catch (error) {
     console.log("signIn method error:", error);
+    throw error;
   }
 }

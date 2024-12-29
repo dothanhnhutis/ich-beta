@@ -221,3 +221,5 @@ export const navs: (BaseNav | DropDownNav)[] = [
     href: "/lien-he",
   },
 ];
+
+export const audioPath = "/mp3/bell.mp3";

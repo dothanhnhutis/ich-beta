@@ -62,7 +62,7 @@ const DropDownContainerNav = ({
 const generateNavElement = (
   navData: BaseNav | DropDownNav,
   paddingLeft: number
-): JSX.Element => {
+): React.JSX.Element => {
   if ("subNav" in navData) {
     if ("subNav" in navData.subNav[0]) {
       return (

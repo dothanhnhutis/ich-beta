@@ -17,8 +17,7 @@ export const createSocket = ({ url, namespace, ...props }: TCreateSocket) => {
     : namespace.startsWith("/")
     ? url + namespace
     : url + "/" + namespace;
-  console.log(props);
-  return io(URL, { ...props, path: "/api/v1/socket.io" });
+  return io(URL, props);
 };
 
 export default manager;

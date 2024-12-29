@@ -1,13 +1,18 @@
 import React from "react";
 import { SignInForm } from "./form";
+import { Metadata } from "next";
 
-const SignIn = async ({
-  searchParams,
-}: {
-  searchParams: { email?: string | string[] | undefined };
-}) => {
-  const email = typeof searchParams.email == "string" ? searchParams.email : "";
-  return <SignInForm email={email} />;
+export const metadata: Metadata = {
+  title: "Đăng Nhập",
 };
 
-export default SignIn;
+const SignInPage = async ({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}) => {
+  const { email } = await searchParams;
+  return <SignInForm email={Array.isArray(email) ? undefined : email} />;
+};
+
+export default SignInPage;

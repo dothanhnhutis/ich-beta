@@ -3,3 +3,5 @@ node_modules
 .gitignore
 *.md
 .next
+.DS_Store
+

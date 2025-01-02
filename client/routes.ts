@@ -12,7 +12,7 @@ const userRoutes: RegExp = /^\/(profile|security|sessions)$/;
 const postsRoutes: RegExp = /^\/manager\/posts(\/create|.+\/edit)?$/;
 const productsRoutes: RegExp = /^\/manager\/products(\/create|.+\/edit)?$/;
 const usersRoutes: RegExp = /^\/manager\/users(\/create|.+\/edit)?$/;
-const tvRoutes: RegExp = /^\/tv$/;
+const tvRoutes: RegExp = /^\/(tv|tv1)$/;
 const adminRoutes: RegExp = /^\/admin/;
 
 export const privateRegexRoutes = [

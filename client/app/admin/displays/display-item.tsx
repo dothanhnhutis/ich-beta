@@ -15,6 +15,7 @@ import Link from "next/link";
 import { Display } from "@/schema/display.schema";
 import { updateDisplayAction } from "./actions";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 const DisplayItem = ({
   data,
@@ -32,6 +33,7 @@ const DisplayItem = ({
     success: null,
     message: "",
   });
+  const router = useRouter();
 
   React.useEffect(() => {
     if (state.success != null) {
@@ -40,8 +42,9 @@ const DisplayItem = ({
       } else {
         toast.error(state.message);
       }
+      router.refresh();
     }
-  }, [state]);
+  }, [state, router]);
 
   return (
     <div

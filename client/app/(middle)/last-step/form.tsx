@@ -11,6 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { updateProfile } from "@/services/users.service";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import DateInput from "@/components/date-input";
 
 const LastStepForm = () => {
   const router = useRouter();
@@ -83,14 +84,18 @@ const LastStepForm = () => {
         <label htmlFor="birthDate" className="col-span-full">
           Ngày sinh
         </label>
-        <Input
+        <DateInput
+          date={formData.birthDate}
+          onDateChange={(v) => console.log(v)}
+        />
+        {/* <Input
           disabled={isPending}
           id="birthDate"
           name="birthDate"
           placeholder="dd/MM/yyyy"
           value={formData.birthDate}
           onChange={handleOnchange}
-        />
+        /> */}
       </div>
 
       <div className="flex flex-col gap-2 col-span-6">

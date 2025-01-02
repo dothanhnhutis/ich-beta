@@ -149,12 +149,16 @@ export const AddProductBtn = ({ editor }: { editor: Editor }) => {
           </DialogTitle>
           <DialogDescription>{isSelected ? "" : ""}</DialogDescription>
         </DialogHeader>
-        <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="url" className="text-right text-base font-medium">
+
+        <div className="flex gap-2 flex-col">
+          <div className="sm:grid sm:grid-cols-12 sm:items-center sm:gap-4">
+            <Label
+              htmlFor="url"
+              className="col-span-3 text-right text-base font-medium"
+            >
               Hình
             </Label>
-            <div className="col-span-3 flex gap-2">
+            <div className="col-span-9 flex gap-2">
               {data.src == "" ? (
                 <div className="flex flex-col justify-center items-center text-center text-muted-foreground shrink-0 size-[150px] border-2 border-dashed rounded-md">
                   <ImageIcon className="shrink-0 size-10 mx-auto" />
@@ -230,8 +234,12 @@ export const AddProductBtn = ({ editor }: { editor: Editor }) => {
               </div>
             </div>
           </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="name" className="text-right text-base font-medium">
+
+          <div className="sm:grid sm:grid-cols-12 sm:items-center sm:gap-4">
+            <Label
+              htmlFor="name"
+              className="col-span-3 text-right text-base font-medium"
+            >
               Tên sản phẩm
             </Label>
             <Input
@@ -243,15 +251,19 @@ export const AddProductBtn = ({ editor }: { editor: Editor }) => {
                   name: e.target.value,
                 }));
               }}
-              className="col-span-3 focus-visible:ring-offset-0 focus-visible:ring-0"
+              className="col-span-9 focus-visible:ring-offset-0 focus-visible:ring-0"
               placeholder="Tên sản phẩm"
             />
           </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="unit" className="text-right text-base font-medium">
+
+          <div className="sm:grid sm:grid-cols-12 sm:items-center sm:gap-4">
+            <Label
+              htmlFor="unit"
+              className="col-span-3 text-right text-base font-medium"
+            >
               Đơn Vị Tính
             </Label>
-            <div className="flex items-center col-span-3 border rounded-md p-1 gap-1">
+            <div className="flex items-center col-span-9 border rounded-md p-1 gap-1">
               {units.map((unit) => (
                 <button
                   onClick={() =>
@@ -278,15 +290,16 @@ export const AddProductBtn = ({ editor }: { editor: Editor }) => {
               ))}
             </div>
           </div>
-          <div className="grid grid-cols-4 items-center gap-4">
+
+          <div className="sm:grid sm:grid-cols-12 sm:items-center sm:gap-4">
             <Label
               htmlFor="amount"
-              className="text-right text-base font-medium"
+              className="col-span-3 text-right text-base font-medium"
             >
               Số lượng
             </Label>
 
-            <div className="col-span-3 flex gap-3 items-center">
+            <div className="col-span-9 flex  items-center">
               <div
                 className={cn(
                   "flex items-center",
@@ -343,7 +356,7 @@ export const AddProductBtn = ({ editor }: { editor: Editor }) => {
             </div>
           </div>
         </div>
-        <DialogFooter>
+        <DialogFooter className="gap-2">
           <DialogClose asChild>
             <Button type="button" variant="secondary">
               Huỷ
@@ -367,11 +380,11 @@ export const ProductNodeView = ({ node }: NodeViewRendererProps) => {
     <NodeViewWrapper>
       <div className="flex gap-2 py-2">
         {node.attrs.src == "" ? (
-          <div className="hidden sm:flex items-center border-2 border-dashed rounded-md shrink-0 size-[100px] text-center">
+          <div className="flex items-center border-2 border-dashed rounded-md shrink-0 size-[100px] text-center">
             <ImageIcon className="shrink-0 size-8 text-muted-foreground mx-auto" />
           </div>
         ) : (
-          <div className="hidden sm:block relative aspect-square size-[100px] rounded-md overflow-hidden shrink-0">
+          <div className="relative aspect-square size-[100px] rounded-md overflow-hidden shrink-0">
             <Image
               src={node.attrs.src}
               fill

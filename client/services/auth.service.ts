@@ -36,6 +36,7 @@ export async function signIn(input: SignIn) {
     message: string;
     session?: { sessionId: string; expires: string };
   }>("/signin", input);
+  console.log(data);
   return data;
 }
 

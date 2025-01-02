@@ -179,7 +179,7 @@ const DisplayForm = ({ departments = [], ...props }: DisplayFormProps) => {
           formData.enable ? "sm:row-span-2" : ""
         )}
       >
-        <label htmlFor="priority">Hiển thị tại</label>
+        <label htmlFor="priority">Phòng ban</label>
         <div className="flex gap-2 items-center flex-wrap">
           {formData.departmentIds.map((departmentId) => {
             const department = departments.find(
@@ -276,7 +276,6 @@ const DisplayForm = ({ departments = [], ...props }: DisplayFormProps) => {
         <DisplayEditor
           content={formData.content}
           onEditorChange={(e) => {
-            console.log(e.getHTML());
             setFormData((prev) => ({
               ...prev,
               content: e.getHTML(),

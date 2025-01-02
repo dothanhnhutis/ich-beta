@@ -156,6 +156,8 @@ const DisplayPagination = (pagination: {
               searchParams.toString()
             );
             newSearchParams.set("limit", v.toString());
+            newSearchParams.set("page", "1");
+
             router.push(pathname + "?" + newSearchParams.toString());
           }}
         >

@@ -1,18 +1,12 @@
-import { buttonVariants } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-import Link from "next/link";
-import Image from "next/image";
-
 import React from "react";
-import SendVerifyEmailBtn from "./send-verify-btn";
+import Image from "next/image";
 import ReplaceEmailForm from "./replace-email-form";
 import { Metadata } from "next";
-import EmailBox from "./email-box";
+import SendVerifyEmail from "./send-verify";
 export const metadata: Metadata = {
   title: "Xác Thực Email",
 };
-const VerifyEmailPage = () => {
-
+const VerifyEmailPage = async () => {
   return (
     <div
       className="flex flex-col flex-grow sm:flex-grow-0 sm:grid grid-cols-12 transition-all
@@ -31,27 +25,7 @@ const VerifyEmailPage = () => {
               />
             </div>
           </div>
-          <h1 className="text-2xl font-semibold tracking-tight text-center mt-4">
-            <span>Xác minh email của bạn để tiếp tục</span>
-          </h1>
-         <EmailBox/>
-          <p className="text-center text-muted-foreground text-base">
-            Vui lòng kiểm tra email của bạn và chọn liên kết được cung cấp để
-            xác minh địa chỉ của bạn.
-          </p>
-          <div className="flex flex-col sm:justify-center sm:flex-row gap-2">
-            <Link
-              target="_blank"
-              href="https://gmail.com/"
-              className={cn(
-                buttonVariants({ variant: "default" }),
-                "rounded-full order-last font-bold"
-              )}
-            >
-              Đi tới Hộp thư đến Gmail
-            </Link>
-            <SendVerifyEmailBtn />
-          </div>
+          <SendVerifyEmail />
 
           <ReplaceEmailForm />
         </div>

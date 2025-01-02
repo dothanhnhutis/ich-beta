@@ -29,20 +29,19 @@ export async function signOut(options?: Omit<RequestInit, "body">) {
   }
 }
 
-export async function reSendVerifyEmail() {
-  try {
-    await userInstance.get("/verify-email");
-  } catch (error) {
-    console.log("reSendVerifyEmail method error:", error);
-  }
+export async function reSendVerifyEmail(options?: Omit<RequestInit, "body">) {
+  return await userInstance.get<{ message: string }>("/verify-email", options);
 }
 
-export async function changeEmail(email: string) {
-  try {
-    await userInstance.patch("/replace-email", { email });
-  } catch (error) {
-    console.log("changeEmail method error:", error);
-  }
+export async function changeEmail(
+  email: string,
+  options?: Omit<RequestInit, "body">
+) {
+  return await userInstance.patch<{ message: string }>(
+    "/replace-email",
+    { email },
+    options
+  );
 }
 
 export async function updateProfile(input: UpdateProfile) {

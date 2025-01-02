@@ -16,27 +16,32 @@ services:
 
   # client:
   #   container_name: client-container
+  #   image: nextapp
   #   build:
   #     context: ./client
   #     dockerfile: Dockerfile
   #   restart: always
+  #   ports:
+  #     - 3000:3000
   #   depends_on:
   #     - server
   #   networks:
   #     - mynet
 
-  server:
-    container_name: server-container
-    build:
-      context: ./server
-      dockerfile: Dockerfile
-    restart: always
-    depends_on:
-      - redis
-      - postgres
-      - rabbitmq
-    networks:
-      - mynet
+  # server:
+  #   container_name: server-container
+  #   build:
+  #     context: ./server
+  #     dockerfile: Dockerfile
+  #   restart: always
+  #   ports:
+  #     - 4000:4000
+  #   depends_on:
+  #     - redis
+  #     - postgres
+  #     - rabbitmq
+  #   networks:
+  #     - mynet
 
   redis:
     container_name: redis_container

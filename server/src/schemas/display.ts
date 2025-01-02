@@ -6,34 +6,34 @@ export const createDisplaySchema = z.object({
   body: z
     .object({
       content: z.string({
-        required_error: "content is required",
-        invalid_type_error: "content must be string",
+        required_error: "Nội dung hiển thị không được trống",
+        invalid_type_error: "Nội dung hiển thị là chuỗi",
       }),
       enable: z
         .boolean({
-          required_error: "enable is required",
-          invalid_type_error: "enable must be boolean",
+          required_error: "Bật tắt hiển thị không được trống",
+          invalid_type_error: "Bật tắt hiển thị là true/false",
         })
         .default(true),
       priority: z
         .number({
-          required_error: "priority is required",
-          invalid_type_error: "priority must be interger",
+          required_error: "Ưu tiên không được trống",
+          invalid_type_error: "Ưu tiên là số nguyên",
         })
-        .min(0, "priority minimun 0")
-        .max(100, "priority maximun 100")
+        .min(0, "Ưu tiên là số nguyên lớn hơn hoặc bằng 0")
+        .max(99, "Ưu tiên là số nguyên nhỏ hơn hoặc bằng 99")
         .default(0),
       departmentIds: z
         .array(
           z.string({
-            invalid_type_error: "departmentIds item must be string",
+            invalid_type_error: "Mã phòng là chuỗi",
           }),
           {
-            required_error: "departmentIds is required",
-            invalid_type_error: "departmentIds must be array string",
+            required_error: "Phòng ban không được trống",
+            invalid_type_error: "Phòng ban là mảng chuỗi",
           }
         )
-        .nonempty("departmentIds can not empty"),
+        .nonempty("Phòng ban không được bỏ trống"),
     })
     .strict(),
 });
@@ -45,34 +45,30 @@ export const updateDisplayByIdSchema = z.object({
   body: z
     .object({
       content: z.string({
-        required_error: "content is required",
-        invalid_type_error: "content must be string",
+        invalid_type_error: "Nội dung hiển thị là chuỗi",
       }),
       enable: z
         .boolean({
-          required_error: "enable is required",
-          invalid_type_error: "enable must be boolean",
+          invalid_type_error: "Bật tắt hiển thị là true/false",
         })
         .default(true),
       priority: z
         .number({
-          required_error: "priority is required",
-          invalid_type_error: "priority must be interger",
+          invalid_type_error: "Ưu tiên là số nguyên",
         })
-        .min(0, "priority minimun 0")
-        .max(100, "priority maximun 100")
+        .min(0, "Ưu tiên là số nguyên lớn hơn hoặc bằng 0")
+        .max(99, "Ưu tiên là số nguyên nhỏ hơn hoặc bằng 99")
         .default(0),
       departmentIds: z
         .array(
           z.string({
-            invalid_type_error: "departmentIds item must be string",
+            invalid_type_error: "Mã phòng là chuỗi",
           }),
           {
-            required_error: "departmentIds is required",
-            invalid_type_error: "departmentIds must be array string",
+            invalid_type_error: "Phòng ban là mảng chuỗi",
           }
         )
-        .nonempty("departmentIds can not empty"),
+        .nonempty("Phòng ban không được bỏ trống"),
     })
     .strip()
     .partial(),

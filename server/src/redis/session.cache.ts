@@ -58,6 +58,11 @@ export async function readSessionCacheOfUser(userId: string) {
 export async function writeSessionCache(input: WriteSessionCache) {
   const sessionId = await randId();
   const now = new Date();
+  console.log(
+    "writeSessionCache",
+    parseInt(env.SESSION_MAX_AGE),
+    new Date(now.getTime() + parseInt(env.SESSION_MAX_AGE))
+  );
   const cookieOpt = {
     path: "/",
     httpOnly: true,

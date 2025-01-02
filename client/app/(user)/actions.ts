@@ -1,6 +1,6 @@
 "use server";
 import { deleteSessionByIdService } from "@/services/users.service";
-import { revalidatePath } from "next/cache";
+// import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 
 export const deleteSessionByIdAction = async (displayId: string) => {
@@ -14,7 +14,7 @@ export const deleteSessionByIdAction = async (displayId: string) => {
           .join("; "),
       },
     });
-    revalidatePath("/sessions");
+    // revalidatePath("/sessions");
     return { success: true, message: "Xoá phiên đăng nhập thành công" };
   } catch (error: unknown) {
     console.log("deleteSessionByIdAction method error: ", error);

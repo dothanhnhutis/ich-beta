@@ -113,7 +113,7 @@ export const BlockList = ({ editor }: { editor: Editor }) => {
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="w-[200px] justify-between p-2"
+          className="w-[150px] justify-between p-2"
         >
           <div className="flex items-center gap-2">
             <Icon className={cn("size-6")} />
@@ -123,7 +123,7 @@ export const BlockList = ({ editor }: { editor: Editor }) => {
           <ChevronsUpDown className="opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[200px] p-0">
+      <PopoverContent className="w-[150px] p-0">
         <Command value="asds">
           <CommandList>
             <CommandGroup>

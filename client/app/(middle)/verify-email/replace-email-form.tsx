@@ -2,7 +2,6 @@
 import React, { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { z } from "zod";
 import { toast } from "sonner";
 import {
   Dialog,
@@ -13,37 +12,30 @@ import {
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { LoaderPinwheelIcon } from "lucide-react";
-import { useAuth } from "@/components/providers/auth-provider";
+import { changeEmailAction } from "../actions";
 
 const ReplaceEmailForm = ({ disabled }: { disabled?: boolean }) => {
   const [optenDialog, setOptenDialog] = useState<boolean>(false);
   const [email, setEmail] = useState<string>("");
-  const [error, setError] = useState<boolean>(false);
-  const {  currentUser,changeEmail } = useAuth();
-  const [isPending, startTransition] = React.useTransition();
+  const formRef = React.useRef<HTMLFormElement>(null);
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (currentUser?.email == email) {
-      setEmail("");
-      setOptenDialog(false);
-      return;
-    }
-    if (!z.string().email().safeParse(email).success) return;
+  const [state, formAction, isPending] = React.useActionState<
+    { success: boolean | null; message: string },
+    FormData
+  >(changeEmailAction, {
+    success: null,
+    message: "",
+  });
+  console.log(state);
 
-    try {
-      setError(false);
-      startTransition(async () => {
-        await changeEmail(email);
-      });
-      setEmail("");
-      toast.success("Updated and resending e-mail...");
+  React.useEffect(() => {
+    setEmail("");
+    formRef.current?.reset();
+    if (state.success) {
       setOptenDialog(false);
-    } catch (error: unknown) {
-      setError(true);
-      console.log(error);
+      toast.success(state.message);
     }
-  };
+  }, [state]);
 
   return (
     <Dialog open={optenDialog} onOpenChange={setOptenDialog}>
@@ -91,11 +83,13 @@ const ReplaceEmailForm = ({ disabled }: { disabled?: boolean }) => {
           </li>
         </ol>
         <form
-          onSubmit={handleSubmit}
+          ref={formRef}
+          action={formAction}
           className="flex flex-col sm:flex-row gap-2 mt-4"
         >
-          <div className="">
+          <div>
             <Input
+              name="email"
               disabled={isPending}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -103,12 +97,13 @@ const ReplaceEmailForm = ({ disabled }: { disabled?: boolean }) => {
               placeholder="Email address"
               className={cn(
                 "sm:max-w-[300px] focus-visible:ring-offset-0 focus-visible:ring-transparent",
-                error ? "border-destructive" : ""
+                state.success == false && !isPending ? "border-destructive" : ""
               )}
             />
-            {error && (
+            {state.success == false && !isPending && (
               <p className="text-destructive font-light text-sm">
-                You have signed up for this email
+                {/* You have signed up for this email */}
+                {state.message}
               </p>
             )}
           </div>

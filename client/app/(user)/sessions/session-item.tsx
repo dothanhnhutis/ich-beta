@@ -10,6 +10,7 @@ import { EllipsisIcon } from "lucide-react";
 import { deleteSessionByIdAction } from "../actions";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 const ipSchema = z.string().ip({ version: "v4" });
 const SessionItem = ({
@@ -29,6 +30,7 @@ const SessionItem = ({
     success: null,
     message: "",
   });
+  const router = useRouter();
 
   React.useEffect(() => {
     if (state.success != null) {
@@ -37,8 +39,9 @@ const SessionItem = ({
       } else {
         toast.error(state.message);
       }
+      router.refresh();
     }
-  }, [state]);
+  }, [state, router]);
 
   return (
     <form

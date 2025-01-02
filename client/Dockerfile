@@ -1,4 +1,4 @@
-FROM node:22-alpine3.19 AS base
+FROM node:22-slim AS base
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 RUN corepack enable
@@ -17,4 +17,4 @@ COPY --from=prod-deps /app/node_modules /app/node_modules
 COPY --from=build /app/.next /app/.next
 
 EXPOSE 3000
-CMD [ "pnpm", "start" ]
+CMD [ "pnpm", "run", "start" ]

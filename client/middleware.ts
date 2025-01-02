@@ -64,33 +64,37 @@ export async function middleware(request: NextRequest) {
 
   if (isPrivateRoute) {
     if (user) {
-      if (!user.emailVerified) {
-        if (!request.nextUrl.pathname.startsWith(EMAIL_VERIFY_ROUTE)) {
-          return NextResponse.redirect(
-            new URL(EMAIL_VERIFY_ROUTE, request.nextUrl)
-          );
-        }
-      } else {
-        if (request.nextUrl.pathname.startsWith(EMAIL_VERIFY_ROUTE)) {
-          return NextResponse.redirect(
-            new URL(DEFAULT_LOGIN_REDIRECT, request.nextUrl)
-          );
-        }
+      if (
+        !user.emailVerified &&
+        !request.nextUrl.pathname.startsWith(EMAIL_VERIFY_ROUTE)
+      ) {
+        return NextResponse.redirect(
+          new URL(EMAIL_VERIFY_ROUTE, request.nextUrl)
+        );
+      } else if (
+        user.emailVerified &&
+        !user.birthDate &&
+        !request.nextUrl.pathname.startsWith(COMPLETE_PROFILE_ROUTE)
+      ) {
+        return NextResponse.redirect(
+          new URL(COMPLETE_PROFILE_ROUTE, request.nextUrl)
+        );
       }
 
-      if (!user.birthDate) {
-        if (!request.nextUrl.pathname.startsWith(COMPLETE_PROFILE_ROUTE)) {
-          return NextResponse.redirect(
-            new URL(COMPLETE_PROFILE_ROUTE, request.nextUrl)
-          );
-        }
-      } else {
-        if (request.nextUrl.pathname.startsWith(COMPLETE_PROFILE_ROUTE)) {
-          return NextResponse.redirect(
-            new URL(DEFAULT_LOGIN_REDIRECT, request.nextUrl)
-          );
-        }
-      }
+      // else {
+      //   if (request.nextUrl.pathname.startsWith(EMAIL_VERIFY_ROUTE)) {
+      //     return NextResponse.redirect(
+      //       new URL(DEFAULT_LOGIN_REDIRECT, request.nextUrl)
+      //     );
+      //   }
+      // }
+      // else {
+      //   if (request.nextUrl.pathname.startsWith(COMPLETE_PROFILE_ROUTE)) {
+      //     return NextResponse.redirect(
+      //       new URL(DEFAULT_LOGIN_REDIRECT, request.nextUrl)
+      //     );
+      //   }
+      // }
     } else {
       const response = NextResponse.redirect(
         new URL(DEFAULT_LOGOUT_REDIRECT, request.url)

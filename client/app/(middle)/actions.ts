@@ -1,7 +1,12 @@
 "use server";
 
+import { UpdateProfile } from "@/schema/user.schema";
 import { FetchApiError } from "@/services/fetch-api";
-import { changeEmail, reSendVerifyEmail } from "@/services/users.service";
+import {
+  changeEmail,
+  reSendVerifyEmail,
+  updateProfile,
+} from "@/services/users.service";
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 
@@ -45,6 +50,37 @@ export async function changeEmailAction(
       },
     });
     revalidatePath("/verify-email");
+    return {
+      message: data.message,
+      success: true,
+    };
+  } catch (error: unknown) {
+    let msg: string = "unknown";
+    if (error instanceof FetchApiError) {
+      msg = error.message;
+    } else if (error instanceof TypeError) {
+      msg = error.message;
+    }
+    console.log("changeEmailAction method error: ", msg);
+    return {
+      message: msg,
+      success: false,
+    };
+  }
+}
+
+export async function completeProfile(info: UpdateProfile) {
+  const cookieStore = await cookies();
+  try {
+    const { data } = await updateProfile(info, {
+      headers: {
+        cookie: cookieStore
+          .getAll()
+          .map(({ name, value }) => `${name}=${encodeURIComponent(value)}`)
+          .join("; "),
+      },
+    });
+    revalidatePath("/last-step");
     return {
       message: data.message,
       success: true,

@@ -1,11 +1,11 @@
 import React from "react";
 import { Metadata } from "next";
-import Display from "./display";
+import DisplayContainer from "./display";
 export const metadata: Metadata = {
   title: "Phòng ban",
 };
-const Task1Page = () => {
-  return <Display />;
+const TaskPage = () => {
+  return <DisplayContainer />;
 };
 
-export default Task1Page;
+export default TaskPage;

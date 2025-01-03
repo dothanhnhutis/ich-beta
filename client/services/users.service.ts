@@ -44,12 +44,11 @@ export async function changeEmail(
   );
 }
 
-export async function updateProfile(input: UpdateProfile) {
-  try {
-    await userInstance.put("", input);
-  } catch (error) {
-    console.log("updateProfile method error:", error);
-  }
+export async function updateProfile(
+  input: UpdateProfile,
+  options?: Omit<RequestInit, "body">
+) {
+  return await userInstance.put<{ message: string }>("", input, options);
 }
 
 export async function getSessionsService(options?: Omit<RequestInit, "body">) {

@@ -1,5 +1,6 @@
 "use client";
 import { useTV } from "@/components/providers/tv-provider";
+
 import { useSidebar } from "@/components/ui/sidebar";
 import { audioPath } from "@/configs/constants";
 import { cn, sortByFields } from "@/lib/utils";
@@ -9,7 +10,52 @@ import { format } from "date-fns";
 import { PanelLeftIcon, VolumeOffIcon } from "lucide-react";
 import React from "react";
 
-const DisplayItem = ({ data }: { data: Display }) => {
+// const DisplayItem = ({ data }: { data: Display }) => {
+//   const [isNew, setIsNew] = React.useState<boolean>(false);
+
+//   React.useEffect(() => {
+//     let id: NodeJS.Timeout;
+//     if (Date.now() - new Date(data.updatedAt).getTime() < 60000) {
+//       setIsNew(true);
+//       id = setTimeout(() => {
+//         setIsNew(false);
+//       }, 60000 - (Date.now() - new Date(data.updatedAt).getTime()));
+//     }
+//     return () => clearTimeout(id);
+//   }, [data]);
+
+//   return (
+//     <div
+//       className={cn(
+//         "p-2 border bg-white rounded-[10px]",
+//         isNew ? "animation-border" : ""
+//       )}
+//     >
+//       <div dangerouslySetInnerHTML={{ __html: data.content }}></div>
+//       <div className="flex justify-end gap-4 items-center mt-2">
+//         <p className="text-xs text-muted-foreground">
+//           {`Ưu tiên: ${data.priority}`}
+//         </p>
+//         <p className="text-xs text-muted-foreground">
+//           {`Ngày tạo: ${format(data.createdAt, "dd/MM/yy HH:mm")}`}
+//         </p>
+//         <p className="text-xs text-muted-foreground">
+//           {`Ngày cập nhật: ${format(data.updatedAt, "dd/MM/yy HH:mm")}`}
+//         </p>
+//       </div>
+//     </div>
+//   );
+// };
+
+const DisplayItem = ({
+  data,
+  idx,
+  style,
+}: {
+  data: Display;
+  idx: number;
+  style?: React.CSSProperties;
+}) => {
   const [isNew, setIsNew] = React.useState<boolean>(false);
 
   React.useEffect(() => {
@@ -18,30 +64,88 @@ const DisplayItem = ({ data }: { data: Display }) => {
       setIsNew(true);
       id = setTimeout(() => {
         setIsNew(false);
-      }, 60000 - (Date.now() - new Date(data.updatedAt).getTime()));
+      }, 30000 - (Date.now() - new Date(data.updatedAt).getTime()));
     }
     return () => clearTimeout(id);
   }, [data]);
 
   return (
     <div
-      className={cn(
-        "p-2 border bg-white rounded-[10px]",
-        isNew ? "animation-border" : ""
-      )}
+      className="bg-sky-200 rounded-md p-2 shadow-md relative "
+      style={style}
     >
-      <div dangerouslySetInnerHTML={{ __html: data.content }}></div>
-      <div className="flex justify-end gap-4 items-center mt-2">
-        <p className="text-xs text-muted-foreground">
-          {`Ưu tiên: ${data.priority}`}
-        </p>
-        <p className="text-xs text-muted-foreground">
-          {`Ngày tạo: ${format(data.createdAt, "dd/MM/yy HH:mm")}`}
-        </p>
-        <p className="text-xs text-muted-foreground">
-          {`Ngày cập nhật: ${format(data.updatedAt, "dd/MM/yy HH:mm")}`}
-        </p>
+      <div className="flex gap-2 items-center justify-between ">
+        <h4
+          className={cn(
+            "text-4xl font-bold text-blue-600 ",
+            isNew ? "animate-bounce" : ""
+          )}
+        >
+          {idx}
+        </h4>
+        <div className="flex justify-end gap-4 items-center ">
+          <p className="text-xs text-black">{`Ưu tiên: ${data.priority}`}</p>
+          <p className="text-xs text-black">
+            {`Ngày tạo: ${format(data.createdAt, "dd/MM/yy HH:mm")}`}
+          </p>
+          <p className="text-xs text-black">
+            {`Ngày cập nhật: ${format(data.updatedAt, "dd/MM/yy HH:mm")}`}
+          </p>
+        </div>
       </div>
+      <div className="p-2 rounded-md bg-white">
+        <div dangerouslySetInnerHTML={{ __html: data.content }}></div>
+      </div>
+    </div>
+  );
+};
+
+// const DisplayList = ({
+//   displays,
+//   col,
+// }: {
+//   displays: Display[];
+//   col: number;
+// }) => {
+//   const displaysRef = React.useRef<HTMLDivElement | null>(null);
+
+//   return (
+//     <div
+//       ref={displaysRef}
+//       className="flex flex-col gap-2 basis-1/3 p-1 py-2  relative z-0 h-[calc(100vh_-_56px)] overflow-y-scroll"
+//     >
+//       {displays.length > 0 ? (
+//         displays.map((d, idx) => (
+//           <DisplayItem key={d.id} data={d} idx={idx * 3 + col + 1} />
+//         ))
+//       ) : (
+//         <p className="text-center text-xl"></p>
+//       )}
+//     </div>
+//   );
+// };
+
+const DisplayList = ({
+  displays,
+  col,
+}: {
+  displays: Display[];
+  col: number;
+}) => {
+  return (
+    <div className="flex flex-col gap-2 basis-1/3 p-1 py-2  relative z-0 h-[calc(100vh_-_56px)] overflow-y-scroll">
+      {displays.length > 0 ? (
+        displays.map((d, idx) => (
+          <DisplayItem
+            key={idx}
+            data={d}
+            idx={idx * 3 + col + 1}
+            style={{ transform: `translate3d(0px, 0px, 0px)` }}
+          />
+        ))
+      ) : (
+        <p className="text-center text-xl"></p>
+      )}
     </div>
   );
 };
@@ -91,7 +195,7 @@ const DisplayContainer = () => {
               order: "desc",
             },
             {
-              key: "updatedAt",
+              key: "createdAt",
               order: "desc",
             },
           ]
@@ -123,7 +227,7 @@ const DisplayContainer = () => {
                   order: "desc",
                 },
                 {
-                  key: "updatedAt",
+                  key: "createdAt",
                   order: "desc",
                 },
               ]
@@ -139,7 +243,7 @@ const DisplayContainer = () => {
                   order: "desc",
                 },
                 {
-                  key: "updatedAt",
+                  key: "createdAt",
                   order: "desc",
                 },
               ]
@@ -161,7 +265,7 @@ const DisplayContainer = () => {
                   order: "desc",
                 },
                 {
-                  key: "updatedAt",
+                  key: "createdAt",
                   order: "desc",
                 },
               ]
@@ -187,7 +291,7 @@ const DisplayContainer = () => {
               order: "desc",
             },
             {
-              key: "updatedAt",
+              key: "createdAt",
               order: "desc",
             },
           ]
@@ -252,18 +356,9 @@ const DisplayContainer = () => {
           </div>
         </div>
 
-        <div className="flex w-full h-[calc(100vh_-_56px)]">
-          {data.map((displays, idx) => (
-            <div
-              key={idx}
-              className="flex flex-col gap-1 basis-1/3 p-1 relative z-0"
-            >
-              {displays.length > 0 ? (
-                displays.map((d) => <DisplayItem key={d.id} data={d} />)
-              ) : (
-                <p className="text-center text-xl"></p>
-              )}
-            </div>
+        <div className="flex w-full gap-2">
+          {data.map((displays, col) => (
+            <DisplayList displays={displays} col={col} key={col} />
           ))}
         </div>
       </div>

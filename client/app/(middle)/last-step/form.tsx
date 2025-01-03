@@ -1,5 +1,5 @@
 "use client";
-import React, { useTransition } from "react";
+import React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -8,14 +8,15 @@ import { useAuth } from "@/components/providers/auth-provider";
 import { UpdateProfile, updateProfileSchema, User } from "@/schema/user.schema";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
-import { updateProfile } from "@/services/users.service";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import DateInput from "@/components/date-input";
+import { completeProfile } from "../actions";
 
 const LastStepForm = () => {
   const router = useRouter();
   const { currentUser } = useAuth();
+
   const [formData, setFormData] = React.useState<UpdateProfile>({
     username: currentUser?.username || "",
     birthDate: currentUser?.birthDate || "",
@@ -27,21 +28,40 @@ const LastStepForm = () => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-  const [isPending, startTransition] = useTransition();
+  const [state, formAction, isPending] = React.useActionState<{
+    success: null | boolean;
+    message: string;
+  }>(completeProfile.bind(null, formData), {
+    success: null,
+    message: "",
+  });
+  const formRef = React.useRef<HTMLFormElement | null>(null);
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const { data, success } = updateProfileSchema.safeParse(formData);
-    if (!success) return;
-    startTransition(async () => {
-      await updateProfile(data);
+  React.useEffect(() => {
+    formRef.current?.reset();
+    if (state.success) {
       router.push("/profile");
-      toast.success("Tạo hồ sơ thành công.");
-    });
-  };
+      toast.success(state.message);
+    } else {
+      toast.error(state.message);
+    }
+  }, [router, state]);
+
+  // const [isPending, startTransition] = useTransition();
+
+  // const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  //   e.preventDefault();
+  //   const { data, success } = updateProfileSchema.safeParse(formData);
+  //   if (!success) return;
+  //   startTransition(async () => {
+  //     await updateProfile(data);
+  //     router.push("/profile");
+  //     toast.success("Tạo hồ sơ thành công.");
+  //   });
+  // };
 
   return (
-    <form className="grid grid-cols-6 gap-4" onSubmit={handleSubmit}>
+    <form className="grid grid-cols-6 gap-4" action={formAction}>
       <div className="flex justify-center col-span-6">
         <Avatar className="size-24">
           <AvatarImage
@@ -71,7 +91,7 @@ const LastStepForm = () => {
       <div className="flex flex-col gap-1 col-span-6 sm:col-span-3">
         <label htmlFor="phoneNumber">Số điện thoại</label>
         <Input
-          placeholder="0123456789"
+          placeholder="84+ 123 456789"
           id="phoneNumber"
           name="phoneNumber"
           value={formData.phoneNumber}
@@ -80,22 +100,16 @@ const LastStepForm = () => {
         />
       </div>
 
-      <div className="grid gap-1 col-span-6">
+      <div className="grid gap-1 col-span-6 ">
         <label htmlFor="birthDate" className="col-span-full">
           Ngày sinh
         </label>
         <DateInput
           date={formData.birthDate}
-          onDateChange={(v) => console.log(v)}
+          onDateChange={(v) =>
+            setFormData((prev) => ({ ...prev, birthDate: v }))
+          }
         />
-        {/* <Input
-          disabled={isPending}
-          id="birthDate"
-          name="birthDate"
-          placeholder="dd/MM/yyyy"
-          value={formData.birthDate}
-          onChange={handleOnchange}
-        /> */}
       </div>
 
       <div className="flex flex-col gap-2 col-span-6">
@@ -130,7 +144,10 @@ const LastStepForm = () => {
         </RadioGroup>
       </div>
 
-      <Button className="col-span-6" disabled={isPending}>
+      <Button
+        className="col-span-6"
+        disabled={isPending || !updateProfileSchema.safeParse(formData).success}
+      >
         Lưu
       </Button>
     </form>

@@ -40,8 +40,6 @@ export default async function RootLayout({
     },
   });
 
-  console.log(user);
-
   const session = await getCurrentSessionService({
     headers: {
       Cookie: allCookie,

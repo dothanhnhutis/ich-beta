@@ -1,126 +1,101 @@
 "use client";
 import React from "react";
 
-const LoopVerticalScroll = () => {
-  const ref1 = React.useRef<HTMLDivElement | null>(null);
-  const [startY, setStartY] = React.useState(0); // Initial Y position on drag start
-  const [currentTranslateY, setCurrentTranslateY] = React.useState(-100); // Current translateY value
+const data = [
+  {
+    id: "1",
+    height: 200,
+  },
+];
 
-  const handleMouseDown = (event: React.MouseEvent) => {
-    // setStartY(event.clientY); // Store the initial Y position
-    // document.addEventListener("mousemove", handleMouseMove);
-    // document.addEventListener("mouseup", handleMouseUp);
+const FPS = 120;
 
-    // console.log(event.clientY);
-    setStartY(event.clientY);
-  };
+const LoopItem = () => {
+  const containerRef = React.useRef<HTMLDivElement | null>(null);
+  const listRef = React.useRef<HTMLDivElement | null>(null);
+  const [listData, setListData] = React.useState<
+    {
+      id: string;
+      height: number;
+    }[]
+  >(data);
+  const firstChildRef = React.useRef<HTMLDivElement | null>(null);
+
+  const [isOverContainer, setOverContainer] = React.useState<boolean>(false);
+  const [currentTranslateY, setCurrentTranslateY] = React.useState<number>(0);
 
   React.useEffect(() => {
-    const handleMouseUp = (event: MouseEvent) => {
-      if (!ref1.current) return;
-      const deltaY = event.clientY - startY;
-      setCurrentTranslateY((prev) => prev + deltaY);
+    if (!listRef.current || !containerRef.current) return;
+    setOverContainer(
+      containerRef.current.offsetHeight < listRef.current.offsetHeight
+    );
+  }, []);
 
-      setStartY(event.clientY);
+  React.useEffect(() => {
+    if (!isOverContainer) return;
+    const time = setInterval(() => {
+      if (!listRef.current || !containerRef.current) return;
+      if (currentTranslateY + listRef.current.offsetHeight <= 0) {
+        setCurrentTranslateY(containerRef.current.offsetHeight);
+      } else {
+        setCurrentTranslateY((prev) => prev - 1);
+      }
+    }, 1000 / FPS);
+    return () => clearInterval(time);
+  }, [currentTranslateY, isOverContainer]);
 
-      ref1.current.style.transform = `translate3d(0, ${
-        currentTranslateY + deltaY
-      }px, 0)`;
-      console.log("handleMouseUp");
-    };
+  React.useEffect(() => {
+    if (!firstChildRef.current || !containerRef.current) return;
 
-    if (ref1.current) {
-      ref1.current.addEventListener("mouseup", handleMouseUp);
+    const containerRect = containerRef.current.getBoundingClientRect();
+    const item1Rect = firstChildRef.current.getBoundingClientRect();
+
+    if (item1Rect.bottom <= containerRect.top) {
+      setListData((prev) => {
+        const firstChild = prev[0];
+        const newList = prev.filter((d) => d.id != firstChild.id);
+        return [...newList, firstChild];
+      });
+      setCurrentTranslateY(-1);
     }
+  }, [currentTranslateY, listData]);
 
-    return () => ref1.current?.removeEventListener("mouseup", handleMouseUp);
-  }, [currentTranslateY, startY]);
+  return (
+    <div
+      ref={containerRef}
+      className="basis-1/3 h-[calc(100vh_-_56px)] overflow-hidden"
+    >
+      <div
+        ref={listRef}
+        className="flex flex-col gap-2 py-2"
+        style={{ transform: `translate3d(0px, ${currentTranslateY}px, 0px)` }}
+      >
+        {listData.map((d, idx) => (
+          <div
+            key={idx}
+            ref={(el) => {
+              if (idx == 0) {
+                firstChildRef.current = el;
+              }
+            }}
+            className={`h-[${d.height}px] bg-sky-200 rounded-md shadow-md text-center shrink-0`}
+          >
+            {d.id}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
 
-  // const handleMouseMove = (event: MouseEvent) => {
-  //   if (!ref1.current) return;
-  //   const deltaY = event.clientY - startY; // Calculate how much the mouse moved
-  //   setCurrentTranslateY((prev) => prev + deltaY); // Update the translateY value
-  //   setStartY(event.clientY); // Reset the start Y to the current position
-
-  //   ref1.current.style.transform = `translate3d(0, ${
-  //     currentTranslateY + deltaY
-  //   }px, 0)`;
-  // };
-
+const LoopVerticalScroll = () => {
   return (
     <div className="bg-gray-100">
       <div className="h-[56px] sticky top-0 left-0 w-full bg-white">header</div>
       <div className="flex w-full gap-2">
-        <div className="basis-1/3 h-[calc(100vh_-_56px)] overflow-hidden">
-          <div
-            ref={ref1}
-            className="flex flex-col gap-2 py-2"
-            style={{ transform: `translate3d(0px, -100px, 0px);` }}
-            onMouseDown={handleMouseDown}
-          >
-            <div
-              className="h-[200px] bg-sky-200 rounded-md shadow-md text-center shrink-0"
-              style={{ transform: `translate3d(0px, 0px, 0px)` }}
-            >
-              1
-            </div>
-            <div className="h-[400px] bg-sky-200 rounded-md shadow-md text-center shrink-0">
-              4
-            </div>
-            <div className="h-[600px] bg-sky-200 rounded-md shadow-md text-center shrink-0">
-              7
-            </div>
-            <div className="h-[200px] bg-sky-200 rounded-md shadow-md text-center shrink-0">
-              10
-            </div>
-            <div className="h-[100px] bg-sky-200 rounded-md shadow-md text-center shrink-0">
-              13
-            </div>
-            <div className="h-[100px] bg-sky-200 rounded-md shadow-md text-center shrink-0">
-              16
-            </div>
-          </div>
-        </div>
-        <div className="flex flex-col gap-2 py-2 basis-1/3 h-[calc(100vh_-_56px)] overflow-y-scroll">
-          <div className="h-[200px] bg-sky-200 rounded-md shadow-md text-center shrink-0">
-            1
-          </div>
-          <div className="h-[400px] bg-sky-200 rounded-md shadow-md text-center shrink-0">
-            4
-          </div>
-          <div className="h-[600px] bg-sky-200 rounded-md shadow-md text-center shrink-0">
-            7
-          </div>
-          <div className="h-[200px] bg-sky-200 rounded-md shadow-md text-center shrink-0">
-            10
-          </div>
-          <div className="h-[100px] bg-sky-200 rounded-md shadow-md text-center shrink-0">
-            13
-          </div>
-          <div className="h-[100px] bg-sky-200 rounded-md shadow-md text-center shrink-0">
-            16
-          </div>
-        </div>
-        <div className="flex flex-col gap-2 py-2 basis-1/3 h-[calc(100vh_-_56px)] overflow-y-scroll">
-          <div className="h-[200px] bg-sky-200 rounded-md shadow-md text-center shrink-0">
-            1
-          </div>
-          <div className="h-[400px] bg-sky-200 rounded-md shadow-md text-center shrink-0">
-            4
-          </div>
-          <div className="h-[600px] bg-sky-200 rounded-md shadow-md text-center shrink-0">
-            7
-          </div>
-          <div className="h-[200px] bg-sky-200 rounded-md shadow-md text-center shrink-0">
-            10
-          </div>
-          <div className="h-[100px] bg-sky-200 rounded-md shadow-md text-center shrink-0">
-            13
-          </div>
-          <div className="h-[100px] bg-sky-200 rounded-md shadow-md text-center shrink-0">
-            16
-          </div>
-        </div>
+        <LoopItem />
+        <LoopItem />
+        <LoopItem />
       </div>
     </div>
   );

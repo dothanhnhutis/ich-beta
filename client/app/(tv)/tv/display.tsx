@@ -136,12 +136,7 @@ const DisplayList = ({
     <div className="flex flex-col gap-2 basis-1/3 p-1 py-2  relative z-0 h-[calc(100vh_-_56px)] overflow-y-scroll">
       {displays.length > 0 ? (
         displays.map((d, idx) => (
-          <DisplayItem
-            key={idx}
-            data={d}
-            idx={idx * 3 + col + 1}
-            style={{ transform: `translate3d(0px, 0px, 0px)` }}
-          />
+          <DisplayItem key={idx} data={d} idx={idx * 3 + col + 1} />
         ))
       ) : (
         <p className="text-center text-xl"></p>

@@ -47,14 +47,41 @@ import React from "react";
 //   );
 // };
 
-const DisplayItem = ({
+// const DisplayList = ({
+//   displays,
+//   col,
+// }: {
+//   displays: Display[];
+//   col: number;
+// }) => {
+//   const displaysRef = React.useRef<HTMLDivElement | null>(null);
+
+//   return (
+//     <div
+//       ref={displaysRef}
+//       className="flex flex-col gap-2 basis-1/3 p-1 py-2  relative z-0 h-[calc(100vh_-_56px)] overflow-y-scroll"
+//     >
+//       {displays.length > 0 ? (
+//         displays.map((d, idx) => (
+//           <DisplayItem key={d.id} data={d} idx={idx * 3 + col + 1} />
+//         ))
+//       ) : (
+//         <p className="text-center text-xl"></p>
+//       )}
+//     </div>
+//   );
+// };
+
+const DisplayRow = ({
   data,
   idx,
   style,
+  ref,
 }: {
   data: Display;
   idx: number;
   style?: React.CSSProperties;
+  ref?: React.RefObject<HTMLDivElement>;
 }) => {
   const [isNew, setIsNew] = React.useState<boolean>(false);
 
@@ -71,6 +98,7 @@ const DisplayItem = ({
 
   return (
     <div
+      ref={ref}
       className="bg-sky-200 rounded-md p-2 shadow-md relative "
       style={style}
     >
@@ -100,47 +128,87 @@ const DisplayItem = ({
   );
 };
 
-// const DisplayList = ({
-//   displays,
-//   col,
-// }: {
-//   displays: Display[];
-//   col: number;
-// }) => {
-//   const displaysRef = React.useRef<HTMLDivElement | null>(null);
-
-//   return (
-//     <div
-//       ref={displaysRef}
-//       className="flex flex-col gap-2 basis-1/3 p-1 py-2  relative z-0 h-[calc(100vh_-_56px)] overflow-y-scroll"
-//     >
-//       {displays.length > 0 ? (
-//         displays.map((d, idx) => (
-//           <DisplayItem key={d.id} data={d} idx={idx * 3 + col + 1} />
-//         ))
-//       ) : (
-//         <p className="text-center text-xl"></p>
-//       )}
-//     </div>
-//   );
-// };
-
-const DisplayList = ({
+const FPS = 120;
+const DisplayCol = ({
   displays,
   col,
 }: {
   displays: Display[];
   col: number;
 }) => {
+  const containerRef = React.useRef<HTMLDivElement | null>(null);
+  const listRef = React.useRef<HTMLDivElement | null>(null);
+  const [listData, setListData] = React.useState<Display[]>([]);
+
+  React.useEffect(() => {
+    setListData(displays);
+  }, [displays]);
+
+  const firstChildRef = React.useRef<HTMLDivElement | null>(null);
+
+  const [isOverContainer, setOverContainer] = React.useState<boolean>(false);
+  const [currentTranslateY, setCurrentTranslateY] = React.useState<number>(0);
+
+  React.useEffect(() => {
+    if (!listRef.current || !containerRef.current) return;
+    setOverContainer(
+      containerRef.current.offsetHeight < listRef.current.offsetHeight
+    );
+  }, []);
+
+  React.useEffect(() => {
+    if (!isOverContainer) return;
+    const time = setInterval(() => {
+      if (!listRef.current || !containerRef.current) return;
+      if (currentTranslateY + listRef.current.offsetHeight <= 0) {
+        setCurrentTranslateY(containerRef.current.offsetHeight);
+      } else {
+        setCurrentTranslateY((prev) => prev - 1);
+      }
+    }, 1000 / FPS);
+    return () => clearInterval(time);
+  }, [currentTranslateY, isOverContainer]);
+
+  React.useEffect(() => {
+    if (!firstChildRef.current || !containerRef.current) return;
+
+    const containerRect = containerRef.current.getBoundingClientRect();
+    const item1Rect = firstChildRef.current.getBoundingClientRect();
+
+    if (item1Rect.bottom <= containerRect.top) {
+      setListData((prev) => {
+        const firstChild = prev[0];
+        const newList = prev.filter((d) => d.id != firstChild.id);
+        return [...newList, firstChild];
+      });
+      setCurrentTranslateY(-1);
+    }
+  }, [currentTranslateY, listData]);
+
   return (
-    <div className="flex flex-col gap-2 basis-1/3 p-1 py-2  relative z-0 h-[calc(100vh_-_56px)] overflow-y-scroll">
-      {displays.length > 0 ? (
-        displays.map((d, idx) => (
-          <DisplayItem key={idx} data={d} idx={idx * 3 + col + 1} />
-        ))
-      ) : (
-        <p className="text-center text-xl"></p>
-      )}
+    <div
+      ref={containerRef}
+      className="basis-1/3 h-[calc(100vh_-_56px)] overflow-hidden"
+    >
+      <div
+        ref={listRef}
+        className="flex flex-col gap-2 py-2"
+        style={{ transform: `translate3d(0px, ${currentTranslateY}px, 0px)` }}
+      >
+        {listData.map((d, idx) => (
+          <div
+            key={idx}
+            ref={(el) => {
+              if (idx == 0) {
+                firstChildRef.current = el;
+              }
+            }}
+            className={` bg-sky-200 rounded-md shadow-md text-center shrink-0`}
+          >
+            <di
+          </div>
+        ))}
+      </div>
     </div>
   );
 };
@@ -153,7 +221,7 @@ function splitBigArray<T>(bigArray: T[], part: number) {
   return ketQua;
 }
 
-const DisplayContainer = () => {
+const DisplayWrapper = () => {
   const {
     connected,
     departmentsData,
@@ -353,7 +421,7 @@ const DisplayContainer = () => {
 
         <div className="flex w-full gap-2">
           {data.map((displays, col) => (
-            <DisplayList displays={displays} col={col} key={col} />
+            <DisplayCol key={col} displays={displays} col={col} />
           ))}
         </div>
       </div>
@@ -361,4 +429,4 @@ const DisplayContainer = () => {
   );
 };
 
-export default DisplayContainer;
+export default DisplayWrapper;

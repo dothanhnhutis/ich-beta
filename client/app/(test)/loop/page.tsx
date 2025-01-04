@@ -6,6 +6,26 @@ const data = [
     id: "1",
     height: 200,
   },
+  {
+    id: "2",
+    height: 400,
+  },
+  {
+    id: "3",
+    height: 600,
+  },
+  {
+    id: "4",
+    height: 100,
+  },
+  {
+    id: "5",
+    height: 400,
+  },
+  {
+    id: "6",
+    height: 50,
+  },
 ];
 
 const FPS = 120;
@@ -78,9 +98,10 @@ const LoopItem = () => {
                 firstChildRef.current = el;
               }
             }}
-            className={`h-[${d.height}px] bg-sky-200 rounded-md shadow-md text-center shrink-0`}
+            className={` bg-sky-200 rounded-md shadow-md text-center shrink-0`}
           >
             {d.id}
+            <div>height</div>
           </div>
         ))}
       </div>

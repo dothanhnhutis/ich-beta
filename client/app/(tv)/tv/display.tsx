@@ -72,44 +72,31 @@ import React from "react";
 //   );
 // };
 
-const DisplayRow = ({
-  data,
-  idx,
-  style,
-  ref,
-}: {
-  data: Display;
-  idx: number;
-  style?: React.CSSProperties;
-  ref?: React.RefObject<HTMLDivElement>;
-}) => {
+const DisplayRow = ({ data }: { data: DisplayRow }) => {
   const [isNew, setIsNew] = React.useState<boolean>(false);
 
   React.useEffect(() => {
-    let id: NodeJS.Timeout;
-    if (Date.now() - new Date(data.updatedAt).getTime() < 60000) {
+    console.log("first");
+    let timeId: NodeJS.Timeout;
+    if (Date.now() - new Date(data.updatedAt).getTime() < 30000) {
       setIsNew(true);
-      id = setTimeout(() => {
+      timeId = setTimeout(() => {
         setIsNew(false);
       }, 30000 - (Date.now() - new Date(data.updatedAt).getTime()));
     }
-    return () => clearTimeout(id);
+    return () => clearTimeout(timeId);
   }, [data]);
 
   return (
-    <div
-      ref={ref}
-      className="bg-sky-200 rounded-md p-2 shadow-md relative "
-      style={style}
-    >
+    <div className="bg-sky-200 rounded-md p-2 shadow-md relative ">
       <div className="flex gap-2 items-center justify-between ">
         <h4
           className={cn(
-            "text-4xl font-bold text-blue-600 ",
+            "text-4xl font-bold text-blue-600",
             isNew ? "animate-bounce" : ""
           )}
         >
-          {idx}
+          {data.index}
         </h4>
         <div className="flex justify-end gap-4 items-center ">
           <p className="text-xs text-black">{`Ưu tiên: ${data.priority}`}</p>
@@ -128,54 +115,44 @@ const DisplayRow = ({
   );
 };
 
-const FPS = 120;
-const DisplayCol = ({
-  displays,
-  col,
-}: {
-  displays: Display[];
-  col: number;
-}) => {
+const FPS = 60;
+const DisplayCol = ({ displays }: { displays: DisplayRow[] }) => {
   const containerRef = React.useRef<HTMLDivElement | null>(null);
   const listRef = React.useRef<HTMLDivElement | null>(null);
-  const [listData, setListData] = React.useState<Display[]>([]);
+  const [listData, setListData] = React.useState<DisplayRow[]>([]);
+
+  const firstChildRef = React.useRef<HTMLDivElement | null>(null);
+  const [isOverContainer, setOverContainer] = React.useState<boolean>(false);
+  const [currentTranslateY, setCurrentTranslateY] = React.useState<number>(0);
 
   React.useEffect(() => {
     setListData(displays);
   }, [displays]);
 
-  const firstChildRef = React.useRef<HTMLDivElement | null>(null);
-
-  const [isOverContainer, setOverContainer] = React.useState<boolean>(false);
-  const [currentTranslateY, setCurrentTranslateY] = React.useState<number>(0);
-
-  React.useEffect(() => {
-    if (!listRef.current || !containerRef.current) return;
-    setOverContainer(
-      containerRef.current.offsetHeight < listRef.current.offsetHeight
-    );
-  }, []);
+  React.useLayoutEffect(() => {
+    setCurrentTranslateY(0);
+    if (containerRef.current && listRef.current) {
+      const containerHeight = containerRef.current.offsetHeight;
+      const listHeight = listRef.current.offsetHeight;
+      setOverContainer(listHeight > containerHeight);
+    }
+  }, [displays, listData]);
 
   React.useEffect(() => {
     if (!isOverContainer) return;
-    const time = setInterval(() => {
-      if (!listRef.current || !containerRef.current) return;
-      if (currentTranslateY + listRef.current.offsetHeight <= 0) {
-        setCurrentTranslateY(containerRef.current.offsetHeight);
-      } else {
-        setCurrentTranslateY((prev) => prev - 1);
-      }
+    const intervalId = setInterval(() => {
+      setCurrentTranslateY((prev) => prev - 1);
     }, 1000 / FPS);
-    return () => clearInterval(time);
-  }, [currentTranslateY, isOverContainer]);
+    return () => clearInterval(intervalId);
+  }, [isOverContainer]);
 
   React.useEffect(() => {
     if (!firstChildRef.current || !containerRef.current) return;
 
     const containerRect = containerRef.current.getBoundingClientRect();
-    const item1Rect = firstChildRef.current.getBoundingClientRect();
+    const firstChilRect = firstChildRef.current.getBoundingClientRect();
 
-    if (item1Rect.bottom <= containerRect.top) {
+    if (firstChilRect.bottom <= containerRect.top) {
       setListData((prev) => {
         const firstChild = prev[0];
         const newList = prev.filter((d) => d.id != firstChild.id);
@@ -183,7 +160,7 @@ const DisplayCol = ({
       });
       setCurrentTranslateY(-1);
     }
-  }, [currentTranslateY, listData]);
+  }, [currentTranslateY]);
 
   return (
     <div
@@ -203,9 +180,9 @@ const DisplayCol = ({
                 firstChildRef.current = el;
               }
             }}
-            className={` bg-sky-200 rounded-md shadow-md text-center shrink-0`}
+            className={`bg-sky-200 rounded-md shadow-md shrink-0`}
           >
-            <di
+            <DisplayRow data={d} />
           </div>
         ))}
       </div>
@@ -213,13 +190,23 @@ const DisplayCol = ({
   );
 };
 
-function splitBigArray<T>(bigArray: T[], part: number) {
-  const ketQua: T[][] = Array.from({ length: part }, () => []);
+function splitBigArray<T extends object>(
+  bigArray: T[],
+  part: number
+): (T & { index: number })[][] {
+  const ketQua: (T & { index: number })[][] = Array.from(
+    { length: part },
+    () => []
+  );
   for (let index = 0; index < bigArray.length; index++) {
-    ketQua[index % part].push(bigArray[index]);
+    ketQua[index % part].push({ index: index + 1, ...bigArray[index] });
   }
   return ketQua;
 }
+
+type DisplayRow = Display & {
+  index: number;
+};
 
 const DisplayWrapper = () => {
   const {
@@ -420,9 +407,10 @@ const DisplayWrapper = () => {
         </div>
 
         <div className="flex w-full gap-2">
-          {data.map((displays, col) => (
-            <DisplayCol key={col} displays={displays} col={col} />
-          ))}
+          {/* {data.map((displays, col) => (
+            <DisplayCol key={col} displays={displays} />
+          ))} */}
+          <DisplayCol displays={data[0]} />
         </div>
       </div>
     </div>

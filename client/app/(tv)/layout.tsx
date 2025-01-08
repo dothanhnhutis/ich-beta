@@ -15,8 +15,10 @@ import React from "react";
 import Image from "next/image";
 import { cookies } from "next/headers";
 import { getDepartments } from "@/services/department.service";
-import { TVProvider } from "@/components/providers/tv-provider";
+import { TVProvider, TVSettings } from "@/components/providers/tv-provider";
 import DepartmentItem from "./department-item";
+import { DISPLAY_SETTING } from "@/configs/constants";
+import UserFooter from "./user-footer";
 
 const TaskLayout = async ({
   children,
@@ -34,10 +36,26 @@ const TaskLayout = async ({
     },
   });
 
-  const pinDepartmentId = cookieStore.get("deparment:pin")?.value;
+  const tvSettingsCookie = cookieStore.get(DISPLAY_SETTING);
+
+  const tvSettings = tvSettingsCookie
+    ? (JSON.parse(tvSettingsCookie.value) as TVSettings)
+    : undefined;
 
   return (
-    <TVProvider defaultPinId={pinDepartmentId} departments={departments}>
+    <TVProvider
+      defaultSettings={{
+        col: tvSettings?.col || 3,
+        isAudioAllowed: false,
+        pinDepartmentId: tvSettings?.pinDepartmentId || null,
+        speed: tvSettings?.speed || 60,
+        selectedDepartment:
+          !tvSettings || !tvSettings.pinDepartmentId || departments.length == 0
+            ? null
+            : departments.find((d) => d.id == tvSettings.pinDepartmentId) ||
+              null,
+      }}
+    >
       <SidebarProvider defaultOpen={defaultOpen} className="bg-gray-100 z-[-2]">
         <Sidebar className="[&>div[data-sidebar='sidebar']]:bg-transparent bg-white">
           <SidebarHeader>
@@ -60,26 +78,14 @@ const TaskLayout = async ({
               <SidebarGroupContent>
                 <SidebarMenu>
                   {departments.map((d) => (
-                    <DepartmentItem key={d.id} name={d.name} id={d.id} />
+                    <DepartmentItem key={d.id} department={d} />
                   ))}
                 </SidebarMenu>
               </SidebarGroupContent>
             </SidebarGroup>
           </SidebarContent>
           <SidebarFooter>
-            <div className=" flex items-center flex-shrink-0 gap-2 bg-white rounded-md p-2">
-              <Image
-                src="/logo.png"
-                alt="logo.png"
-                width="100"
-                height="100"
-                className="size-10 shrink-0 rounded-full border-2 border-white shadow bg-white"
-              />
-              <div className="text-sm">
-                <p className="font-semibold">Thanh Nhut</p>
-                <p>gaconght@gmail.com</p>
-              </div>
-            </div>
+            <UserFooter />
           </SidebarFooter>
           <SidebarRail />
         </Sidebar>

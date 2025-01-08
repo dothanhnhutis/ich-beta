@@ -20,6 +20,8 @@ export const constants = {
   },
 };
 
+export const DISPLAY_SETTING = "display-settings";
+
 export type BaseNav = {
   title: string;
   href: string;

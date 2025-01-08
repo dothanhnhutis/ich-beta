@@ -14,19 +14,14 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { audioPath } from "@/configs/constants";
+import { audioPath, DISPLAY_SETTING } from "@/configs/constants";
 import { Department } from "@/schema/department.schema";
 
 interface ITaskContext {
   connected: boolean;
   socket: Socket | null;
-  selectedId: string | null;
-  setSelectedId: (departmentId: string) => void;
-  pinId: string | null;
-  setPinId: (departmentId: string | null) => void;
-  departmentsData: Department[];
-  isAudioAllowed: boolean;
-  setAccessAudio: () => void;
+  data: TVData;
+  setData: (newData: Partial<TVData>) => void;
 }
 const TVContext = React.createContext<ITaskContext | null>(null);
 
@@ -38,28 +33,54 @@ export const useTV = () => {
   return context;
 };
 
+export type TVSettings = {
+  col: number;
+  speed: number;
+  pinDepartmentId: string | null;
+};
+
+type TVData = TVSettings & {
+  selectedDepartment: Department | null;
+  isAudioAllowed: boolean;
+};
+
 export function TVProvider({
   children,
-  defaultPinId,
-  departments,
+  defaultSettings,
 }: {
   children?: React.ReactNode;
-  defaultPinId?: string | null;
-  departments: Department[];
+  defaultSettings?: TVData;
 }) {
   const [socket, setSocket] = React.useState<Socket | null>(null);
   const [connected, setConnected] = React.useState<boolean>(false);
-
   const [openDialog, setOpenDialog] = React.useState(true);
 
-  const [isAudioAllowed, setIsAudioAllowed] = React.useState(false);
+  const [tvData, setTVData] = React.useState<TVData>({
+    col: 3,
+    speed: 60,
+    pinDepartmentId: null,
+    selectedDepartment: null,
+    isAudioAllowed: false,
+    ...defaultSettings,
+  });
 
-  const [selectedId, setSelectedId] = React.useState<string | null>(
-    defaultPinId || (departments.length == 0 ? null : departments[0].id)
-  );
-  const [pinId, setPinId] = React.useState<string | null>(defaultPinId ?? null);
-
-  const [data] = React.useState<Department[]>(departments);
+  const handleSetData = (newData: Partial<TVData>) => {
+    console.log(
+      "pinDepartmentId",
+      newData.pinDepartmentId ?? tvData.pinDepartmentId
+    );
+    // console.log({
+    //   pinDepartmentId: newData.pinDepartmentId || tvData.pinDepartmentId,
+    //   col: newData.col || tvData.col,
+    //   speed: newData.speed || tvData.speed,
+    // });
+    document.cookie = `${DISPLAY_SETTING}=${JSON.stringify({
+      pinDepartmentId: newData.pinDepartmentId ?? tvData.pinDepartmentId,
+      col: newData.col ?? tvData.col,
+      speed: newData.speed ?? tvData.speed,
+    })}; path=/;`;
+    setTVData((prev) => ({ ...prev, ...newData }));
+  };
 
   function onConnect() {
     console.log("onConnect");
@@ -96,37 +117,24 @@ export function TVProvider({
   }, [socket]);
 
   React.useEffect(() => {
-    if (socket && selectedId) {
-      socket.emit("joinDepartment", selectedId);
+    if (socket && tvData.selectedDepartment) {
+      socket.emit("joinDepartment", tvData.selectedDepartment.id);
     }
     return () => {
-      if (socket && selectedId) {
-        socket.emit("leaveDepartment", selectedId);
+      if (socket && tvData.selectedDepartment) {
+        socket.emit("leaveDepartment", tvData.selectedDepartment.id);
       }
     };
-  }, [socket, selectedId]);
-
-  const handleSelected = (departmentId: string) => {
-    setSelectedId(departmentId);
-  };
-
-  const handleSetPin = (departmentId: string | null) => {
-    if (departmentId) {
-      document.cookie = `deparment:pin=${departmentId}; path=/;`;
-    } else {
-      document.cookie =
-        "deparment:pin=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;";
-    }
-    setPinId(departmentId);
-  };
+  }, [socket, tvData.selectedDepartment]);
 
   const handleAccessAudio = () => {
     const audio = new Audio(audioPath);
+    audio.muted = true;
     audio
       .play()
       .then(() => {
         audio.pause();
-        setIsAudioAllowed(true);
+        setTVData((prev) => ({ ...prev, isAudioAllowed: true }));
         console.log("Quyền phát audio đã được cấp!");
       })
       .catch((err) => {
@@ -139,13 +147,8 @@ export function TVProvider({
       value={{
         connected,
         socket,
-        selectedId,
-        setSelectedId: handleSelected,
-        pinId,
-        setPinId: handleSetPin,
-        departmentsData: data,
-        isAudioAllowed,
-        setAccessAudio: handleAccessAudio,
+        data: tvData,
+        setData: handleSetData,
       }}
     >
       {children}

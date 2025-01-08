@@ -25,8 +25,8 @@ export const updateDisplayAction = async (
           .join("; "),
       },
     });
-    // revalidatePath("/admin/displays");
-    // revalidatePath("/admin/displays/" + displayId);
+    revalidatePath("/admin/displays");
+    revalidatePath("/admin/displays/" + displayId);
     return { success: true, message: "Cập nhật hiển thị thành công" };
   } catch (error: unknown) {
     if (error instanceof FetchApiError) {

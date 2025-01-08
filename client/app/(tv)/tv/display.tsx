@@ -7,7 +7,7 @@ import { cn, sortByFields } from "@/lib/utils";
 import { Display } from "@/schema/display.schema";
 import { getDisplaysOfDepartment } from "@/services/display.service";
 import { format } from "date-fns";
-import { PanelLeftIcon, VolumeOffIcon } from "lucide-react";
+import { PanelLeftIcon, SettingsIcon, VolumeOffIcon } from "lucide-react";
 import React from "react";
 
 // const DisplayItem = ({ data }: { data: Display }) => {
@@ -76,19 +76,20 @@ const DisplayRow = ({ data }: { data: DisplayRow }) => {
   const [isNew, setIsNew] = React.useState<boolean>(false);
 
   React.useEffect(() => {
-    console.log("first");
     let timeId: NodeJS.Timeout;
-    if (Date.now() - new Date(data.updatedAt).getTime() < 30000) {
-      setIsNew(true);
+    setIsNew(Date.now() - new Date(data.updatedAt).getTime() < 60000);
+    if (Date.now() - new Date(data.updatedAt).getTime() < 60000) {
       timeId = setTimeout(() => {
         setIsNew(false);
-      }, 30000 - (Date.now() - new Date(data.updatedAt).getTime()));
+      }, 60000 - (Date.now() - new Date(data.updatedAt).getTime()));
     }
-    return () => clearTimeout(timeId);
+    return () => {
+      clearTimeout(timeId);
+    };
   }, [data]);
 
   return (
-    <div className="bg-sky-200 rounded-md p-2 shadow-md relative ">
+    <div className="bg-sky-200 rounded-md p-2 relative">
       <div className="flex gap-2 items-center justify-between ">
         <h4
           className={cn(
@@ -135,6 +136,13 @@ const DisplayCol = ({ displays }: { displays: DisplayRow[] }) => {
       const containerHeight = containerRef.current.offsetHeight;
       const listHeight = listRef.current.offsetHeight;
       setOverContainer(listHeight > containerHeight);
+      if (
+        listHeight / containerHeight < 2 &&
+        listHeight / containerHeight >= 1
+      ) {
+        console.log("1");
+        setListData((prev) => [...prev, ...prev]);
+      }
     }
   }, [displays, listData]);
 
@@ -155,7 +163,7 @@ const DisplayCol = ({ displays }: { displays: DisplayRow[] }) => {
     if (firstChilRect.bottom <= containerRect.top) {
       setListData((prev) => {
         const firstChild = prev[0];
-        const newList = prev.filter((d) => d.id != firstChild.id);
+        const newList = prev.filter((_, idx) => idx > 0);
         return [...newList, firstChild];
       });
       setCurrentTranslateY(-1);
@@ -180,7 +188,7 @@ const DisplayCol = ({ displays }: { displays: DisplayRow[] }) => {
                 firstChildRef.current = el;
               }
             }}
-            className={`bg-sky-200 rounded-md shadow-md shrink-0`}
+            className={`bg-sky-200 rounded-md shrink-0`}
           >
             <DisplayRow data={d} />
           </div>
@@ -396,6 +404,10 @@ const DisplayWrapper = () => {
                 </button>
               )}
 
+              <button className="text-muted-foreground p-2">
+                <SettingsIcon className="shrink-0 size-6" />
+              </button>
+
               <div
                 className={cn(
                   "size-2 rounded-full shrink-0",
@@ -407,10 +419,10 @@ const DisplayWrapper = () => {
         </div>
 
         <div className="flex w-full gap-2">
-          {/* {data.map((displays, col) => (
+          {data.map((displays, col) => (
             <DisplayCol key={col} displays={displays} />
-          ))} */}
-          <DisplayCol displays={data[0]} />
+          ))}
+          {/* <DisplayCol displays={data[0]} /> */}
         </div>
       </div>
     </div>

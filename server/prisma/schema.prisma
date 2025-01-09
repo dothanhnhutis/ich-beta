@@ -42,6 +42,7 @@ model Users {
   mfa                      MFA?
   oauthProviders           OauthProviders[]
   displays                 Displays[]
+  alarms                   Alarms[]
   usersRoles               UsersRoles[]
   images                   Images[]
   products                 Products[]
@@ -109,6 +110,7 @@ model Departments {
   createdAt           DateTime              @default(now())
   updatedAt           DateTime              @updatedAt
   departmentsDisplays DepartmentsDisplays[]
+  DepartmentsAlarms   DepartmentsAlarms[]
 
   @@unique([factoryId, name])
   @@index([name, factoryId])
@@ -135,6 +137,26 @@ model Displays {
   departmentsDisplays DepartmentsDisplays[]
 
   @@index([enable, userId])
+}
+
+model DepartmentsAlarms {
+  departmentId String
+  alarmId      String
+  department   Departments @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  alarm        Alarms      @relation(fields: [alarmId], references: [id], onDelete: Cascade)
+
+  @@id([departmentId, alarmId])
+}
+
+model Alarms {
+  id                String              @id @default(uuid())
+  enable            Boolean             @default(true)
+  repeat            String[]            @default([])
+  userId            String
+  createdBy         Users               @relation(fields: [userId], references: [id])
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  departmentsAlarms DepartmentsAlarms[]
 }
 
 model Products {

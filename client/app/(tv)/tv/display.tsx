@@ -510,21 +510,6 @@ const DisplayContainer = () => {
             ))}
           </div>
         )}
-
-        {/* <div className="flex w-full gap-2 px-2">
-          {displays.length == 0 ? (
-            <div className="flex flex-col items-center w-full min-h-full">
-              <PackageIcon className="shrink-0 size-36" />
-              <p className="text-lg font-semibold text-center w-full">
-                Không có đơn hàng
-              </p>
-            </div>
-          ) : (
-            displaysColData.map((displays, col) => (
-              <DisplayCol key={col} displays={displays} />
-            ))
-          )}
-        </div> */}
       </div>
     </div>
   );

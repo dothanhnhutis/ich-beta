@@ -63,7 +63,7 @@ const DisplayItem = ({
         <DropdownMenuContent align="end" className="w-20">
           <DropdownMenuGroup>
             <DropdownMenuItem asChild className="cursor-pointer">
-              <Link href={"/admin/displays/" + data.id}>Chỉnh sửa</Link>
+              <Link href={"/admin/tv/displays/" + data.id}>Chỉnh sửa</Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
               <form action={formAction} className="!p-0">

@@ -40,7 +40,7 @@ const AdminHeader = () => {
             className="p-3 rounded-full hover:bg-accent"
             onClick={toggleSidebar}
           >
-            <MenuIcon className="size-6 shrink-0 " />
+            <MenuIcon className="size-6 shrink-0" />
           </button>
         </div>
 

@@ -7,7 +7,7 @@ import { cn, sortByFields } from "@/lib/utils";
 import { Display } from "@/schema/display.schema";
 import { getDisplaysOfDepartment } from "@/services/display.service";
 import { format } from "date-fns";
-import { PanelLeftIcon, SettingsIcon, XIcon } from "lucide-react";
+import { PackageIcon, PanelLeftIcon, SettingsIcon, XIcon } from "lucide-react";
 import React from "react";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import {
@@ -384,7 +384,7 @@ const DisplayContainer = () => {
   return (
     <div className="flex gap-2 relative h-screen overflow-hidden">
       <div className="basis-full">
-        <div className="bg-gray-50 p-2 rounded-md">
+        <div className="bg-white p-2 rounded-md">
           <div className="flex items-center gap-2 w-full">
             <button type="button" onClick={toggleSidebar} className="p-2">
               <PanelLeftIcon className="size-6 shrink-0 text-muted-foreground" />
@@ -417,7 +417,7 @@ const DisplayContainer = () => {
                     <h4 className="font-bold text-lg">Cài đặt</h4>
                     <div className="flex justify-between gap-1">
                       <p className="text-muted-foreground">
-                        Thông báo âm thanh
+                        Âm thanh thông báo
                       </p>
                       <button
                         type="button"
@@ -496,11 +496,35 @@ const DisplayContainer = () => {
           </div>
         </div>
 
-        <div className="flex w-full gap-2 px-1">
-          {displaysColData.map((displays, col) => (
-            <DisplayCol key={col} displays={displays} />
-          ))}
-        </div>
+        {displays.length == 0 ? (
+          <div className="flex flex-col items-center justify-center w-full text-muted-foreground h-[calc(100vh_-_56px)]">
+            <PackageIcon className="shrink-0 size-36" />
+            <p className="font-semibold text-center w-full">
+              Không có đơn hàng
+            </p>
+          </div>
+        ) : (
+          <div className="flex w-full gap-2 px-2">
+            {displaysColData.map((displays, col) => (
+              <DisplayCol key={col} displays={displays} />
+            ))}
+          </div>
+        )}
+
+        {/* <div className="flex w-full gap-2 px-2">
+          {displays.length == 0 ? (
+            <div className="flex flex-col items-center w-full min-h-full">
+              <PackageIcon className="shrink-0 size-36" />
+              <p className="text-lg font-semibold text-center w-full">
+                Không có đơn hàng
+              </p>
+            </div>
+          ) : (
+            displaysColData.map((displays, col) => (
+              <DisplayCol key={col} displays={displays} />
+            ))
+          )}
+        </div> */}
       </div>
     </div>
   );

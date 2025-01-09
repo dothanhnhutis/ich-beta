@@ -50,10 +50,8 @@ const TaskLayout = async ({
         pinDepartmentId: tvSettings?.pinDepartmentId || null,
         speed: tvSettings?.speed || 60,
         selectedDepartment:
-          !tvSettings || !tvSettings.pinDepartmentId || departments.length == 0
-            ? null
-            : departments.find((d) => d.id == tvSettings.pinDepartmentId) ||
-              null,
+          departments.find((d) => d.id == tvSettings?.pinDepartmentId) ||
+          departments[0],
       }}
     >
       <SidebarProvider defaultOpen={defaultOpen} className="bg-gray-100 z-[-2]">

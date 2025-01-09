@@ -65,17 +65,8 @@ export function TVProvider({
   });
 
   const handleSetData = (newData: Partial<TVData>) => {
-    console.log(
-      "pinDepartmentId",
-      newData.pinDepartmentId ?? tvData.pinDepartmentId
-    );
-    // console.log({
-    //   pinDepartmentId: newData.pinDepartmentId || tvData.pinDepartmentId,
-    //   col: newData.col || tvData.col,
-    //   speed: newData.speed || tvData.speed,
-    // });
     document.cookie = `${DISPLAY_SETTING}=${JSON.stringify({
-      pinDepartmentId: newData.pinDepartmentId ?? tvData.pinDepartmentId,
+      pinDepartmentId: newData.pinDepartmentId,
       col: newData.col ?? tvData.col,
       speed: newData.speed ?? tvData.speed,
     })}; path=/;`;

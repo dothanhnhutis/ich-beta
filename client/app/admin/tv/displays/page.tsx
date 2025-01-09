@@ -24,7 +24,7 @@ const DisplayPage = async (props: DisplayPageProps) => {
   const searchParams = await props.searchParams;
   if (Object.keys(searchParams).length == 0) {
     redirect(
-      "/admin/displays?enable=true&orderBy=priority.desc&orderBy=updatedAt.desc&limit=10&page=1"
+      "/admin/tv/displays?enable=true&orderBy=priority.desc&orderBy=updatedAt.desc&limit=10&page=1"
     );
   }
   const {
@@ -45,7 +45,7 @@ const DisplayPage = async (props: DisplayPageProps) => {
         <DisplaySort />
         <DisplayFilter />
         <Link
-          href={"/admin/displays/create"}
+          href={"/admin/tv/displays/create"}
           className="border rounded-md p-1 hover:bg-accent"
         >
           <PlusIcon className="shrink-0 size-5" />

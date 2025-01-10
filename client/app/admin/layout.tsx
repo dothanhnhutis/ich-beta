@@ -23,11 +23,12 @@ import Link from "next/link";
 import {
   BoxesIcon,
   ChevronRight,
+  MapPinHouseIcon,
   MonitorIcon,
   NewspaperIcon,
   UsersIcon,
 } from "lucide-react";
-import AdminHeader from "./header";
+// import AdminHeader from "./header";
 import {
   Collapsible,
   CollapsibleContent,
@@ -42,9 +43,10 @@ const AdminLayout = async ({
 }>) => {
   const cookieStore = await cookies();
   const defaultOpen = cookieStore.get("sidebar:state")?.value === "true";
+
   return (
-    <SidebarProvider defaultOpen={defaultOpen}>
-      <Sidebar className="[&_>_div[data-sidebar='sidebar']]:bg-transparent">
+    <SidebarProvider defaultOpen={defaultOpen} className="bg-gray-100">
+      <Sidebar className="[&_>_div[data-sidebar='sidebar']]:bg-white">
         <SidebarHeader>
           <div className="flex items-center gap-2">
             <Image
@@ -64,14 +66,46 @@ const AdminLayout = async ({
             <SidebarGroupLabel>Quản trị</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                <Collapsible defaultOpen className="group/collapsible">
+                <Collapsible className="group/collapsible">
                   <SidebarMenuItem>
                     <CollapsibleTrigger asChild>
                       <SidebarMenuButton
                         tooltip={"Tivi"}
-                        className="[&>svg]:size-6"
+                        className="[&>svg:first-child]:size-5"
                       >
-                        <MonitorIcon className="shrink-0 " />
+                        <MapPinHouseIcon className="shrink-0" />
+                        <span>Cơ sở</span>
+                        <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                      </SidebarMenuButton>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                      <SidebarMenuSub>
+                        <SidebarMenuSubItem>
+                          <SidebarMenuSubButton asChild>
+                            <Link href={"/admin/facility/locations"}>
+                              <span>Địa điểm</span>
+                            </Link>
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                        <SidebarMenuSubItem>
+                          <SidebarMenuSubButton asChild>
+                            <Link href={"/admin/facility/departments"}>
+                              <span>Phòng ban</span>
+                            </Link>
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                      </SidebarMenuSub>
+                    </CollapsibleContent>
+                  </SidebarMenuItem>
+                </Collapsible>
+                <Collapsible className="group/collapsible">
+                  <SidebarMenuItem>
+                    <CollapsibleTrigger asChild>
+                      <SidebarMenuButton
+                        tooltip={"Tivi"}
+                        className="[&>svg:first-child]:size-5"
+                      >
+                        <MonitorIcon className="shrink-0" />
                         <span>Tivi</span>
                         <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
                       </SidebarMenuButton>
@@ -96,12 +130,12 @@ const AdminLayout = async ({
                     </CollapsibleContent>
                   </SidebarMenuItem>
                 </Collapsible>
-                <Collapsible defaultOpen className="group/collapsible">
+                <Collapsible className="group/collapsible">
                   <SidebarMenuItem>
                     <CollapsibleTrigger asChild>
                       <SidebarMenuButton
                         tooltip={"Tivi"}
-                        className="[&>svg]:size-6"
+                        className="[&>svg:first-child]:size-5"
                       >
                         <UsersIcon className="shrink-0" />
                         <span>Người dùng & Vai trò</span>
@@ -128,13 +162,12 @@ const AdminLayout = async ({
                     </CollapsibleContent>
                   </SidebarMenuItem>
                 </Collapsible>
-
-                <Collapsible defaultOpen className="group/collapsible">
+                <Collapsible className="group/collapsible">
                   <SidebarMenuItem>
                     <CollapsibleTrigger asChild>
                       <SidebarMenuButton
                         tooltip={"Tivi"}
-                        className="[&>svg]:size-6"
+                        className="[&>svg:first-child]:size-5"
                       >
                         <NewspaperIcon className="shrink-0" />
                         <span>Bài viết</span>
@@ -168,9 +201,8 @@ const AdminLayout = async ({
                     </CollapsibleContent>
                   </SidebarMenuItem>
                 </Collapsible>
-
                 <SidebarMenuItem>
-                  <SidebarMenuButton className="[&>svg]:size-6">
+                  <SidebarMenuButton className="[&>svg:first-child]:size-5">
                     <BoxesIcon />
                     <span>Warehose</span>
                   </SidebarMenuButton>
@@ -183,7 +215,7 @@ const AdminLayout = async ({
         <SidebarRail />
       </Sidebar>
       <SidebarInset className="bg-transparent">
-        <AdminHeader />
+        {/* <AdminHeader /> */}
         {children}
       </SidebarInset>
     </SidebarProvider>

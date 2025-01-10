@@ -1,11 +1,5 @@
-import { getDepartments } from "@/services/department.service";
-import { Metadata } from "next";
-import { cookies } from "next/headers";
 import React from "react";
-import DisplayForm from "../display-form";
-import { createDisplayAction } from "../actions";
-import { SidebarTrigger } from "@/components/ui/sidebar";
-import { Separator } from "@/components/ui/separator";
+import { Metadata } from "next";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -14,23 +8,15 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { SidebarTrigger } from "@/components/ui/sidebar";
+import { Separator } from "@/components/ui/separator";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Tạo hiển thị",
+  title: "Tạo hẹn giờ",
 };
 
-const CreateDisplayPage = async () => {
-  const cookieStore = await cookies();
-  const departments = await getDepartments({
-    headers: {
-      cookie: cookieStore
-        .getAll()
-        .map(({ name, value }) => `${name}=${encodeURIComponent(value)}`)
-        .join("; "),
-    },
-  });
-
+const CreateAlarmPage = () => {
   return (
     <>
       <header className="sticky top-0 z-[5] bg-white flex shrink-0 items-center py-2 gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
@@ -39,7 +25,7 @@ const CreateDisplayPage = async () => {
           <Separator orientation="vertical" className="mr-2 h-4" />
           <Breadcrumb>
             <BreadcrumbList>
-              <BreadcrumbItem className="hidden md:block">
+              <BreadcrumbItem className="hidden md:block ">
                 <BreadcrumbPage className="text-muted-foreground">
                   Tivi
                 </BreadcrumbPage>
@@ -47,24 +33,22 @@ const CreateDisplayPage = async () => {
               <BreadcrumbSeparator className="hidden md:block" />
               <BreadcrumbItem>
                 <BreadcrumbLink asChild className="hidden md:block">
-                  <Link href="/admin/tv/displays">Hiển thị</Link>
+                  <Link href="/admin/tv/alarms">Hẹn giờ</Link>
                 </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator className="hidden md:block" />
               <BreadcrumbItem>
-                <BreadcrumbPage>Tạo hiển thị</BreadcrumbPage>
+                <BreadcrumbPage>Tạo hẹn giờ</BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
         </div>
       </header>
-
       <div className="mx-auto w-full max-w-screen-lg py-4 px-2">
-        <h3 className="text-3xl font-bold">Tạo hiển thị</h3>
-        <DisplayForm departments={departments} action={createDisplayAction} />
+        <h3 className="text-3xl font-bold">Tạo hẹn giờ</h3>
       </div>
     </>
   );
 };
 
-export default CreateDisplayPage;
+export default CreateAlarmPage;

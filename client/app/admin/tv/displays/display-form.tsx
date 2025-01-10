@@ -172,14 +172,19 @@ const DisplayForm = ({ departments = [], ...props }: DisplayFormProps) => {
   }, [router, state]);
 
   return (
-    <form action={formAction} className="grid sm:grid-cols-2 gap-4 mt-5">
+    <form
+      action={formAction}
+      className="grid sm:grid-cols-2 gap-4 mt-5 bg-white rounded-md p-2 sm:p-3 border"
+    >
       <div
         className={cn(
           "space-y-2 sm:col-span-1",
           formData.enable ? "sm:row-span-2" : ""
         )}
       >
-        <label htmlFor="priority">Phòng ban</label>
+        <label htmlFor="priority" className="font-medium">
+          Phòng ban
+        </label>
         <div className="flex gap-2 items-center flex-wrap">
           {formData.departmentIds.map((departmentId) => {
             const department = departments.find(
@@ -223,7 +228,9 @@ const DisplayForm = ({ departments = [], ...props }: DisplayFormProps) => {
         </div>
       </div>
       <div className="space-y-2">
-        <label htmlFor="priority">Hiển thị</label>
+        <label htmlFor="priority" className="font-medium">
+          Hiển thị
+        </label>
         <div className="text-xs flex items-center gap-2 text-muted-foreground">
           <p className="w-full">Bật / Tắt hiển thị</p>
           <Switch
@@ -242,7 +249,9 @@ const DisplayForm = ({ departments = [], ...props }: DisplayFormProps) => {
       </div>
       {formData.enable && (
         <div className="space-y-2">
-          <label htmlFor="priority">Mức độ ưu tiên</label>
+          <label htmlFor="priority" className="font-medium">
+            Mức độ ưu tiên
+          </label>
           <div className="text-xs flex items-center gap-2 text-muted-foreground">
             <p className="w-full">
               Mức độ ưu tiên cao thì sẽ được đẩy lên trên [0-99]
@@ -272,7 +281,9 @@ const DisplayForm = ({ departments = [], ...props }: DisplayFormProps) => {
       )}
 
       <div className="space-y-2 sm:col-span-2">
-        <label htmlFor="priority">Nội dung</label>
+        <label htmlFor="priority" className="font-medium">
+          Nội dung
+        </label>
         <DisplayEditor
           content={formData.content}
           onEditorChange={(e) => {

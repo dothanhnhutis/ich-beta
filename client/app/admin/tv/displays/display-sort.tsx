@@ -122,7 +122,7 @@ const DisplaySort = () => {
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <button type="button" className="border rounded-md p-1 hover:bg-accent">
+        <button type="button" className="p-1 bg-white rounded-md border">
           <SlidersHorizontalIcon className="shrink-0 size-5" />
         </button>
       </PopoverTrigger>

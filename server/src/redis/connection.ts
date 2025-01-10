@@ -31,7 +31,9 @@ function handleEventConnect(redisClient: Redis) {
 }
 
 export function initRedis(): void {
-  const instanceRedis: Redis = new Redis(env.REDIS_HOST);
+  const instanceRedis: Redis = new Redis(env.REDIS_HOST, {
+    maxRetriesPerRequest: null,
+  });
   redisClient = instanceRedis;
   handleEventConnect(redisClient);
   for (const s of ["SIGINT", "SIGTERM"]) {

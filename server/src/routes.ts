@@ -7,6 +7,7 @@ import roleRouter from "@/routes/role";
 import displayRouter from "@/routes/display";
 import departmentRouter from "@/routes/department";
 import factoryRouter from "@/routes/factory";
+import alarmRouter from "@/routes/alarm";
 
 const BASE_PATH = "/api/v1";
 
@@ -19,4 +20,5 @@ export function appRoutes(app: Application) {
   app.use(BASE_PATH, factoryRouter);
   app.use(BASE_PATH, departmentRouter);
   app.use(BASE_PATH, displayRouter);
+  app.use(BASE_PATH, alarmRouter);
 }

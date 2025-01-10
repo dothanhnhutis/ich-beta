@@ -150,6 +150,8 @@ model DepartmentsAlarms {
 
 model Alarms {
   id                String              @id @default(uuid())
+  time              String //HH:mm:ss
+  label             String              @default("")
   enable            Boolean             @default(true)
   repeat            String[]            @default([])
   userId            String

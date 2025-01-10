@@ -7,6 +7,7 @@ import { initRedis } from "./redis/connection";
 import { Amqp } from "./rabbitmq/connect";
 import env from "./configs/env";
 import { sendEmailListener } from "./rabbitmq/mail";
+import { initWorker } from "./utils/bullmq";
 
 const SERVER_PORT = 4000;
 
@@ -14,6 +15,9 @@ const startHttpServer = async (httpServer: http.Server) => {
   try {
     // redis cache
     initRedis();
+
+    // queue BullMQ
+    initWorker();
 
     // rabbitMQ
     const amqp = new Amqp(env.RABBITMQ_URL);

@@ -35,5 +35,7 @@ export const dateRegex =
 export const displayRegex =
   /^(createdAt|updatedAt|priority|enable)\.(asc|desc)$/;
 export const trueFalseList: string[] = ["1", "0", "true", "false"];
+export const alarmTimeRegex = /^([0-1]\d|2[0-3]):([0-5]\d)$/;
+export const timersTimeRegex = /^(?!0:00:00$)(\d|1\d|2[0-3]):[0-5]\d:[0-5]\d$/;
 
 export const productRegex = /^(name|innerBoxQuantity)\.(asc|desc)$/;

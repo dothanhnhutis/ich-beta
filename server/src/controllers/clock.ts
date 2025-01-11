@@ -1,8 +1,15 @@
+import { CreateAlarmReq } from "@/schemas/clock";
 import { alarmQueue } from "@/utils/bullmq";
 import { Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 
-export async function createAlarmHandler(req: Request, res: Response) {
+export async function createAlarmHandler(
+  req: Request<{}, {}, CreateAlarmReq["body"]>,
+  res: Response
+) {
+  const { id } = req.user!;
+  const body = req.body;
+
   // await alarmQueue.add("testname", { message: "oker" });
   // await alarmQueue.upsertJobScheduler(
   //   "test1",

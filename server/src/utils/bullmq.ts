@@ -2,13 +2,14 @@ import { Queue, Worker } from "bullmq";
 
 import { redisClient } from "@/redis/connection";
 
-export const myFirstQueue = new Queue("myFirstQueue", {
+export const alarmQueue = new Queue("alarmQueue", {
   connection: redisClient,
 });
 
 export const initWorker = () => {
+  //alarm worker
   new Worker(
-    "myFirstQueue",
+    "alarmQueue",
     async (job) => {
       console.log(job);
     },

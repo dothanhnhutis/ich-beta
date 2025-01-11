@@ -1,10 +1,10 @@
-import { myFirstQueue } from "@/utils/bullmq";
+import { alarmQueue } from "@/utils/bullmq";
 import { Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 
 export async function createAlarmHandler(req: Request, res: Response) {
-  // await myFirstQueue.add("testname", { message: "oker" });
-  // await myFirstQueue.upsertJobScheduler(
+  // await alarmQueue.add("testname", { message: "oker" });
+  // await alarmQueue.upsertJobScheduler(
   //   "test1",
   //   {
   //     pattern: "*/10 * * * * *",
@@ -18,10 +18,9 @@ export async function createAlarmHandler(req: Request, res: Response) {
   //   }
   // );
 
-  // const scheduler = await myFirstQueue.getJobScheduler(
-  //   "fb73277b-17bd-43f2-b588-c8f89cb3b786"
-  // );
+  const scheduler = await alarmQueue.getJobSchedulersCount();
+  console.log(scheduler);
   // console.log("Current job scheduler:", scheduler);
-  const isSuccess = await myFirstQueue.remove("test1");
-  return res.status(StatusCodes.OK).send(isSuccess);
+  // const isSuccess = await alarmQueue.removeJobScheduler("test1");
+  return res.status(StatusCodes.OK).send("isSuccess");
 }

@@ -43,6 +43,7 @@ model Users {
   oauthProviders           OauthProviders[]
   displays                 Displays[]
   alarms                   Alarms[]
+  timers                   Timers[]
   usersRoles               UsersRoles[]
   images                   Images[]
   products                 Products[]
@@ -111,6 +112,7 @@ model Departments {
   updatedAt           DateTime              @updatedAt
   departmentsDisplays DepartmentsDisplays[]
   DepartmentsAlarms   DepartmentsAlarms[]
+  DepartmentsTimers   DepartmentsTimers[]
 
   @@unique([factoryId, name])
   @@index([name, factoryId])
@@ -139,6 +141,7 @@ model Displays {
   @@index([enable, userId])
 }
 
+// Clock 
 model DepartmentsAlarms {
   departmentId String
   alarmId      String
@@ -150,7 +153,7 @@ model DepartmentsAlarms {
 
 model Alarms {
   id                String              @id @default(uuid())
-  time              String //HH:mm:ss
+  time              String //HH:mm
   label             String              @default("")
   enable            Boolean             @default(true)
   repeat            String[]            @default([])
@@ -159,6 +162,26 @@ model Alarms {
   createdAt         DateTime            @default(now())
   updatedAt         DateTime            @updatedAt
   departmentsAlarms DepartmentsAlarms[]
+}
+
+model DepartmentsTimers {
+  departmentId String
+  timerId      String
+  department   Departments @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  timer        Timers      @relation(fields: [timerId], references: [id], onDelete: Cascade)
+
+  @@id([departmentId, timerId])
+}
+
+model Timers {
+  id                String              @id @default(uuid())
+  time              String //HH:mm:ss
+  label             String              @default("")
+  status            String              @default("running ") // pause | running 
+  createdAt         DateTime            @default(now())
+  userId            String
+  createdBy         Users               @relation(fields: [userId], references: [id])
+  departmentsTimers DepartmentsTimers[]
 }
 
 model Products {

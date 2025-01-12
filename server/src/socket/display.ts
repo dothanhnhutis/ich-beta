@@ -1,6 +1,7 @@
 import { Server } from "socket.io";
 import SocketServer from "./init";
 import { Display } from "@/schemas/display";
+import { Alarm } from "@/schemas/clock";
 
 export const departmentSocketListener = (io: Server) => {
   const departmentNamespace = io.of("/department");

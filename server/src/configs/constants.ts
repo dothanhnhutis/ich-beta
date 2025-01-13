@@ -24,6 +24,11 @@ export const permissions = [
   "update:departments",
   "delete:departments",
 
+  "write:alarms",
+  "read:alarms",
+  "update:alarms",
+  "delete:alarms",
+
   "write:products",
   "read:products",
   "update:products",

@@ -1,6 +1,12 @@
-import { BadRequestError } from "@/error-handler";
+import { BadRequestError, PermissionError } from "@/error-handler";
+import { hasPermission } from "@/middlewares/checkPermission";
 import { CreateAlarmReq, CreateTimerReq } from "@/schemas/clock";
-import { createAlarm, createTimer } from "@/services/clock";
+import {
+  createAlarm,
+  createTimer,
+  deleteAlarmById,
+  getAlarmById,
+} from "@/services/clock";
 import { getDepartmentById } from "@/services/department";
 import { clockQueue, convertTimerRepeatToCronJob } from "@/utils/bullmq";
 import { Request, Response } from "express";
@@ -43,6 +49,34 @@ export async function createAlarmHandler(
 
   return res.status(StatusCodes.OK).json({
     message: "Tạo báo thức thành công",
+    alarm,
+  });
+}
+
+export async function deleteAlarmHandler(
+  req: Request<{ alarmId: string }>,
+  res: Response
+) {
+  const { alarmId } = req.params;
+  const { id } = req.user!;
+
+  const alarm = await getAlarmById(alarmId);
+
+  const isValidAccess = hasPermission(req.user, "delete:alarms");
+  if (!isValidAccess && alarm?.userId != id) throw new PermissionError();
+
+  if (!alarm) throw new BadRequestError(`Báo thức id=${alarmId} không tồn tại`);
+
+  await deleteAlarmById(alarmId);
+
+  const alarmCronJob = await clockQueue.getJobScheduler(alarm.id);
+
+  if (alarmCronJob) {
+    await clockQueue.removeJobScheduler(alarm.id);
+  }
+
+  res.status(StatusCodes.OK).json({
+    message: "Xoá báo thức thành công",
     alarm,
   });
 }

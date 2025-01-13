@@ -16,6 +16,20 @@ export async function createAlarm(data: CreateAlarmData) {
   });
 }
 
+export async function getAlarmById(alarmId: string) {
+  return prisma.alarms.findUnique({
+    where: {
+      id: alarmId,
+    },
+  });
+}
+
+export async function deleteAlarmById(alarmId: string) {
+  prisma.alarms.delete({
+    where: { id: alarmId },
+  });
+}
+
 export async function createTimer(data: CreateTimerData) {
   const { departmentIds, ...props } = data;
 

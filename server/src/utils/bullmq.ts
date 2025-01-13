@@ -1,8 +1,8 @@
 import { Queue, Worker } from "bullmq";
 
 import { redisClient } from "@/redis/connection";
-import { sendAlarmSocketSender } from "@/socket/alarm";
-import { Alarm } from "@/schemas/clock";
+import { sendAlarmSocketSender, sendTimerSocketSender } from "@/socket/alarm";
+import { Alarm, Timer } from "@/schemas/clock";
 
 export const convertTimerRepeatToCronJob = (time: string, repeat: string[]) => {
   const daysMap: Record<string, number> = {
@@ -20,16 +20,22 @@ export const convertTimerRepeatToCronJob = (time: string, repeat: string[]) => {
   return `${minute} ${hour} * * ${days || "*"}`;
 };
 
-export const alarmQueue = new Queue("alarmQueue", {
+export const clockQueue = new Queue("clockQueue", {
   connection: redisClient,
 });
 
 export const initWorker = () => {
   //alarm worker
-  new Worker<{ departmentIds: string[]; alarm: Alarm }>(
-    "alarmQueue",
+  new Worker(
+    "clockQueue",
     async (job) => {
-      sendAlarmSocketSender(job.data.departmentIds, job.data.alarm);
+      if (job.name == "alarm-job") {
+        const data = job.data as { departmentIds: string[]; alarm: Alarm };
+        sendAlarmSocketSender(data.departmentIds, data.alarm);
+      } else if (job.name == "timer-job") {
+        const data = job.data as { departmentIds: string[]; timer: Timer };
+        sendTimerSocketSender(data.departmentIds, data.timer);
+      }
     },
     {
       connection: redisClient,

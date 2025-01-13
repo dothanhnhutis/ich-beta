@@ -15,6 +15,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { toast } from "sonner";
 
 // const DisplayItem = ({ data }: { data: Display }) => {
 //   const [isNew, setIsNew] = React.useState<boolean>(false);
@@ -340,46 +341,26 @@ const DisplayContainer = () => {
     [displays, data.isAudioAllowed, data.selectedDepartment]
   );
 
-  const handleDeleteDisplay = React.useCallback(
-    (displayDeleted: Display) => {
-      setDisplays(
-        sortByFields(
-          displays.filter((d) => d.id != displayDeleted.id),
-          [
-            {
-              key: "priority",
-              order: "desc",
-            },
-            {
-              key: "createdAt",
-              order: "desc",
-            },
-          ]
-        )
-      );
-      if (data.isAudioAllowed) {
-        const audio = new Audio(audioPath);
-        audio.play();
-      }
-    },
-    [displays, data.isAudioAllowed]
-  );
+  const handleAlarm = (data: unknown) => {
+    console.log(data);
+    toast.success("oker");
+  };
 
   React.useEffect(() => {
     if (socket) {
       socket.on("createDisplay", handleCreateDisplay);
       socket.on("updateDisplay", handleUpdateDisplay);
-      socket.on("deleteDisplay", handleDeleteDisplay);
+      socket.on("alarm", handleAlarm);
     }
 
     return () => {
       if (socket) {
         socket.off("createDisplay", handleCreateDisplay);
         socket.off("updateDisplay", handleUpdateDisplay);
-        socket.off("deleteDisplay", handleDeleteDisplay);
+        socket.off("alarm", handleAlarm);
       }
     };
-  }, [socket, handleCreateDisplay, handleUpdateDisplay, handleDeleteDisplay]);
+  }, [socket, handleCreateDisplay, handleUpdateDisplay]);
 
   return (
     <div className="flex gap-2 relative h-screen overflow-hidden">

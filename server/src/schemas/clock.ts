@@ -6,41 +6,41 @@ export const createAlarmSchema = z.object({
     .object({
       time: z
         .string({
-          required_error: "Thời gian báo động là bất buộc",
-          invalid_type_error: "Thời gian báo động phải là chuỗi",
+          required_error: "Thời gian báo thức là bất buộc",
+          invalid_type_error: "Thời gian báo thức phải là chuỗi",
         })
         .refine((v) => alarmTimeRegex.test(v), {
-          message: "Thời gian báo động không hợp lệ",
+          message: "Thời gian báo thức không hợp lệ",
         }),
       label: z
         .string({
-          required_error: "Nhãn báo động là bất buộc",
-          invalid_type_error: "Nhãn báo động phải là chuỗi",
+          required_error: "Nhãn báo thức là bất buộc",
+          invalid_type_error: "Nhãn báo thức phải là chuỗi",
         })
         .default(""),
       enable: z
         .boolean({
-          required_error: "Bật tắt báo động là bất buộc",
-          invalid_type_error: "Bật tắt báo động là true/false",
+          required_error: "Bật tắt báo thức là bất buộc",
+          invalid_type_error: "Bật tắt báo thức là true/false",
         })
         .default(true),
       repeat: z
         .array(
           z
             .string({
-              invalid_type_error: "Lập lại báo động là chuỗi",
+              invalid_type_error: "Lập lại báo thức là chuỗi",
             })
             .refine(
               (value) =>
                 ["t2", "t3", "t4", "t5", "t6", "t7", "cn"].includes(value),
               {
                 message:
-                  "Lập lại báo động phải là mảng các giá trị 't2, t3, t4, t5, t6, t7, cn'",
+                  "Lập lại báo thức phải là mảng các giá trị 't2, t3, t4, t5, t6, t7, cn'",
               }
             ),
           {
-            required_error: "Lập lại báo động là bất buộc",
-            invalid_type_error: "Lập lại báo động phải là mãng",
+            required_error: "Lập lại báo thức là bất buộc",
+            invalid_type_error: "Lập lại báo thức phải là mãng",
           }
         )
         .default([]),
@@ -59,7 +59,71 @@ export const createAlarmSchema = z.object({
     .strict(),
 });
 
+export const updateAlarmSchema = z.object({
+  params: z.object({
+    alarmId: z.string(),
+  }),
+  body: z
+    .object({
+      time: z
+        .string({
+          required_error: "Thời gian báo thức là bất buộc",
+          invalid_type_error: "Thời gian báo thức phải là chuỗi",
+        })
+        .refine((v) => alarmTimeRegex.test(v), {
+          message: "Thời gian báo thức không hợp lệ",
+        }),
+      label: z
+        .string({
+          required_error: "Nhãn báo thức là bất buộc",
+          invalid_type_error: "Nhãn báo thức phải là chuỗi",
+        })
+        .default(""),
+      enable: z
+        .boolean({
+          required_error: "Bật tắt báo thức là bất buộc",
+          invalid_type_error: "Bật tắt báo thức là true/false",
+        })
+        .default(true),
+      repeat: z
+        .array(
+          z
+            .string({
+              invalid_type_error: "Lập lại báo thức là chuỗi",
+            })
+            .refine(
+              (value) =>
+                ["t2", "t3", "t4", "t5", "t6", "t7", "cn"].includes(value),
+              {
+                message:
+                  "Lập lại báo thức phải là mảng các giá trị 't2, t3, t4, t5, t6, t7, cn'",
+              }
+            ),
+          {
+            required_error: "Lập lại báo thức là bất buộc",
+            invalid_type_error: "Lập lại báo thức phải là mãng",
+          }
+        )
+        .default([]),
+      departmentIds: z
+        .array(
+          z.string({
+            invalid_type_error: "Mã phòng là chuỗi",
+          }),
+          {
+            required_error: "Phòng ban là bất buộc",
+            invalid_type_error: "Phòng ban là mảng chuỗi",
+          }
+        )
+        .nonempty("Phòng ban không được bỏ trống"),
+    })
+    .strip()
+    .partial(),
+});
+
 export type CreateAlarmReq = z.infer<typeof createAlarmSchema>;
+export type UpdateAlarmReq = z.infer<typeof updateAlarmSchema>;
+
 export type CreateAlarmData = CreateAlarmReq["body"] & {
   userId: string;
 };
@@ -86,8 +150,8 @@ export const createTimerSchema = z.object({
         message: "Thời gian hẹn giờ không hợp lệ",
       }),
     label: z.string({
-      required_error: "Nhãn báo động là bất buộc",
-      invalid_type_error: "Nhãn báo động phải là chuỗi",
+      required_error: "Nhãn hẹn giờ là bất buộc",
+      invalid_type_error: "Nhãn hẹn giờ phải là chuỗi",
     }),
     status: z.enum(["pause", "proceed"], {
       invalid_type_error: "Trạng thái hẹn giờ phải là 'pause' hoặc 'proceed'",
@@ -107,7 +171,16 @@ export const createTimerSchema = z.object({
   }),
 });
 
-export type CreateTimer = z.infer<typeof createTimerSchema>;
-export type CreateTimerData = CreateTimer["body"] & {
+export type CreateTimerReq = z.infer<typeof createTimerSchema>;
+export type CreateTimerData = CreateTimerReq["body"] & {
   userId: string;
+};
+
+export type Timer = {
+  time: string;
+  status: string;
+  label: string;
+  id: string;
+  userId: string;
+  createdAt: Date;
 };

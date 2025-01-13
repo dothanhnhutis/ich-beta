@@ -177,7 +177,7 @@ model Timers {
   id                String              @id @default(uuid())
   time              String //HH:mm:ss
   label             String              @default("")
-  status            String              @default("running ") // pause | running 
+  status            String              @default("running") // pause | running 
   createdAt         DateTime            @default(now())
   userId            String
   createdBy         Users               @relation(fields: [userId], references: [id])

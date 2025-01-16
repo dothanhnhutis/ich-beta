@@ -26,6 +26,7 @@ import {
   MapPinHouseIcon,
   MonitorIcon,
   NewspaperIcon,
+  SirenIcon,
   UsersIcon,
 } from "lucide-react";
 // import AdminHeader from "./header";
@@ -70,7 +71,7 @@ const AdminLayout = async ({
                   <SidebarMenuItem>
                     <CollapsibleTrigger asChild>
                       <SidebarMenuButton
-                        tooltip={"Tivi"}
+                        tooltip={"Cơ sở"}
                         className="[&>svg:first-child]:size-5"
                       >
                         <MapPinHouseIcon className="shrink-0" />
@@ -98,15 +99,26 @@ const AdminLayout = async ({
                     </CollapsibleContent>
                   </SidebarMenuItem>
                 </Collapsible>
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    asChild
+                    className="[&>svg:first-child]:size-5"
+                  >
+                    <Link href={"/admin/tv"}>
+                      <MonitorIcon />
+                      <span>Tivi</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
                 <Collapsible className="group/collapsible">
                   <SidebarMenuItem>
                     <CollapsibleTrigger asChild>
                       <SidebarMenuButton
-                        tooltip={"Tivi"}
+                        tooltip={"Đồng hồ"}
                         className="[&>svg:first-child]:size-5"
                       >
-                        <MonitorIcon className="shrink-0" />
-                        <span>Tivi</span>
+                        <SirenIcon className="shrink-0" />
+                        <span>Đồng hồ</span>
                         <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
                       </SidebarMenuButton>
                     </CollapsibleTrigger>
@@ -114,14 +126,14 @@ const AdminLayout = async ({
                       <SidebarMenuSub>
                         <SidebarMenuSubItem>
                           <SidebarMenuSubButton asChild>
-                            <Link href={"/admin/tv/displays"}>
-                              <span>Hiển thị</span>
+                            <Link href={"/admin/clock/alarms"}>
+                              <span>Báo thức</span>
                             </Link>
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
                         <SidebarMenuSubItem>
                           <SidebarMenuSubButton asChild>
-                            <Link href={"/admin/tv/alarms"}>
+                            <Link href={"/admin/clock/timers"}>
                               <span>Hẹn giờ</span>
                             </Link>
                           </SidebarMenuSubButton>

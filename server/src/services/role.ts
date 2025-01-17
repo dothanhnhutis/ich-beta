@@ -35,3 +35,16 @@ export async function deleteRoleById(roleId: string) {
     },
   });
 }
+
+export async function getRoleOfUser(userId: string) {
+  const ur = await prisma.usersRoles.findMany({
+    where: {
+      userId,
+    },
+    select: {
+      role: true,
+    },
+  });
+
+  return ur.map(({ role }) => role);
+}

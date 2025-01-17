@@ -24,6 +24,7 @@ import {
 export const metadata: Metadata = {
   title: "Danh sách phòng ban",
 };
+
 const DepartmentsPage = () => {
   return (
     <>
@@ -69,15 +70,15 @@ const DepartmentsPage = () => {
                 <TableHead className="h-10">ID</TableHead>
                 <TableHead className="h-10">Tên phòng ban</TableHead>
                 <TableHead className="h-10">Tên địa điểm</TableHead>
+                <TableHead className="h-10">Action</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody className="bg-white">
               <TableRow>
-                <TableCell className="font-medium">
-                  23123132-1132132-1321113
-                </TableCell>
+                <TableCell className="font-medium">ui-iui</TableCell>
                 <TableCell>Phòng 1</TableCell>
                 <TableCell>Công ty TNHH MTV TM Sản Xuất I.C.H</TableCell>
+                <TableCell>+</TableCell>
               </TableRow>
             </TableBody>
           </Table>

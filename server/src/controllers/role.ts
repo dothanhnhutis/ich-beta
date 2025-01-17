@@ -1,15 +1,30 @@
 import { BadRequestError, PermissionError } from "@/error-handler";
 import { hasPermission } from "@/middlewares/checkPermission";
+import { getPermissionByKeyCache } from "@/redis/role.cache";
 import { CreateRoleReq, UpdateRoleReq } from "@/schemas/role";
 import {
   createRole,
   deleteRoleById,
   getRoleById,
+  getRoleOfUser,
   getRoles,
   updateRoleById,
 } from "@/services/role";
 import { Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
+
+export async function getRoleOfUserHandler(req: Request, res: Response) {
+  const { id } = req.user!;
+
+  const roles = await getRoleOfUser(id);
+
+  let keys: string = roles
+    .map(({ id }) => id)
+    .sort()
+    .join(",");
+  const pers = await getPermissionByKeyCache(keys);
+  if (pers) return pers;
+}
 
 export async function getRolesHandler(req: Request, res: Response) {
   const isValidAccess = hasPermission(req.user, "read:roles");

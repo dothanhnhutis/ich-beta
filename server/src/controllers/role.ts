@@ -1,6 +1,13 @@
 import { BadRequestError, PermissionError } from "@/error-handler";
 import { hasPermission } from "@/middlewares/checkPermission";
-import { getPermissionByKeyCache } from "@/redis/role.cache";
+import {
+  createPermission,
+  delRoleCache,
+  editRoleCache,
+  getPermissionByKeyCache,
+  readRoleByIdCache,
+  writeRoleCache,
+} from "@/redis/role.cache";
 import { CreateRoleReq, UpdateRoleReq } from "@/schemas/role";
 import {
   createRole,
@@ -16,14 +23,27 @@ import { StatusCodes } from "http-status-codes";
 export async function getRoleOfUserHandler(req: Request, res: Response) {
   const { id } = req.user!;
 
-  const roles = await getRoleOfUser(id);
+  const roleIds = await getRoleOfUser(id);
 
-  let keys: string = roles
+  let rolesCache = (
+    await Promise.all(roleIds.map((roleId) => readRoleByIdCache(roleId)))
+  ).filter((role) => role != null);
+
+  if (rolesCache.length == roleIds.length)
+    return res.status(StatusCodes.OK).json(rolesCache);
+
+  const roleMissedCacheIds = rolesCache
     .map(({ id }) => id)
-    .sort()
-    .join(",");
-  const pers = await getPermissionByKeyCache(keys);
-  if (pers) return pers;
+    .filter((id) => !roleIds.includes(id));
+
+  for (const id of roleMissedCacheIds) {
+    const role = await getRoleById(id);
+    if (role) {
+      writeRoleCache(role);
+      rolesCache.push(role);
+    }
+  }
+  return res.status(StatusCodes.OK).json(rolesCache);
 }
 
 export async function getRolesHandler(req: Request, res: Response) {
@@ -39,7 +59,13 @@ export async function getRoleByIdHandler(
 ) {
   const isValidAccess = hasPermission(req.user, "read:roles");
   if (!isValidAccess) throw new PermissionError();
+
+  const roleCache = await readRoleByIdCache(req.params.roleId);
+  if (roleCache) return roleCache;
+
   const role = await getRoleById(req.params.roleId);
+  if (role) await writeRoleCache(role);
+
   return res.status(StatusCodes.OK).send(role);
 }
 
@@ -51,6 +77,9 @@ export async function createRoleHandler(
   if (!isValidAccess) throw new PermissionError();
 
   const newRole = await createRole(req.body);
+
+  await writeRoleCache(newRole);
+
   return res.status(StatusCodes.CREATED).json({
     message: "Tạo vai trò thành công",
     role: newRole,
@@ -64,10 +93,15 @@ export async function updateRoleByIdHandler(
   const isValidAccess = hasPermission(req.user, "update:roles");
   if (!isValidAccess) throw new PermissionError();
 
-  const role = await getRoleById(req.params.roleId);
+  const role =
+    (await readRoleByIdCache(req.params.roleId)) ||
+    (await getRoleById(req.params.roleId));
+
   if (!role)
     throw new BadRequestError(`Vai trò id=${req.params.roleId} không tồn tại`);
   const newRole = await updateRoleById(req.params.roleId, req.body);
+
+  await editRoleCache(newRole);
 
   return res.status(StatusCodes.OK).json({
     message: "Cập nhật vai trò thành công",
@@ -86,6 +120,8 @@ export async function deleteRoleByIdHandler(
     throw new BadRequestError(`Vai trò id=${req.params.roleId} không tồn tại`);
 
   const roleDelete = await deleteRoleById(req.params.roleId);
+
+  await delRoleCache(roleDelete.id);
   return res.status(StatusCodes.OK).json({
     message: "Xoá vai trò thành công",
     role: roleDelete,

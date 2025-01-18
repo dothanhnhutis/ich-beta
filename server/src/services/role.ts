@@ -42,9 +42,9 @@ export async function getRoleOfUser(userId: string) {
       userId,
     },
     select: {
-      role: true,
+      roleId: true,
     },
   });
 
-  return ur.map(({ role }) => role);
+  return ur.map(({ roleId }) => roleId);
 }

@@ -36,7 +36,10 @@ export type CreateRoleData = {
   permissions: string[];
 };
 
-export type UpdateRoleData = {
-  name: string;
-  permissions: string[];
+export type UpdateRoleData = CreateRoleData;
+
+export type Role = CreateRoleData & {
+  id: string;
+  createdAt: Date;
+  updatedAt: Date;
 };

@@ -2,6 +2,7 @@ import {
   createRoleHandler,
   deleteRoleByIdHandler,
   getRoleByIdHandler,
+  getRoleOfUserHandler,
   getRolesHandler,
   updateRoleByIdHandler,
 } from "@/controllers/role";
@@ -13,6 +14,7 @@ import express, { type Router } from "express";
 const router: Router = express.Router();
 function roleRouter(): Router {
   router.get("/roles", authMiddleware(), getRolesHandler);
+  router.get("/roles/permissions", authMiddleware(), getRoleOfUserHandler);
   router.get("/roles/:roleId", authMiddleware(), getRoleByIdHandler);
 
   router.post(

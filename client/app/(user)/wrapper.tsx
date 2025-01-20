@@ -123,7 +123,7 @@ const WrapperUserSiderbar = ({
           </div>
 
           <div className="flex items-center justify-center gap-2">
-            {currentUser && currentUser.roles.length > 0 && (
+            {currentUser && (
               <Button
                 aria-label="menu"
                 variant="ghost"

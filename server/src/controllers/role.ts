@@ -20,21 +20,17 @@ import {
 import { Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 
-export async function getRoleOfUserHandler(req: Request, res: Response) {
-  const { id } = req.user!;
-
-  const roleIds = await getRoleOfUser(id);
+export async function rolesOfUser(userId: string) {
+  const roleIds = await getRoleOfUser(userId);
 
   let rolesCache = (
     await Promise.all(roleIds.map((roleId) => readRoleByIdCache(roleId)))
   ).filter((role) => role != null);
 
-  if (rolesCache.length == roleIds.length)
-    return res.status(StatusCodes.OK).json(rolesCache);
+  if (rolesCache.length == roleIds.length) return rolesCache;
 
-  const roleMissedCacheIds = rolesCache
-    .map(({ id }) => id)
-    .filter((id) => !roleIds.includes(id));
+  const roleCacheIds = rolesCache.map(({ id }) => id);
+  const roleMissedCacheIds = roleIds.filter((id) => !roleCacheIds.includes(id));
 
   for (const id of roleMissedCacheIds) {
     const role = await getRoleById(id);
@@ -43,11 +39,18 @@ export async function getRoleOfUserHandler(req: Request, res: Response) {
       rolesCache.push(role);
     }
   }
-  return res.status(StatusCodes.OK).json(rolesCache);
+  return rolesCache;
+}
+
+export async function getRoleOfUserHandler(req: Request, res: Response) {
+  const { id } = req.user!;
+
+  const roles = await rolesOfUser(id);
+  return res.status(StatusCodes.OK).json(roles);
 }
 
 export async function getRolesHandler(req: Request, res: Response) {
-  const isValidAccess = hasPermission(req.user, "read:roles");
+  const isValidAccess = await hasPermission(req.user, "read:roles");
   if (!isValidAccess) throw new PermissionError();
   const roles = await getRoles();
   return res.status(StatusCodes.OK).send(roles);
@@ -57,7 +60,7 @@ export async function getRoleByIdHandler(
   req: Request<{ roleId: string }>,
   res: Response
 ) {
-  const isValidAccess = hasPermission(req.user, "read:roles");
+  const isValidAccess = await hasPermission(req.user, "read:roles");
   if (!isValidAccess) throw new PermissionError();
 
   const roleCache = await readRoleByIdCache(req.params.roleId);
@@ -73,7 +76,7 @@ export async function createRoleHandler(
   req: Request<{}, {}, CreateRoleReq["body"]>,
   res: Response
 ) {
-  const isValidAccess = hasPermission(req.user, "write:roles");
+  const isValidAccess = await hasPermission(req.user, "write:roles");
   if (!isValidAccess) throw new PermissionError();
 
   const newRole = await createRole(req.body);
@@ -90,7 +93,7 @@ export async function updateRoleByIdHandler(
   req: Request<UpdateRoleReq["params"], {}, UpdateRoleReq["body"]>,
   res: Response
 ) {
-  const isValidAccess = hasPermission(req.user, "update:roles");
+  const isValidAccess = await hasPermission(req.user, "update:roles");
   if (!isValidAccess) throw new PermissionError();
 
   const role =
@@ -113,7 +116,7 @@ export async function deleteRoleByIdHandler(
   req: Request<{ roleId: string }>,
   res: Response
 ) {
-  const isValidAccess = hasPermission(req.user, "delete:roles");
+  const isValidAccess = await hasPermission(req.user, "delete:roles");
   if (!isValidAccess) throw new PermissionError();
   const role = await getRoleById(req.params.roleId);
   if (!role)

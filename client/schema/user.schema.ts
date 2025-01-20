@@ -55,13 +55,6 @@ export type User = {
   createdAt: string;
   updatedAt: string;
   hasPassword: boolean;
-  roles: {
-    id: string;
-    name: string;
-    permissions: string[];
-    createdAt: string;
-    updatedAt: string;
-  }[];
 };
 
 export type UserToken = {

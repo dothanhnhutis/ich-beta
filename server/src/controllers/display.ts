@@ -27,7 +27,7 @@ export async function createDisplayHandler(
   req: Request<{}, {}, CreateDisplayReq["body"]>,
   res: Response
 ) {
-  const isValidAccess = hasPermission(req.user, "read:displays");
+  const isValidAccess = await hasPermission(req.user, "write:displays");
   if (!isValidAccess) throw new PermissionError();
 
   for (const departmentId of req.body.departmentIds) {
@@ -59,7 +59,7 @@ export async function updateDisplayByIdHandler(
   >,
   res: Response
 ) {
-  const isValidAccess = hasPermission(req.user, "update:displays");
+  const isValidAccess = await hasPermission(req.user, "update:displays");
   if (!isValidAccess) throw new PermissionError();
 
   const display = await getDisplayById(req.params.id);
@@ -92,7 +92,7 @@ export async function getDisplayByIdHandler(
   req: Request<{ id: string }>,
   res: Response
 ) {
-  const isValidAccess = hasPermission(req.user, "read:displays");
+  const isValidAccess = await hasPermission(req.user, "read:displays");
 
   const display = await getDisplayById(req.params.id);
 
@@ -126,7 +126,7 @@ export async function searchDisplaysHandler(req: Request, res: Response) {
     userId,
   } = req.query;
 
-  const isValidAccess = hasPermission(req.user, "read:displays");
+  const isValidAccess = await hasPermission(req.user, "read:displays");
   if (!isValidAccess) throw new PermissionError();
 
   if (
@@ -252,7 +252,7 @@ export async function deleteDisplayByIdHandler(
   req: Request<{ id: string }>,
   res: Response
 ) {
-  const isValidAccess = hasPermission(req.user, "delete:displays");
+  const isValidAccess = await hasPermission(req.user, "delete:displays");
 
   const display = await getDisplayById(req.params.id);
 

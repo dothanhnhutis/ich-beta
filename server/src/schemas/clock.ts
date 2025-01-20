@@ -1,5 +1,7 @@
 import { alarmTimeRegex, timersTimeRegex } from "@/configs/constants";
 import * as z from "zod";
+import { Department } from "./department";
+import { User } from "./user";
 
 export const createAlarmSchema = z.object({
   body: z
@@ -127,6 +129,22 @@ export type UpdateAlarmReq = z.infer<typeof updateAlarmSchema>;
 export type CreateAlarmData = CreateAlarmReq["body"] & {
   userId: string;
 };
+export type UpdateAlarmData = UpdateAlarmReq["body"];
+
+export type AlarmAttributeFilter = {
+  id: string;
+  time: string;
+  label: string;
+  enable: boolean;
+  repeat: string[];
+  userId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  departmentsAlarms: {
+    department: Department;
+  }[];
+  createdBy: Pick<User, "id" | "email" | "username" | "picture">;
+};
 
 export type Alarm = {
   time: string;
@@ -137,6 +155,8 @@ export type Alarm = {
   createdAt: Date;
   updatedAt: Date;
   userId: string;
+  createdBy: Pick<User, "id" | "email" | "username" | "picture">;
+  departments: Department[];
 };
 
 export const createTimerSchema = z.object({

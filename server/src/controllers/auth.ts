@@ -124,8 +124,6 @@ export async function signIn(
       session: sessionId,
     });
   } else {
-    console.log("signin", req.body.email);
-
     const newSession = await writeSessionCache({
       userId: user.id,
       reqInfo: {
@@ -135,7 +133,6 @@ export async function signIn(
     });
 
     if (!newSession) throw new BadRequestError("Tạo session thất bại.");
-    console.log("newSession", newSession);
     return res
       .status(StatusCodes.OK)
       .cookie(env.SESSION_KEY_NAME, encrypt(newSession.key), {

@@ -17,13 +17,10 @@ const userAttributeFilter = (user: UserAttributeFilterProps): User => {
     passwordResetToken,
     reActiveExpires,
     reActiveToken,
-    usersRoles,
     ...props
   } = user;
-  const roles = usersRoles.map(({ role }) => role);
-  const newUser = { ...props, roles };
 
-  return newUser;
+  return props;
 };
 
 export async function readUserByEmail(email: string, cache?: boolean) {
@@ -34,13 +31,6 @@ export async function readUserByEmail(email: string, cache?: boolean) {
   const user = await prisma.users.findUnique({
     where: {
       email,
-    },
-    include: {
-      usersRoles: {
-        include: {
-          role: true,
-        },
-      },
     },
   });
 
@@ -63,13 +53,6 @@ export async function readUserById(id: string, cache?: boolean) {
   const user = await prisma.users.findUnique({
     where: {
       id,
-    },
-    include: {
-      usersRoles: {
-        include: {
-          role: true,
-        },
-      },
     },
   });
   if (user) {
@@ -97,13 +80,6 @@ export async function readUserByToken(token: UserToken, cache?: boolean) {
           emailVerificationToken: token.session,
           emailVerificationExpires: { gte: new Date() },
         },
-        include: {
-          usersRoles: {
-            include: {
-              role: true,
-            },
-          },
-        },
       });
       break;
 
@@ -113,13 +89,6 @@ export async function readUserByToken(token: UserToken, cache?: boolean) {
           passwordResetToken: token.session,
           passwordResetExpires: { gte: new Date() },
         },
-        include: {
-          usersRoles: {
-            include: {
-              role: true,
-            },
-          },
-        },
       });
       break;
 
@@ -128,13 +97,6 @@ export async function readUserByToken(token: UserToken, cache?: boolean) {
         where: {
           reActiveToken: token.session,
           reActiveExpires: { gte: new Date() },
-        },
-        include: {
-          usersRoles: {
-            include: {
-              role: true,
-            },
-          },
         },
       });
       break;
@@ -188,13 +150,6 @@ export async function writeUserWithPassword(
 
   const user = await prisma.users.create({
     data,
-    include: {
-      usersRoles: {
-        include: {
-          role: true,
-        },
-      },
-    },
   });
 
   const afterUser = userAttributeFilter(user);
@@ -241,13 +196,6 @@ export async function editUserById(
   const user = await prisma.users.update({
     where: { id: userId },
     data,
-    include: {
-      usersRoles: {
-        include: {
-          role: true,
-        },
-      },
-    },
   });
 
   if (roleIds) {

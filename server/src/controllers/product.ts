@@ -14,7 +14,7 @@ import { Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 
 export async function searhProductHandler(req: Request, res: Response) {
-  const isValidAccess = hasPermission(req.user, "read:products");
+  const isValidAccess = await hasPermission(req.user, "read:products");
   if (!isValidAccess) throw new PermissionError();
 
   const { name, userId, orderBy, page, limit } = req.query;
@@ -72,14 +72,14 @@ export async function getProductByIdHandler(
   req: Request<{ productId: string }>,
   res: Response
 ) {
-  const isValidAccess = hasPermission(req.user, "read:products");
+  const isValidAccess = await hasPermission(req.user, "read:products");
   if (!isValidAccess) throw new PermissionError();
   const product = await getProductById(req.params.productId);
   res.status(StatusCodes.OK).json(product);
 }
 
 export async function getProductsHandler(req: Request, res: Response) {
-  const isValidAccess = hasPermission(req.user, "read:products");
+  const isValidAccess = await hasPermission(req.user, "read:products");
   if (!isValidAccess) throw new PermissionError();
   const products = await getProducts();
   res.status(StatusCodes.OK).json(products);
@@ -90,7 +90,7 @@ export async function createProductHandler(
   res: Response
 ) {
   const { id } = req.user!;
-  const isValidAccess = hasPermission(req.user, "write:products");
+  const isValidAccess = await hasPermission(req.user, "write:products");
   if (!isValidAccess) throw new PermissionError();
 
   const product = await createProduct({ ...req.body, userId: id });
@@ -104,7 +104,7 @@ export async function updateProductByIdHandler(
   req: Request<{ productId: string }>,
   res: Response
 ) {
-  const isValidAccess = hasPermission(req.user, "update:products");
+  const isValidAccess = await hasPermission(req.user, "update:products");
   if (!isValidAccess) throw new PermissionError();
   const product = await getProductById(req.params.productId);
   if (!product)
@@ -123,7 +123,7 @@ export async function deleteProductHandler(
   req: Request<{ productId: string }>,
   res: Response
 ) {
-  const isValidAccess = hasPermission(req.user, "delete:products");
+  const isValidAccess = await hasPermission(req.user, "delete:products");
   if (!isValidAccess) throw new PermissionError();
 
   const product = await getProductById(req.params.productId);

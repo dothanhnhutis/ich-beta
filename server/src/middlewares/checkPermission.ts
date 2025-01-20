@@ -3,13 +3,15 @@ import { PermissionError } from "@/error-handler";
 import { readUserRolesById } from "@/services/user";
 import { User } from "@/schemas/user";
 import { permissions } from "@/configs/constants";
+import { rolesOfUser } from "@/controllers/role";
 
-export function hasPermission(
+export async function hasPermission(
   user: User | null,
   permission: (typeof permissions)[number]
 ) {
   if (!user) return false;
-  return user.roles.some(({ permissions }) => permissions.includes(permission));
+  const roles = await rolesOfUser(user.id);
+  return roles.some(({ permissions }) => permissions.includes(permission));
 }
 
 export function checkPermission(
@@ -18,7 +20,7 @@ export function checkPermission(
   return async (req, _, next) => {
     if (!req.user) throw new PermissionError();
 
-    const isValidAccess = hasPermission(req.user, permission);
+    const isValidAccess = await hasPermission(req.user, permission);
     if (!isValidAccess) throw new PermissionError();
 
     next();

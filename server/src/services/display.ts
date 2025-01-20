@@ -10,10 +10,8 @@ import {
 import { getDepartmentById } from "./department";
 
 const displayAttributeFilter = (display: DisplayAttributeFilter): Display => {
-  const departments = display.departmentsDisplays.map(
-    ({ department }) => department
-  );
   const { departmentsDisplays, ...props } = display;
+  const departments = departmentsDisplays.map(({ department }) => department);
   return { ...props, departments };
 };
 

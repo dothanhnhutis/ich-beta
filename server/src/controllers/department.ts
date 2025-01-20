@@ -14,7 +14,7 @@ import { Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 
 export async function getDepartmentsHandler(req: Request, res: Response) {
-  const isValidAccess = hasPermission(req.user, "read:departments");
+  const isValidAccess = await hasPermission(req.user, "read:departments");
   if (!isValidAccess) throw new PermissionError();
   const departments = await getDepartments();
   res.status(StatusCodes.OK).json(departments);
@@ -24,7 +24,7 @@ export async function getDepartmentByIdHandler(
   req: Request<{ departmentId: string }>,
   res: Response
 ) {
-  const isValidAccess = hasPermission(req.user, "read:departments");
+  const isValidAccess = await hasPermission(req.user, "read:departments");
   if (!isValidAccess) throw new PermissionError();
   const departments = await getDepartmentById(req.params.departmentId);
   res.status(StatusCodes.OK).json(departments);
@@ -34,7 +34,7 @@ export async function createDepartmentHandler(
   req: Request<{}, {}, createDepartmentReq["body"]>,
   res: Response
 ) {
-  const isValidAccess = hasPermission(req.user, "write:departments");
+  const isValidAccess = await hasPermission(req.user, "write:departments");
   if (!isValidAccess) throw new PermissionError();
 
   const factoryId = await getFactoryById(req.body.factoryId);
@@ -58,7 +58,7 @@ export async function updateDepartmentHandler(
   req: Request<UpdateDepartmentReq["params"], {}, UpdateDepartmentReq["body"]>,
   res: Response
 ) {
-  const isValidAccess = hasPermission(req.user, "update:departments");
+  const isValidAccess = await hasPermission(req.user, "update:departments");
   if (!isValidAccess) throw new PermissionError();
 
   const department = await getDepartmentById(req.params.departmentId);
@@ -92,7 +92,7 @@ export async function deleteDepartmentByIdHandler(
   req: Request<{ departmentId: string }>,
   res: Response
 ) {
-  const isValidAccess = hasPermission(req.user, "delete:departments");
+  const isValidAccess = await hasPermission(req.user, "delete:departments");
   if (!isValidAccess) throw new PermissionError();
 
   const department = await getDepartmentById(req.params.departmentId);

@@ -15,14 +15,14 @@ export async function getFactorieByIdHandler(
   req: Request<{ factoryId: string }>,
   res: Response
 ) {
-  const isValidAccess = hasPermission(req.user!, "read:factories");
+  const isValidAccess = await hasPermission(req.user!, "read:factories");
   if (!isValidAccess) throw new PermissionError();
   const factory = await getFactoryById(req.params.factoryId);
   return res.status(StatusCodes.OK).json(factory);
 }
 
 export async function getFactoriesHandler(req: Request, res: Response) {
-  const isValidAccess = hasPermission(req.user!, "read:factories");
+  const isValidAccess = await hasPermission(req.user!, "read:factories");
   if (!isValidAccess) throw new PermissionError();
   const factory = await getFactorys();
   return res.status(StatusCodes.OK).json(factory);
@@ -32,7 +32,7 @@ export async function createFactoryHandler(
   req: Request<{}, {}, CreateFactoryReq["body"]>,
   res: Response
 ) {
-  const isValidAccess = hasPermission(req.user!, "write:factories");
+  const isValidAccess = await hasPermission(req.user!, "write:factories");
   if (!isValidAccess) throw new PermissionError();
 
   const newFactory = await createFactory(req.body);
@@ -47,7 +47,7 @@ export async function updateFactoryByIdHandler(
   req: Request<UpdateFactoryReq["params"], {}, UpdateFactoryReq["body"]>,
   res: Response
 ) {
-  const isValidAccess = hasPermission(req.user!, "update:factories");
+  const isValidAccess = await hasPermission(req.user!, "update:factories");
   if (!isValidAccess) throw new PermissionError();
 
   const factory = await getFactoryById(req.params.factoryId);
@@ -65,7 +65,7 @@ export async function updateFactoryByIdHandler(
 }
 
 export async function deleteFactoryByIdHandler(req: Request, res: Response) {
-  const isValidAccess = hasPermission(req.user!, "delete:factories");
+  const isValidAccess = await hasPermission(req.user!, "delete:factories");
   if (!isValidAccess) throw new PermissionError();
   const factory = await getFactoryById(req.params.factoryId);
   if (!factory)

@@ -267,7 +267,7 @@ export type UpdateUserByIdReq = z.infer<typeof updateUserByIdSchema>;
 type UserStatus = "ACTIVE" | "SUSPENDED" | "DISABLED";
 type UserGender = "MALE" | "FEMALE" | "OTHER" | null;
 
-export type BaseUser = {
+export type User = {
   id: string;
   email: string;
   emailVerified: boolean;
@@ -287,33 +287,11 @@ export type UserToken = {
   session: string;
 };
 
-export type UserAttributeFilterProps = BaseUser & {
+export type UserAttributeFilterProps = User & {
   emailVerificationExpires: Date | null;
   emailVerificationToken: string | null;
   passwordResetToken: string | null;
   passwordResetExpires: Date | null;
   reActiveToken: string | null;
   reActiveExpires: Date | null;
-  usersRoles: {
-    createdAt: Date;
-    userId: string;
-    roleId: string;
-    role: {
-      id: string;
-      createdAt: Date;
-      updatedAt: Date;
-      name: string;
-      permissions: string[];
-    };
-  }[];
-};
-
-export type User = BaseUser & {
-  roles: {
-    id: string;
-    createdAt: Date;
-    updatedAt: Date;
-    name: string;
-    permissions: string[];
-  }[];
 };

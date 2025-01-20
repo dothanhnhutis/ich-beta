@@ -92,6 +92,7 @@ export type Display = {
   createdAt: Date;
   updatedAt: Date;
   departments: Department[];
+  createdBy: Pick<User, "id" | "email" | "username" | "picture">;
 };
 
 export type DisplayAttributeFilter = {

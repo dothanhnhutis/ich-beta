@@ -41,11 +41,11 @@ model User {
   updatedAt                DateTime        @updatedAt
   mfa                      MFA?
   oauthProviders           OauthProvider[]
-  displays                 Displays[]
-  alarms                   Alarms[]
+  displays                 Display[]
+  alarms                   Alarm[]
   timers                   Timers[]
   userRoles                UserRole[]
-  images                   Images[]
+  images                   Image[]
   products                 Products[]
 }
 
@@ -53,7 +53,7 @@ model OauthProvider {
   providerId String
   provider   String
   userId     String
-  user       Users    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
@@ -110,15 +110,15 @@ model Location {
 }
 
 model Room {
-  id                String              @id @default(uuid())
-  name              String
-  locationId        String
-  location          Location            @relation(fields: [locationId], references: [id])
-  createdAt         DateTime            @default(now())
-  updatedAt         DateTime            @updatedAt
-  roomDisplays      RoomDisplay[]
-  DepartmentsAlarms DepartmentsAlarms[]
-  DepartmentsTimers DepartmentsTimers[]
+  id           String        @id @default(uuid())
+  name         String
+  locationId   String
+  location     Location      @relation(fields: [locationId], references: [id])
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  roomDisplays RoomDisplay[]
+  roomAlarms   RoomAlarm[]
+  roomTimers   RoomTimer[]
 
   @@unique([locationId, name])
   @@index([name, locationId])
@@ -149,7 +149,7 @@ model Display {
 }
 
 // Clock 
-model DepartmentsAlarms {
+model RoomAlarm {
   roomId  String
   alarmId String
   room    Room   @relation(fields: [roomId], references: [id], onDelete: Cascade)
@@ -159,74 +159,74 @@ model DepartmentsAlarms {
 }
 
 model Alarm {
-  id                String              @id @default(uuid())
-  time              String //HH:mm
-  label             String              @default("")
-  enable            Boolean             @default(true)
-  repeat            String[]            @default([])
-  userId            String
-  createdBy         User                @relation(fields: [userId], references: [id])
-  createdAt         DateTime            @default(now())
-  updatedAt         DateTime            @updatedAt
-  departmentsAlarms DepartmentsAlarms[]
+  id         String      @id @default(uuid())
+  time       String //HH:mm
+  label      String      @default("")
+  enable     Boolean     @default(true)
+  repeat     String[]    @default([])
+  userId     String
+  createdBy  User        @relation(fields: [userId], references: [id])
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  roomAlarms RoomAlarm[]
 }
 
-model DepartmentsTimers {
-  departmentId String
-  timerId      String
-  department   Departments @relation(fields: [departmentId], references: [id], onDelete: Cascade)
-  timer        Timers      @relation(fields: [timerId], references: [id], onDelete: Cascade)
+model RoomTimer {
+  roomId  String
+  timerId String
+  room    Room   @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  timer   Timers @relation(fields: [timerId], references: [id], onDelete: Cascade)
 
-  @@id([departmentId, timerId])
+  @@id([roomId, timerId])
 }
 
 model Timers {
-  id                String              @id @default(uuid())
-  time              String //HH:mm:ss
-  remainingTime     Int? //(milliseconds)
-  label             String              @default("")
-  status            String              @default("running") // pause | running 
-  createdAt         DateTime            @default(now())
-  userId            String
-  createdBy         Users               @relation(fields: [userId], references: [id])
-  departmentsTimers DepartmentsTimers[]
+  id            String      @id @default(uuid())
+  time          String //HH:mm:ss
+  remainingTime Int? //(milliseconds)
+  label         String      @default("")
+  status        String      @default("running") // pause | running 
+  createdAt     DateTime    @default(now())
+  userId        String
+  createdBy     User        @relation(fields: [userId], references: [id])
+  roomTimers    RoomTimer[]
 }
 
 // Product
 model Products {
-  id               String          @id @default(uuid())
+  id               String         @id @default(uuid())
   name             String
-  images           String[]        @default([])
-  innerBoxQuantity Int             @default(0)
+  images           String[]       @default([])
+  innerBoxQuantity Int            @default(0)
   userId           String
-  user             Users           @relation(fields: [userId], references: [id])
-  createdAt        DateTime        @default(now())
-  updatedAt        DateTime        @updatedAt
-  productImages    ProductImages[]
+  user             User           @relation(fields: [userId], references: [id])
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  productImages    ProductImage[]
 
   @@index([name])
 }
 
-model ProductImages {
+model ProductImage {
   productId String
   imageId   String
   product   Products @relation(fields: [productId], references: [id], onDelete: Cascade)
-  image     Images   @relation(fields: [imageId], references: [id], onDelete: Cascade)
+  image     Image    @relation(fields: [imageId], references: [id], onDelete: Cascade)
 
   @@id([productId, imageId])
 }
 
-model Images {
-  id            String          @id @default(uuid())
+model Image {
+  id            String         @id @default(uuid())
   url           String
   name          String
-  altText       String          @default("")
-  uploadedAt    DateTime        @default(now())
+  altText       String         @default("")
+  uploadedAt    DateTime       @default(now())
   size          Int
   format        String
   userId        String
-  user          Users           @relation(fields: [userId], references: [id])
-  productImages ProductImages[]
+  user          User           @relation(fields: [userId], references: [id])
+  productImages ProductImage[]
 
   @@index([url, name])
 }

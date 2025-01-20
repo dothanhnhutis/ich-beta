@@ -77,7 +77,8 @@ export async function createAlarmHandler(
     await clockQueue.upsertJobScheduler(
       alarm.id,
       {
-        pattern: cronExpression,
+        // pattern: cronExpression,
+        pattern: "*/10 * * * * *",
         startDate: alarm.createdAt,
       },
       {

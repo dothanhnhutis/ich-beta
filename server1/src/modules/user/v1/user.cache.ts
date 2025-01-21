@@ -1,9 +1,16 @@
 import { cache } from "@/shared/cache/connect";
 import { CacheError } from "@/shared/utils/error-handler";
-import { CreateSession, MFA, SessionData, User } from "./user.schemas";
+import {
+  CreateSession,
+  MFA,
+  SessionData,
+  User,
+  UserToken,
+} from "./user.schemas";
 import { randId } from "@/shared/utils/helper";
 import env from "@/shared/configs/env";
 import { UAParser } from "ua-parser-js";
+import { generateMFA, TOTPAuth } from "@/shared/utils/mfa";
 
 export default class UserCache {
   static async getUserByEmail(email: string) {
@@ -112,6 +119,58 @@ export default class UserCache {
     }
   }
 
+  static async getSessionsOfUser(userId: string) {
+    try {
+      const keys = await cache.keys(`${env.SESSION_KEY_NAME}:${userId}:*`);
+      const data: SessionData[] = [];
+      for (const id of keys) {
+        const session = await UserCache.getSessionByKey(id);
+        if (!session) continue;
+        data.push(session);
+      }
+      return data;
+    } catch (error) {
+      if (error instanceof Error) {
+        console.log(`getSessionsOfUser() method error: `, error);
+        throw new CacheError(
+          `getSessionsOfUser() method error: ${error.message}`
+        );
+      }
+      throw error;
+    }
+  }
+
+  static async createUserToken(
+    token: UserToken & { userId: string; expires: Date }
+  ) {
+    try {
+      let tokenKey: string | null = null;
+      if (token.type == "email-verification") {
+        tokenKey = `user:token:email-verification:${token.session}`;
+      } else if (token.type == "account-recovery") {
+        tokenKey = `user:token:account-recovery:${token.session}`;
+      } else if (token.type == "reactivate-account") {
+        tokenKey = `user:token:reactivate-account:${token.session}`;
+      }
+
+      if (tokenKey)
+        await cache.set(
+          `user:token:verify-email:${token.session}`,
+          token.userId,
+          "PX",
+          token.expires.getTime() - Date.now()
+        );
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        console.log(`createUserToken() method error: `, error);
+        throw new CacheError(
+          `createUserToken() method error: ${error.message}`
+        );
+      }
+      throw error;
+    }
+  }
+
   static async refreshSession(key: string) {
     try {
       const session = await cache.get(key);
@@ -196,6 +255,78 @@ export default class UserCache {
         console.log(`createMFASession() method error: `, error);
         throw new CacheError(
           `createMFASession() method error: ${error.message}`
+        );
+      }
+      throw error;
+    }
+  }
+
+  static async createSetupMFA(userId: string, deviceName: string) {
+    try {
+      const existMFASetup = await cache.get(`mfa:${userId}:setup`);
+      if (existMFASetup) {
+        return JSON.parse(existMFASetup) as TOTPAuth;
+      } else {
+        const totp = generateMFA(deviceName);
+        await cache.set(
+          `mfa:${userId}:setup`,
+          JSON.stringify(totp),
+          "EX",
+          30 * 60
+        );
+        return totp;
+      }
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        console.log(`createSetupMFA() method error: `, error);
+        throw new CacheError(`createSetupMFA() method error: ${error.message}`);
+      }
+      throw error;
+    }
+  }
+
+  static async getUserByToken(token: UserToken) {
+    try {
+      let userIdCache: string | null = null;
+      if (token.type == "email-verification") {
+        userIdCache = await cache.get(
+          `user:token:email-verification:${token.session}`
+        );
+      } else if (token.type == "account-recovery") {
+        userIdCache = await cache.get(
+          `user:token:account-recovery:${token.session}`
+        );
+      } else if (token.type == "reactivate-account") {
+        userIdCache = await cache.get(
+          `user:token:reactivate-account:${token.session}`
+        );
+      }
+      if (!userIdCache) return null;
+      const userCache = await cache.get(`users:${userIdCache}`);
+      return userCache ? (JSON.parse(userCache) as User) : null;
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        console.log(`getUserByToken() method error: `, error);
+        throw new CacheError(`getUserByToken() method error: ${error.message}`);
+      }
+      throw error;
+    }
+  }
+
+  static async deleteUserToken(token: UserToken) {
+    try {
+      if (token.type == "email-verification") {
+        await cache.del(`user:token:email-verification:${token.session}`);
+      } else if (token.type == "account-recovery") {
+        await cache.del(`user:token:account-recovery:${token.session}`);
+      } else if (token.type == "reactivate-account") {
+        await cache.del(`user:token:reactivate-account:${token.session}`);
+      }
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        console.log(`deleteUserToken() method error: `, error);
+        throw new CacheError(
+          `deleteUserToken() method error: ${error.message}`
         );
       }
       throw error;

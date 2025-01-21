@@ -1,10 +1,15 @@
 import { Request } from "express";
 import { BadRequestError } from "@/shared/utils/error-handler";
-import { SignInReq } from "./user.schemas";
+import { SignInReq, SignUpReq, User, UserToken } from "./user.schemas";
 import UserReposities from "./user.repositories";
-import { compareData } from "@/shared/utils/password";
+import { compareData, hashData } from "@/shared/utils/password";
 import { randId } from "@/shared/utils/helper";
 import UserCache from "./user.cache";
+import env from "@/shared/configs/env";
+import { signJWT, verifyJWT } from "@/shared/utils/token";
+import { emaiEnum } from "@/shared/utils/nodemailer";
+import UserMessageBroker from "@/shared/message-broker/user";
+import { generateQRCode } from "@/shared/utils/qrcode";
 
 export default class UserService {
   static async signIn(req: Request<{}, {}, SignInReq["body"]>) {
@@ -35,7 +40,7 @@ export default class UserService {
       });
       return { sessionId };
     } else {
-      const newSession = await UserCache.createSession({
+      const session = await UserCache.createSession({
         userId: user.id,
         reqInfo: {
           ip: req.ip || "",
@@ -43,11 +48,127 @@ export default class UserService {
         },
       });
 
-      return newSession;
+      return session;
     }
+  }
+
+  static async signUp(data: SignUpReq["body"]) {
+    const { email, password, username } = data;
+    const user = await UserReposities.getUserByEmail(email);
+    if (user) throw new BadRequestError("Email đã được đăng ký.");
+
+    const session = await randId();
+    const expires: number = Math.floor(
+      (Date.now() + 4 * 60 * 60 * 1000) / 1000
+    );
+    const newUser = await UserReposities.createUserWithPassword({
+      email,
+      password: await hashData(password),
+      username,
+      emailVerificationToken: session,
+      emailVerificationExpires: new Date(expires * 1000),
+    });
+
+    const token = signJWT(
+      {
+        type: "email-verification",
+        session: session,
+        exp: expires,
+      },
+      env.JWT_SECRET
+    );
+
+    await Promise.all([
+      UserCache.createUserToken({
+        type: "email-verification",
+        userId: newUser.id,
+        expires: new Date(expires * 1000),
+        session,
+      }),
+      UserMessageBroker.sendEmailVerificationProducer({
+        template: emaiEnum.EMAIL_VERIFICATION,
+        receiver: email,
+        locals: {
+          username: username,
+          verificationLink: env.CLIENT_URL + "/confirm-email?token=" + token,
+        },
+      }),
+    ]);
+  }
+
+  static async confirmEmail(token: string) {
+    const tokenVerify = verifyJWT<UserToken>(token, env.JWT_SECRET);
+    if (!tokenVerify || tokenVerify.type != "email-verification")
+      throw new BadRequestError("Phiên của bạn đã hết hạn.");
+
+    const user = await UserReposities.getUserByToken(tokenVerify);
+    if (!user) throw new BadRequestError("Phiên của bạn đã hết hạn.");
+
+    await Promise.all([
+      UserReposities.updateUserById(user.id, {
+        emailVerified: true,
+        emailVerificationToken: null,
+        emailVerificationExpires: new Date(),
+      }),
+      UserCache.deleteUserToken(tokenVerify),
+    ]);
   }
 
   static async signOut(userId: string, sessionId: string) {
     await UserCache.deleteSession(userId, sessionId);
+  }
+
+  static async getSessionOfUser(userId: string) {
+    return UserCache.getSessionsOfUser(userId);
+  }
+
+  static async resendVerifyEmail(user: User) {
+    const { username, email, emailVerified, id } = user;
+    if (emailVerified) throw new BadRequestError("Tài khoản đã xác thực");
+
+    const session = await randId();
+    const expires: number = Math.floor(
+      (Date.now() + 4 * 60 * 60 * 1000) / 1000
+    );
+    const token = signJWT(
+      {
+        type: "email-verification",
+        session: session,
+        exp: expires,
+      },
+      env.JWT_SECRET
+    );
+
+    await Promise.all([
+      UserReposities.updateUserById(id, {
+        emailVerificationToken: session,
+        emailVerificationExpires: new Date(expires * 1000),
+      }),
+      UserCache.createUserToken({
+        type: "email-verification",
+        userId: id,
+        expires: new Date(expires * 1000),
+        session,
+      }),
+      UserMessageBroker.sendEmailVerificationProducer({
+        template: emaiEnum.EMAIL_VERIFICATION,
+        receiver: email,
+        locals: {
+          username: username,
+          verificationLink: env.CLIENT_URL + "/confirm-email?token=" + token,
+        },
+      }),
+    ]);
+  }
+
+  static async createSetupMFA(useId: string, deviceName: string) {
+    const mfa = await UserReposities.getMFa(useId);
+    if (mfa) throw new BadRequestError("Xác thực đa yếu tố (MFA) đã được bật");
+    const generateMFA = await UserCache.createSetupMFA(useId, deviceName);
+    const imageUrl = await generateQRCode(generateMFA.oauth_url);
+    return {
+      qr: imageUrl,
+      mfa: generateMFA,
+    };
   }
 }

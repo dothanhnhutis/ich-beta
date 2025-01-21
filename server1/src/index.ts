@@ -2,6 +2,8 @@ import http from "http";
 import env from "@/shared/configs/env";
 import { connectCache } from "@/shared/cache/connect";
 import { buildServer } from "@/shared/utils/server";
+import { Amqp } from "./shared/message-broker/connect";
+import UserMessageBroker from "./shared/message-broker/user";
 
 const SERVER_PORT = 4000;
 
@@ -25,9 +27,8 @@ const startServer = async () => {
     // queue BullMQ
     // initWorker();
     // rabbitMQ
-    // const amqp = new Amqp(env.RABBITMQ_URL);
-    // await amqp.connect();
-    //   await sendEmailListener();
+    await Amqp.connect(env.RABBITMQ_URL);
+    await UserMessageBroker.listener();
 
     //   for (const s of ["SIGINT", "SIGTERM"]) {
     //     process.once(s, async () => {

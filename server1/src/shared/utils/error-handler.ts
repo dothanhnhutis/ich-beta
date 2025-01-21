@@ -63,3 +63,18 @@ export class CacheError extends CustomError {
     super(message);
   }
 }
+export class MBConnectError extends CustomError {
+  statusCode: number = 700;
+
+  constructor() {
+    super("Connection to the RabbitMQ cluster failed");
+  }
+}
+
+export class MBInitConnectError extends CustomError {
+  statusCode: number = 701;
+
+  constructor() {
+    super("call Amqp.connect() method when start server");
+  }
+}

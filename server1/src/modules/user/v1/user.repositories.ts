@@ -1,6 +1,7 @@
 import prisma from "@/shared/db/connect";
 import UserCache from "./user.cache";
 import {
+  CreateMFA,
   CreateUserWithPassword,
   MFA,
   UpdateUser,
@@ -117,6 +118,45 @@ export default class UserReposities {
     if (cache ?? true) {
       await UserCache.createMFA(mfa);
     }
+    return mfa;
+  }
+
+  static async createMFA(data: CreateMFA, storeCache?: boolean) {
+    const mfa = await prisma.mFA.create({
+      data,
+    });
+    if (storeCache ?? true) {
+      await UserCache.createMFA(mfa);
+    }
+    return mfa;
+  }
+
+  static async updateMFA(
+    userId: string,
+    data: Partial<Pick<MFA, "secretKey" | "lastAccess">>,
+    updateCache?: boolean
+  ) {
+    const mfa = await prisma.mFA.update({
+      where: { userId },
+      data,
+    });
+
+    if (updateCache || true) {
+      UserCache.updateMFA(mfa);
+    }
+  }
+
+  static async deleteMFA(userId: string, removeCache?: boolean): Promise<MFA> {
+    const mfa = await prisma.mFA.delete({
+      where: {
+        userId,
+      },
+    });
+
+    if (removeCache ?? true) {
+      await UserCache.deleteMFA(userId);
+    }
+
     return mfa;
   }
 

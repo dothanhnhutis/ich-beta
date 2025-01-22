@@ -38,7 +38,7 @@ export default class UserMessageBroker {
     );
   }
 
-  static async sendEmailVerificationProducer(message: SendMailType) {
+  static async sendEmailProducer(message: SendMailType) {
     const userMB = new UserMessageBroker();
     const channel = await userMB.conn.createChannel();
     await channel.assertQueue(sendEmailQueue, {

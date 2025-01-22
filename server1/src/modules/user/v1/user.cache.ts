@@ -105,6 +105,38 @@ export default class UserCache {
     }
   }
 
+  static async deleteSessionsOfUser(
+    userId: string,
+    exceptSessionId?: string[]
+  ) {
+    try {
+      const keys = await cache.keys(`${env.SESSION_KEY_NAME}:${userId}:*`);
+
+      if (keys.length > 0) {
+        if (exceptSessionId) {
+          const safeSession = exceptSessionId.map(
+            (id) => `${env.SESSION_KEY_NAME}:${userId}:${id}`
+          );
+          await Promise.all(
+            keys
+              .filter((key) => !safeSession.includes(key))
+              .map((key) => cache.del(key))
+          );
+        } else {
+          await Promise.all(keys.map((key) => cache.del(key)));
+        }
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        console.log(`deleteSessionsOfUser() method error: `, error);
+        throw new CacheError(
+          `deleteSessionsOfUser() method error: ${error.message}`
+        );
+      }
+      throw error;
+    }
+  }
+
   static async getSessionByKey(key: string) {
     try {
       const session = await cache.get(key);
@@ -236,6 +268,34 @@ export default class UserCache {
     }
   }
 
+  static async updateMFA(mfa: MFA) {
+    try {
+      const oldMFA = await UserCache.getMFA(mfa.userId);
+      await cache.set(
+        `mfa:${mfa.userId}`,
+        JSON.stringify({ ...oldMFA, ...mfa })
+      );
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        console.log(`updateMFA() method error: `, error);
+        throw new CacheError(`updateMFA() method error: ${error.message}`);
+      }
+      throw error;
+    }
+  }
+
+  static async deleteMFA(userId: string) {
+    try {
+      await cache.del(`mfa:${userId}`);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        console.log(`deleteMFA() method error: `, error);
+        throw new CacheError(`deleteMFA() method error: ${error.message}`);
+      }
+      throw error;
+    }
+  }
+
   static async createMFASession(
     sessionId: string,
     input: {
@@ -261,6 +321,50 @@ export default class UserCache {
     }
   }
 
+  static async getMFASession(sessionId: string) {
+    try {
+      const sessionCache = await cache.get(`mfa:session:${sessionId}`);
+      if (!sessionCache) return null;
+      return JSON.parse(sessionCache) as {
+        userId: string;
+        secretKey: string;
+      };
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        console.log(`getMFASession() method error: `, error);
+        throw new CacheError(`getMFASession() method error: ${error.message}`);
+      }
+      throw error;
+    }
+  }
+
+  static async deleteMFASession(sessionId: string) {
+    try {
+      await cache.del(`mfa:session:${sessionId}`);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        console.log(`deleteMFASession() method error: `, error);
+        throw new CacheError(
+          `deleteMFASession() method error: ${error.message}`
+        );
+      }
+      throw error;
+    }
+  }
+
+  static async getSetupMFA(userId: string) {
+    try {
+      const existMFASetup = await cache.get(`mfa:${userId}:setup`);
+      if (!existMFASetup) return;
+      return JSON.parse(existMFASetup) as TOTPAuth;
+    } catch (error) {
+      if (error instanceof Error) {
+        console.log(`readSetupMFA() method error: `, error);
+        throw new CacheError(`readSetupMFA() method error: ${error.message}`);
+      }
+      throw error;
+    }
+  }
   static async createSetupMFA(userId: string, deviceName: string) {
     try {
       const existMFASetup = await cache.get(`mfa:${userId}:setup`);
@@ -280,6 +384,18 @@ export default class UserCache {
       if (error instanceof Error) {
         console.log(`createSetupMFA() method error: `, error);
         throw new CacheError(`createSetupMFA() method error: ${error.message}`);
+      }
+      throw error;
+    }
+  }
+
+  static async deleteSetupMFA(userId: string) {
+    try {
+      await cache.del(`mfa:${userId}:setup`);
+    } catch (error) {
+      if (error instanceof Error) {
+        console.log(`deleteSetupMFA() method error: `, error);
+        throw new CacheError(`deleteSetupMFA() method error: ${error.message}`);
       }
       throw error;
     }

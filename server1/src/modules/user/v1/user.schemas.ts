@@ -21,6 +21,75 @@ export const signInSchema = z.object({
     .strict(),
 });
 
+export const signInWithMFASchema = z.object({
+  body: z
+    .object({
+      sessionId: z.string({
+        required_error: "sessionId là trường bắt buộc",
+        invalid_type_error: "sessionId phải là chuỗi",
+      }),
+      code: z
+        .string({
+          required_error: "code là trường bắt buộc",
+          invalid_type_error: "code phải là chuỗi",
+        })
+        .length(6, "code không hợp lệ"),
+    })
+    .strict(),
+});
+
+export const recoverSchema = z.object({
+  body: z
+    .object({
+      email: z
+        .string({
+          required_error: "Email là trường bắt buộc",
+          invalid_type_error: "Email phải là chuỗi",
+        })
+        .email("Email không hợp lệ"),
+    })
+    .strict(),
+});
+
+export const resetPasswordSchema = z.object({
+  query: z.object({
+    token: z.union([z.string(), z.array(z.string())]).optional(),
+  }),
+  body: z
+    .object({
+      newPassword: z
+        .string({
+          required_error: "Mật khẩu là bắt buộc",
+          invalid_type_error: "Mật khẩu phải là chuỗi",
+        })
+        .min(8, "Mật khẩu quá ngắn")
+        .max(40, "Mật khẩu quá dài")
+        .regex(
+          /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]*$/,
+          "Mật khẩu phải có ký tự hoa, thường, sô và ký tự đặc biệt"
+        ),
+      confirmPassword: z.string(),
+    })
+    .strict()
+    .refine((data) => data.newPassword === data.confirmPassword, {
+      message: "Xác nhận mật khẩu không khớp",
+      path: ["confirmPassword"],
+    }),
+});
+
+export const sendReActivateAccountSchema = z.object({
+  body: z
+    .object({
+      email: z
+        .string({
+          required_error: "Email là trường bắt buộc",
+          invalid_type_error: "Email phải là chuỗi",
+        })
+        .email("Email không hợp lệ"),
+    })
+    .strict(),
+});
+
 export const signUpSchema = z.object({
   body: z
     .object({
@@ -74,10 +143,36 @@ export const setupMFASchema = z.object({
     .strict(),
 });
 
-export type SignInReq = z.infer<typeof signInSchema>;
-export type SignUpReq = z.infer<typeof signUpSchema>;
+export const enableMFASchema = z.object({
+  body: z
+    .object({
+      mfa_code1: z
+        .string({
+          invalid_type_error: "Xác thực đa yếu tố (MFA) 1 là chuỗi",
+          required_error: "Xác thực đa yếu tố (MFA) 1 phải bắt buộc",
+        })
+        .length(6, "Xác thực đa yếu tố (MFA) 1 không hợp lệ"),
+      mfa_code2: z
+        .string({
+          invalid_type_error: "Xác thực đa yếu tố (MFA) 2 là chuỗi",
+          required_error: "Xác thực đa yếu tố (MFA) 2 phải bắt buộc",
+        })
+        .length(6, "Xác thực đa yếu tố (MFA) 2 không hợp lệ"),
+    })
+    .strict(),
+});
 
+export type SignInReq = z.infer<typeof signInSchema>;
+export type SignInWithMFAReq = z.infer<typeof signInWithMFASchema>;
+
+export type SignUpReq = z.infer<typeof signUpSchema>;
+export type RecoverReq = z.infer<typeof recoverSchema>;
+export type ResetPasswordReq = z.infer<typeof resetPasswordSchema>;
+export type SendReActivateAccountReq = z.infer<
+  typeof sendReActivateAccountSchema
+>;
 export type SetupMFAReq = z.infer<typeof setupMFASchema>;
+export type EnableMFAReq = z.infer<typeof enableMFASchema>;
 
 type UserStatus = "ACTIVE" | "SUSPENDED" | "DISABLED";
 type UserGender = "MALE" | "FEMALE" | "OTHER" | null;
@@ -158,4 +253,9 @@ export type CreateUserWithPassword = {
   picture?: string;
   phoneNumber?: string;
   birthDate?: string;
+};
+
+export type CreateMFA = {
+  secretKey: string;
+  userId: string;
 };

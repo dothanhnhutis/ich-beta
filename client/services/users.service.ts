@@ -1,6 +1,6 @@
 import envs from "@/configs/envs";
 import { FetchApi } from "./fetch-api";
-import { UpdateProfile, User, UserSession } from "@/schema/user.schema";
+import { Role, UpdateProfile, User, UserSession } from "@/schema/user.schema";
 
 const userInstance = new FetchApi({
   baseUrl: envs.NEXT_PUBLIC_SERVER_URL + "/api/v1/users",
@@ -13,7 +13,17 @@ const userInstance = new FetchApi({
 
 export async function getCurrentUser(options?: Omit<RequestInit, "body">) {
   try {
-    const { data } = await userInstance.get<User>("/me", options);
+    const { data } = await userInstance.get<{
+      status: number;
+      success: boolean;
+      message: string;
+      data: User & {
+        roles: Role[];
+        session: {
+          id: string;
+        };
+      };
+    }>("/me", options);
     return data;
   } catch (error) {
     console.log("getCurrentUser method error:", error);

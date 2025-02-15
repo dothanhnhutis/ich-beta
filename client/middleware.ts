@@ -50,7 +50,7 @@ export async function middleware(request: NextRequest) {
     .getAll()
     .map((c) => `${c.name}=${encodeURIComponent(c.value)}`)
     .join("; ");
-  const user = await getCurrentUser({
+  const res = await getCurrentUser({
     headers: {
       Cookie: allCookie,
     },
@@ -63,17 +63,23 @@ export async function middleware(request: NextRequest) {
   const isAuthRoute = authRoutes.test(request.nextUrl.pathname);
 
   if (isPrivateRoute) {
-    if (user) {
+    if (res) {
+      const { email_verified, birth_date } = res.data;
+      console.log(
+        "email_verified",
+        !email_verified &&
+          !request.nextUrl.pathname.startsWith(EMAIL_VERIFY_ROUTE)
+      );
       if (
-        !user.emailVerified &&
+        !email_verified &&
         !request.nextUrl.pathname.startsWith(EMAIL_VERIFY_ROUTE)
       ) {
         return NextResponse.redirect(
           new URL(EMAIL_VERIFY_ROUTE, request.nextUrl)
         );
       } else if (
-        user.emailVerified &&
-        !user.birthDate &&
+        email_verified &&
+        !birth_date &&
         !request.nextUrl.pathname.startsWith(COMPLETE_PROFILE_ROUTE)
       ) {
         return NextResponse.redirect(
@@ -103,7 +109,7 @@ export async function middleware(request: NextRequest) {
       return response;
     }
   } else if (isAuthRoute) {
-    if (user) {
+    if (res) {
       return NextResponse.redirect(
         new URL(DEFAULT_LOGIN_REDIRECT, request.nextUrl)
       );

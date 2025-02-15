@@ -3,7 +3,7 @@ import { FetchApi } from "./fetch-api";
 import { SignIn, SignInMFA } from "@/schema/auth.schema";
 
 const authInstance = new FetchApi({
-  baseUrl: envs.NEXT_PUBLIC_SERVER_URL + "/api/v1/auth",
+  baseUrl: envs.NEXT_PUBLIC_SERVER_URL + "/api/v1/users",
   credentials: "include",
   headers: {
     "Content-Type": "application/json",
@@ -36,7 +36,7 @@ export async function signIn(input: SignIn) {
     message: string;
     session?: { sessionId: string; expires: string };
   }>("/signin", input);
-  console.log(data);
+
   return data;
 }
 

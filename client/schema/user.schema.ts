@@ -45,16 +45,16 @@ export type OauthProvider = {
 export type User = {
   id: string;
   email: string;
-  emailVerified: boolean;
+  email_verified: Date | null;
   status: UserStatus;
   username: string;
   gender: UserGender;
   picture: string | null;
-  phoneNumber: string | null;
-  birthDate: string | null;
-  createdAt: string;
-  updatedAt: string;
-  hasPassword: boolean;
+  phone_number: string | null;
+  birth_date: string | null;
+  created_at: string;
+  updated_at: string;
+  has_password: boolean;
 };
 
 export type UserToken = {
@@ -85,4 +85,12 @@ export type UserSession = {
     lastAccess: "2024-12-24T03:48:55.551Z";
     createAt: "2024-12-21T00:53:47.053Z";
   };
+};
+
+export type Role = {
+  id: string;
+  name: string;
+  permissions: string[];
+  created_at: Date;
+  updated_at: Date;
 };
